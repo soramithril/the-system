@@ -2172,41 +2172,71 @@ const DEFAULT_QUESTS=[
   {id:'gr8',m:'grind',t:'weekly',n:'Plan next 7 days — goals, tasks, schedule (×1/week)',   s:'INT',xp:30,g:12,mp:-15,streak:0,done:false,weekDone:0},
 ];
 
-// URGENT QUEST POOL — random surprise quests tied to your missions
-// These spawn 1–2 per day at random, always relevant to what you do
+// URGENT QUEST POOL — spawns randomly once every 1–3 days
+// Large varied pool so repeats are rare. Always tied to your real missions.
 const URGENT_POOL=[
-  // FITNESS SURGES
-  {n:'100 push-ups — do them now, no excuses',        s:'STR',xp:55,g:22,mp:0,  desc:'Drop everything. The dungeon is your body. Begin.'},
-  {n:'100 squats — all at once before you sleep',     s:'STR',xp:55,g:22,mp:0,  desc:'Legs are the foundation. Build them.'},
-  {n:'100 sit-ups — right now, no rest',              s:'STR',xp:45,g:18,mp:0,  desc:'Core strength is invisible armour. Forge it.'},
-  {n:'Extra 30 min run — outside, right now',         s:'AGI',xp:50,g:20,mp:0,  desc:'The System demands cardio. Lace up.'},
-  {n:'Extra 20 min Peloton — get on the bike',        s:'AGI',xp:45,g:18,mp:0,  desc:'Speed is a stat. Go earn it.'},
-  {n:'50 burpees — no stopping',                      s:'STR',xp:50,g:20,mp:0,  desc:'This is punishment and reward at once.'},
-  {n:'Complete a full PPL workout TODAY',              s:'STR',xp:70,g:28,mp:0,  desc:'The iron does not negotiate.'},
-  // JAPANESE SURGES
-  {n:'Study Japanese for 45 min straight — now',      s:'INT',xp:55,g:22,mp:30, desc:'Focused immersion. No distractions. No mercy.'},
-  {n:'Add 20 new Anki cards before bed',              s:'INT',xp:45,g:18,mp:20, desc:'Vocabulary compounds daily. Do not skip today.'},
-  {n:'Watch 30 min anime raw — no subtitles',         s:'INT',xp:40,g:16,mp:20, desc:'Your ears are a weapon. Train them.'},
-  {n:'Write 10 full sentences in Japanese from memory',s:'INT',xp:50,g:20,mp:25,desc:'Output is the hardest skill. Begin it now.'},
-  {n:'Review ALL failed Anki cards from this week',   s:'INT',xp:40,g:16,mp:20, desc:'The cracks in the wall must be filled.'},
-  // YOUTUBE SURGES
-  {n:'Film a piece of content right now — anything',  s:'SEN',xp:60,g:24,mp:20, desc:'The System sees an opportunity. Take it.'},
-  {n:'Write and schedule 3 YouTube Shorts today',     s:'SEN',xp:55,g:22,mp:20, desc:'Quantity builds skill. No waiting for perfect.'},
-  {n:'Engage with 5 creators in your niche today',    s:'SEN',xp:35,g:14,mp:0,  desc:'Community is the algorithm. Show up.'},
-  {n:'Plan your next 7 videos — titles & topics',     s:'SEN',xp:45,g:18,mp:15, desc:'Strategy beats grinding. Plan first.'},
-  // DISCIPLINE SURGES
-  {n:'Clean your room top to bottom — right now',     s:'STA',xp:40,g:16,mp:0,  desc:'Your environment shapes your mindset. Fix it.'},
-  {n:'Delete social media apps for 24 hours',         s:'SEN',xp:50,g:20,mp:0,  desc:'Attention is your most valuable currency.'},
-  {n:'Go to bed by 10pm tonight',                     s:'STA',xp:35,g:14,mp:-25,desc:'Recovery is training. Sleep is a skill.'},
-  {n:'Drink 4 litres of water before midnight',       s:'STA',xp:30,g:12,mp:0,  desc:'Hydration is the foundation of everything.'},
-  {n:'No junk food for the next 48 hours',            s:'STA',xp:45,g:18,mp:0,  desc:'Your body is the temple. Treat it accordingly.'},
-  {n:'Cook a full meal from scratch — no shortcuts',  s:'SEN',xp:30,g:12,mp:0,  desc:'Fuel yourself with intention.'},
-  // SAVINGS SURGES
-  {n:'Cancel one unused subscription today',          s:'SEN',xp:40,g:16,mp:0,  desc:'Leaks sink ships. Find and plug one now.'},
-  {n:'Transfer money to savings — any amount',        s:'SEN',xp:45,g:18,mp:0,  desc:'The habit of saving matters more than the size.'},
-  // MINDSET SURGES
-  {n:'Write down 3 goals and why they matter — now',  s:'INT',xp:35,g:14,mp:-15,desc:'Clarity precedes action. Write it down.'},
-  {n:'Cold shower — 90 seconds cold at the end',      s:'STA',xp:30,g:12,mp:-20,desc:'Voluntary discomfort builds the will.'},
+  // ── FITNESS SURGES ──
+  {n:'100 push-ups — right now, any sets, no excuses',             s:'STR',xp:55,g:22,mp:0,  desc:'Drop everything. The dungeon is your body. Begin.'},
+  {n:'100 squats — all before you sleep tonight',                  s:'STR',xp:55,g:22,mp:0,  desc:'Legs are the foundation of every hunter. Build them.'},
+  {n:'100 sit-ups — core work, no rest longer than 30 sec',        s:'STR',xp:45,g:18,mp:0,  desc:'Core strength is invisible armour. Forge it now.'},
+  {n:'150 push-ups — spread across the day, all done by midnight', s:'STR',xp:70,g:28,mp:0,  desc:'The System raises the bar. So do you.'},
+  {n:'50 burpees — no stopping, no excuses',                       s:'STR',xp:55,g:22,mp:0,  desc:'Full body. Full effort. Full hunter.'},
+  {n:'Extra 30 min run — outside, right now',                      s:'AGI',xp:55,g:22,mp:0,  desc:'Speed is a stat. Go earn it.'},
+  {n:'Extra 20 min Peloton — get on the bike now',                 s:'AGI',xp:45,g:18,mp:0,  desc:'The System demands cardio. No negotiating.'},
+  {n:'5km run — track your time',                                  s:'AGI',xp:65,g:26,mp:0,  desc:'A hunter that cannot run cannot survive.'},
+  {n:'Complete a full PPL workout TODAY even if rest day',         s:'STR',xp:75,g:30,mp:0,  desc:'The iron does not care about your schedule.'},
+  {n:'200 walking lunges — inside or outside',                     s:'STR',xp:55,g:22,mp:0,  desc:'Every rep is a step toward the rank you want.'},
+  {n:'30 min stretching and mobility — full session',              s:'AGI',xp:35,g:14,mp:-15,desc:'Recovery is training. Flexibility is power.'},
+  {n:'Plank for a total of 5 minutes today',                       s:'STA',xp:40,g:16,mp:0,  desc:'Hold the line. Every second counts.'},
+  {n:'No rest day today — complete at least one workout',          s:'STR',xp:60,g:24,mp:0,  desc:'Champions train when they don't feel like it.'},
+  {n:'Hit protein AND hit 3L water AND no junk today',             s:'STA',xp:65,g:26,mp:0,  desc:'Triple discipline day. The System watches.'},
+  // ── JAPANESE SURGES ──
+  {n:'45 min Japanese study session — no distractions',            s:'INT',xp:55,g:22,mp:30, desc:'Focused immersion. Phone face-down. Begin now.'},
+  {n:'Add 20 new Anki cards before midnight',                      s:'INT',xp:45,g:18,mp:20, desc:'Vocabulary compounds daily. Do not break the chain.'},
+  {n:'Watch 30 min anime raw — no subtitles',                      s:'INT',xp:40,g:16,mp:20, desc:'Your ears are a weapon. Train them without a crutch.'},
+  {n:'Write 10 full Japanese sentences from memory',               s:'INT',xp:50,g:20,mp:25, desc:'Output is the hardest skill. Begin it now.'},
+  {n:'Review every failed Anki card from this week',               s:'INT',xp:45,g:18,mp:20, desc:'The cracks must be filled before the wall collapses.'},
+  {n:'Read a full page of Japanese text aloud',                    s:'INT',xp:40,g:16,mp:20, desc:'Speaking seals it in. Read loud, read proud.'},
+  {n:'Learn 5 new kanji — write each one 10 times',               s:'INT',xp:45,g:18,mp:20, desc:'Characters are weapons. Add five to your arsenal.'},
+  {n:'Complete a full N5 grammar practice sheet today',            s:'INT',xp:50,g:20,mp:25, desc:'Foundation first. N5 is the bedrock of everything.'},
+  {n:'60 min Japanese study marathon — timer on screen',           s:'INT',xp:70,g:28,mp:35, desc:'One full hour. The System will know if you cheated.'},
+  {n:'Translate 5 Japanese sentences into English from memory',    s:'INT',xp:40,g:16,mp:20, desc:'Comprehension test. No dictionary. Trust your brain.'},
+  {n:'Listen to a full Japanese podcast episode',                  s:'INT',xp:38,g:15,mp:18, desc:'Passive listening is still training. Put it on.'},
+  {n:'Shadow a native Japanese speaker for 15 min',                s:'INT',xp:45,g:18,mp:22, desc:'Shadowing rewires your accent. Do it now.'},
+  // ── YOUTUBE / CONTENT SURGES ──
+  {n:'Film a piece of content right now — anything',               s:'SEN',xp:60,g:24,mp:20, desc:'Perfect is the enemy of posted. Film. Now.'},
+  {n:'Write and schedule 3 YouTube Shorts today',                  s:'SEN',xp:55,g:22,mp:20, desc:'Quantity builds the skill. No waiting for perfect.'},
+  {n:'Plan your next 10 video ideas — write them down',            s:'SEN',xp:45,g:18,mp:15, desc:'Strategy beats inspiration. Fill the content calendar.'},
+  {n:'Engage with 10 creators in your niche today',               s:'SEN',xp:35,g:14,mp:0,  desc:'Community is the algorithm. Show up everywhere.'},
+  {n:'Respond to every comment on your last video today',          s:'SEN',xp:30,g:12,mp:0,  desc:'The algorithm rewards engagement. Feed it.'},
+  {n:'Write a full video script start to finish today',            s:'SEN',xp:55,g:22,mp:20, desc:'Scripts produce better content. Write one now.'},
+  {n:'Batch film 3 Shorts in one session today',                   s:'SEN',xp:65,g:26,mp:25, desc:'Batch work multiplies output. Load up the camera.'},
+  {n:'Analyse your top-performing video — write 5 insights',       s:'SEN',xp:40,g:16,mp:15, desc:'Learn from what already worked. Study yourself.'},
+  {n:'Post a community update or poll on YouTube today',            s:'SEN',xp:28,g:11,mp:0,  desc:'Community tab content keeps your audience warm.'},
+  {n:'Thumbnail design session — create 3 options for next video', s:'SEN',xp:40,g:16,mp:15, desc:'Thumbnails are 50% of the click. Design them well.'},
+  // ── DISCIPLINE / LIFESTYLE SURGES ──
+  {n:'Clean your room top to bottom — right now',                  s:'STA',xp:40,g:16,mp:0,  desc:'Your environment shapes your mindset. Fix it immediately.'},
+  {n:'Delete social media apps for the next 24 hours',             s:'SEN',xp:50,g:20,mp:0,  desc:'Attention is your scarcest resource. Protect it.'},
+  {n:'Go to bed by 10pm tonight — no exceptions',                  s:'STA',xp:40,g:16,mp:-25,desc:'Recovery is training. Sleep is a performance enhancer.'},
+  {n:'No phone for 3 hours straight — start now',                  s:'SEN',xp:45,g:18,mp:0,  desc:'Deep focus requires deep silence. Begin the silence.'},
+  {n:'Drink 4 litres of water before midnight',                    s:'STA',xp:35,g:14,mp:0,  desc:'Hydration is the foundation of everything else.'},
+  {n:'No junk food for the next 48 hours',                         s:'STA',xp:50,g:20,mp:0,  desc:'Your body is the temple. Treat it accordingly.'},
+  {n:'Cook a proper meal from scratch — no shortcuts today',        s:'SEN',xp:30,g:12,mp:0,  desc:'Fuel yourself with intention. Earn your calories.'},
+  {n:'Full morning routine before touching your phone',             s:'SEN',xp:35,g:14,mp:-15,desc:'Who controls the morning controls the day.'},
+  {n:'Write a full to-do list for tomorrow — tonight',             s:'INT',xp:25,g:10,mp:-10,desc:'Preparation the night before removes morning friction.'},
+  {n:'Cold shower — 2 full minutes cold at the end',               s:'STA',xp:35,g:14,mp:-20,desc:'Voluntary discomfort is the training ground of the will.'},
+  {n:'Spend 0 money today — zero unnecessary purchases',           s:'SEN',xp:30,g:12,mp:0,  desc:'Financial discipline is a daily rep. Start today.'},
+  {n:'Review your savings and transfer something — any amount',    s:'SEN',xp:40,g:16,mp:0,  desc:'The habit of saving matters more than the size of it.'},
+  {n:'Cancel one subscription you don't actually use',            s:'SEN',xp:45,g:18,mp:0,  desc:'Leaks sink ships. Find one and plug it now.'},
+  {n:'Deep clean the bathroom — properly, top to bottom',          s:'STA',xp:35,g:14,mp:0,  desc:'Discipline in small spaces builds discipline everywhere.'},
+  {n:'Declutter — remove 10 things you don't need',              s:'SEN',xp:35,g:14,mp:0,  desc:'Clarity of space is clarity of mind.'},
+  {n:'30 min journaling — what's working, what isn't',          s:'INT',xp:35,g:14,mp:-15,desc:'Self-reflection is the highest form of strategy.'},
+  {n:'Read 20 pages of a book — not your phone',                   s:'INT',xp:28,g:11,mp:10, desc:'Knowledge compounds. Read something real today.'},
+  {n:'Take all your supplements AND drink 3L today — no skipping', s:'STA',xp:30,g:12,mp:0,  desc:'The stack only works when you actually take it.'},
+  {n:'Meditate for 20 minutes — double session today',             s:'STA',xp:30,g:12,mp:-25,desc:'Double the calm. Double the clarity.'},
+  {n:'Write down 3 big goals and WHY they matter — right now',     s:'INT',xp:30,g:12,mp:-10,desc:'Clarity precedes action. Write it, mean it.'},
+  {n:'Call or message someone you've been neglecting',            s:'SEN',xp:25,g:10,mp:0,  desc:'Relationships are long-term investments. Make a deposit.'},
+  {n:'Do grooming maintenance you've been putting off',           s:'SEN',xp:25,g:10,mp:0,  desc:'A hunter who looks sharp fights sharp.'},
 ];
 
 // SHOP — built-in (Treats + System only; gear categories removed)
@@ -2319,7 +2349,7 @@ let G={
       read7:0,read10:0,sta5:false,str6:false,str12:false,agi8:false,
       mind7:false,anki10:false,water5:false,gld20:false,all5:false},
   shopCooldowns:{},lastDate:'',weekDate:'',
-  urgentQuest:null,urgentExpiry:null,
+  urgentQuest:null,urgentExpiry:null,urgentNextDate:null,lastUrgentId:-1,
 };
 let curTab='home',qFilter='all',shopCat='All';
 let editQId=null,editQStat='STR',editQType='daily';
@@ -2346,6 +2376,8 @@ function ld(){
       G.qsd={STR:0,AGI:0,STA:0,INT:0,SEN:0,savings:0,...(p.qsd||{})};
       G.fx={...G.fx,...(p.fx||{})};
       G.shopCooldowns=p.shopCooldowns||{};
+      G.urgentNextDate=p.urgentNextDate||null;
+      G.lastUrgentId=p.lastUrgentId||-1;
       G.customShop=p.customShop||[];
       G.customCategories=p.customCategories||[];
       G.shadows=p.shadows||[];
@@ -2373,8 +2405,10 @@ function dayCheck(){
   }
   G.quests.filter(q=>!q.penaltyTask).forEach(q=>{if(q.t==='daily')q.done=false;});
   G.quests=G.quests.filter(q=>!q.penaltyTask);
-  // Reset urgent quest each day
-  if(G.urgentExpiry!==today){G.urgentQuest=null;G.urgentExpiry=null;}
+  // Clear urgent quest if it's from a previous day (completed or not shown)
+  if(G.urgentExpiry&&G.urgentExpiry!==today&&G.urgentQuest?.done){
+    G.urgentQuest=null;G.urgentExpiry=null;
+  }
   G.lastDate=today;sv();
 }
 
@@ -2390,34 +2424,30 @@ function getMondayStr(){
 }
 
 function maybeSpawnUrgent(){
-  // Don't spawn if one already active today
-  if(G.urgentQuest&&!G.urgentQuest.done&&G.urgentExpiry===new Date().toDateString()) return;
-  // Spawn probability: 65% chance per day — quests appear at random points during the day
-  // They are reset each day so you get 0-2 per day naturally
-  if(Math.random()<0.65){
-    // Pick a quest NOT similar to the last one (avoid repetition)
-    const pool=URGENT_POOL;
-    const pick=pool[~~(Math.random()*pool.length)];
-    G.urgentQuest={...pick,id:'urg_'+Date.now(),m:'urgent',t:'urgent',done:false,streak:0};
-    G.urgentExpiry=new Date().toDateString();
-    sv();
-    // Delay the cinematic so it doesn't fire immediately on app open
-    const delay=G.lastDate?2000:6000;
-    setTimeout(()=>showUrgentCine(G.urgentQuest),delay);
-    // Schedule a possible SECOND urgent quest for later in the day (40% chance)
-    if(Math.random()<0.4){
-      const laterDelay=Math.floor(Math.random()*4+2)*3600000; // 2-6 hours later
-      setTimeout(()=>{
-        if(G.urgentQuest&&!G.urgentQuest.done) return; // first one still pending
-        const pick2=pool[~~(Math.random()*pool.length)];
-        G.urgentQuest={...pick2,id:'urg_'+Date.now(),m:'urgent',t:'urgent',done:false,streak:0};
-        G.urgentExpiry=new Date().toDateString();
-        sv();
-        showUrgentCine(G.urgentQuest);
-        renderAll();
-      },laterDelay);
-    }
-  }
+  const today=new Date().toDateString();
+  // If there's an active uncompleted urgent from today, don't spawn another
+  if(G.urgentQuest&&!G.urgentQuest.done&&G.urgentExpiry===today) return;
+  // Check cooldown — urgent quests spawn once every 1–3 days randomly
+  // We store the next spawn date in G.urgentNextDate
+  if(G.urgentNextDate&&new Date()<new Date(G.urgentNextDate)) return;
+  // Spawn one now
+  const pool=URGENT_POOL;
+  // Avoid repeating the last quest
+  const lastId=G.lastUrgentId;
+  const available=pool.filter((_,i)=>i!==lastId);
+  const idx=~~(Math.random()*available.length);
+  const pick=available[idx];
+  G.urgentQuest={...pick,id:'urg_'+Date.now(),m:'urgent',t:'urgent',done:false,streak:0};
+  G.urgentExpiry=today;
+  G.lastUrgentId=pool.indexOf(pick);
+  // Next urgent spawns in 1–3 days from now
+  const daysUntilNext=1+Math.floor(Math.random()*3); // 1, 2, or 3
+  const next=new Date();next.setDate(next.getDate()+daysUntilNext);next.setHours(~~(Math.random()*14)+7,~~(Math.random()*60),0,0);
+  G.urgentNextDate=next.toISOString();
+  sv();
+  // Show cinematic after a short delay so app loads first
+  const delay=G.lastDate?2500:7000;
+  setTimeout(()=>{if(G.urgentQuest&&!G.urgentQuest.done){showUrgentCine(G.urgentQuest);renderAll();}},delay);
 }
 
 // ══════════════════════════════════════════════
@@ -2499,8 +2529,10 @@ function rHome(){
     np.style.display='none';
   }
   const urgents=(G.urgentQuest&&!G.urgentQuest.done)?[G.urgentQuest]:[];
-  const prev=[...urgents,...G.quests.filter(q=>q.t==='daily'&&!q.done).slice(0,3),...G.quests.filter(q=>q.t==='daily'&&q.done).slice(0,1)];
-  document.getElementById('h-qprev').innerHTML=prev.slice(0,4).map(q=>qCardHTML(q)).join('');
+  // Show ALL daily quests — incomplete first, then done — plus any active urgent
+  const allDailies=G.quests.filter(q=>q.t==='daily');
+  const prev=[...urgents,...allDailies.filter(q=>!q.done),...allDailies.filter(q=>q.done)];
+  document.getElementById('h-qprev').innerHTML=prev.map(q=>qCardHTML(q)).join('');
 
   // ── ACTIVE TITLE STRIP ──
   const strip=document.getElementById('h-title-strip');
