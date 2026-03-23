@@ -1805,7 +1805,6 @@ body{font-family:'Barlow Condensed',sans-serif;color:var(--white);}
         <span class="sw-corner br">◆</span>
         <div class="sw-watermark">SOLO LEVELING · ARISE · THE SYSTEM</div>
         <!-- Firebase sync indicator -->
-        <button onclick="const m=SFX.mute();this.textContent=m?'🔇':'🔊';" style="position:absolute;top:6px;right:8px;background:none;border:none;cursor:pointer;font-size:12px;color:rgba(160,96,255,.4);z-index:10;padding:2px 4px;" title="Toggle sound">🔊</button>
   <div id="fb-status" style="position:absolute;bottom:6px;left:50%;transform:translateX(-50%);font-family:'Share Tech Mono',monospace;font-size:7px;letter-spacing:2px;color:rgba(160,96,255,.4);white-space:nowrap;pointer-events:none;transition:opacity 1s;"></div>
         <div class="sw-header">
           <div class="sw-title-row">
@@ -2320,10 +2319,11 @@ const DEFAULT_QUESTS=[
   {id:'f3',m:'fitness',t:'weekly',n:'Leg workout — quads, hamstrings, glutes (×1/week)',     s:'STR',xp:45,g:18,mp:0,streak:0,done:false,weekDone:0},
   {id:'f4',m:'fitness',t:'daily', n:'20 min Peloton or cardio session',                      s:'AGI',xp:25,g:10,mp:0,streak:0,done:false},
   {id:'f5',m:'fitness',t:'daily', n:'Hit daily protein target',                              s:'STA',xp:15,g:6, mp:0,streak:0,done:false},
-  {id:'f6',m:'fitness',t:'daily', n:'100 push-ups (any sets, any time)',                     s:'STR',xp:30,g:12,mp:0,streak:0,done:false},
-  {id:'f7',m:'fitness',t:'daily', n:'100 sit-ups (any sets, any time)',                      s:'STR',xp:25,g:10,mp:0,streak:0,done:false},
-  {id:'f8',m:'fitness',t:'daily', n:'100 squats (any sets, any time)',                       s:'STR',xp:25,g:10,mp:0,streak:0,done:false},
+  {id:'f6',m:'fitness',t:'daily', n:'20 push-ups (any sets, any time)',                      s:'STR',xp:15,g:6, mp:0,streak:0,done:false},
+  {id:'f7',m:'fitness',t:'daily', n:'20 sit-ups (any sets, any time)',                       s:'STR',xp:12,g:5, mp:0,streak:0,done:false},
+  {id:'f8',m:'fitness',t:'daily', n:'20 squats (any sets, any time)',                        s:'STR',xp:12,g:5, mp:0,streak:0,done:false},
   {id:'f9',m:'fitness',t:'daily', n:'30 min run or walk outside',                            s:'AGI',xp:30,g:12,mp:0,streak:0,done:false},
+  {id:'f12',m:'fitness',t:'daily', n:'10 minutes of stretching',                             s:'AGI',xp:12,g:5, mp:0,streak:0,done:false},
   {id:'f10',m:'fitness',t:'main', n:'Reach 15% body fat',                                   s:'STR',xp:200,g:80,mp:0,streak:0,done:false},
   {id:'f11',m:'fitness',t:'main', n:'Reach 12% body fat',                                   s:'STR',xp:400,g:160,mp:0,streak:0,done:false},
   // ── YOUTUBE ──
@@ -2335,11 +2335,12 @@ const DEFAULT_QUESTS=[
   {id:'y6',m:'youtube',t:'main',  n:'Reach 10,000 subscribers',                             s:'SEN',xp:500,g:200,mp:0,streak:0,done:false},
   {id:'y7',m:'youtube',t:'main',  n:'Reach 100,000 subscribers',                            s:'SEN',xp:1000,g:400,mp:0,streak:0,done:false},
   // ── JAPANESE ──
-  {id:'j1',m:'japanese',t:'daily', n:'Anki — complete all due reviews',                     s:'INT',xp:20,g:8, mp:15,streak:0,done:false},
+  {id:'j1',m:'japanese',t:'daily', n:'Review yesterday\'s kana',                             s:'INT',xp:20,g:8, mp:15,streak:0,done:false},
   {id:'j2',m:'japanese',t:'daily', n:'Anki — add 10 new vocabulary cards',                  s:'INT',xp:18,g:7, mp:10,streak:0,done:false},
   {id:'j3',m:'japanese',t:'daily', n:'Japanese grammar study — 15 min',                     s:'INT',xp:20,g:8, mp:15,streak:0,done:false},
   {id:'j4',m:'japanese',t:'daily', n:'Japanese immersion — watch, read or listen 20 min',   s:'INT',xp:18,g:7, mp:10,streak:0,done:false},
-  {id:'j5',m:'japanese',t:'daily', n:'Write 5 kanji from memory',                           s:'INT',xp:12,g:5, mp:10,streak:0,done:false},
+  {id:'j5',m:'japanese',t:'daily', n:'Learn 5–10 hiragana/katakana',                        s:'INT',xp:15,g:6, mp:10,streak:0,done:false},
+  {id:'j12',m:'japanese',t:'daily', n:'Practice writing one row of kana from memory',       s:'INT',xp:12,g:5, mp:10,streak:0,done:false},
   {id:'j6',m:'japanese',t:'weekly',n:'Full Japanese listening session (×3/week)',            s:'INT',xp:35,g:14,mp:20,streak:0,done:false,weekDone:0},
   {id:'j7',m:'japanese',t:'weekly',n:'Write a short journal entry in Japanese (×1/week)',    s:'INT',xp:30,g:12,mp:15,streak:0,done:false,weekDone:0},
   {id:'j8',m:'japanese',t:'main',  n:'Complete Genki I textbook',                           s:'INT',xp:200,g:80,mp:0,streak:0,done:false},
@@ -2349,19 +2350,17 @@ const DEFAULT_QUESTS=[
   // ── HEALTHY LIFE ──
   {id:'h1',m:'health',t:'daily', n:'Read for 30 minutes',                                   s:'INT',xp:20,g:8, mp:10,streak:0,done:false},
   {id:'h2',m:'health',t:'daily', n:'Meditate for 10 minutes',                               s:'STA',xp:15,g:6, mp:-20,streak:0,done:false},
-  {id:'h3',m:'health',t:'daily', n:'No phone first 30 minutes after waking',                s:'SEN',xp:12,g:5, mp:-15,streak:0,done:false},
-  {id:'h4',m:'health',t:'daily', n:'In bed by 11pm',                                        s:'STA',xp:18,g:7, mp:-30,streak:0,done:false},
   {id:'h5',m:'health',t:'weekly',n:'Cold shower — end with 60 sec cold (×3/week)',          s:'STA',xp:18,g:7, mp:-20,streak:0,done:false,weekDone:0},
   // ── COOKING ──
   {id:'c1',m:'cooking',t:'daily', n:'Cook a proper meal from scratch',                      s:'SEN',xp:22,g:9, mp:0,streak:0,done:false},
   {id:'c2',m:'cooking',t:'daily', n:'No junk food today',                                   s:'STA',xp:14,g:6, mp:0,streak:0,done:false},
   {id:'c3',m:'cooking',t:'weekly',n:'Meal prep for the week (×1/week)',                     s:'SEN',xp:45,g:18,mp:0,streak:0,done:false,weekDone:0},
   // ── SUPPLEMENTS ──
-  {id:'s1',m:'supps',t:'daily', n:'Creatine 5g',                                            s:'STA',xp:8, g:4, mp:0,streak:0,done:false},
-  {id:'s2',m:'supps',t:'daily', n:'Vitamin D3 + K2',                                        s:'STA',xp:7, g:3, mp:0,streak:0,done:false},
   {id:'s3',m:'supps',t:'daily', n:'Omega-3 fish oil',                                       s:'STA',xp:7, g:3, mp:0,streak:0,done:false},
-  {id:'s4',m:'supps',t:'daily', n:'Magnesium glycinate before bed',                         s:'STA',xp:7, g:3, mp:0,streak:0,done:false},
+  {id:'s4',m:'supps',t:'daily', n:'Magnesium + Zinc + B6',                                  s:'STA',xp:7, g:3, mp:0,streak:0,done:false},
   {id:'s5',m:'supps',t:'daily', n:'Drink 3 litres of water',                                s:'STA',xp:10,g:5, mp:0,streak:0,done:false},
+  {id:'s6',m:'supps',t:'daily', n:'Collagen',                                               s:'STA',xp:7, g:3, mp:0,streak:0,done:false},
+  {id:'s7',m:'supps',t:'daily', n:'2 protein shakes',                                       s:'STA',xp:10,g:5, mp:0,streak:0,done:false},
   // ── SAVINGS ──
   {id:'sa1',m:'savings',t:'daily', n:'No unnecessary spending today',                       s:'SEN',xp:10,g:5, mp:0,streak:0,done:false},
   {id:'sa2',m:'savings',t:'weekly',n:'Review weekly budget',                                s:'SEN',xp:25,g:10,mp:0,streak:0,done:false,weekDone:0},
@@ -2370,9 +2369,9 @@ const DEFAULT_QUESTS=[
   // ── THE GRIND (Grooming, Discipline, Room) ──
   {id:'gr1',m:'grind',t:'daily', n:'Full morning grooming — shower, skincare, hair',        s:'SEN',xp:15,g:6, mp:-10,streak:0,done:false},
   {id:'gr2',m:'grind',t:'daily', n:'Make your bed — first thing, no excuses',               s:'SEN',xp:8, g:3, mp:0,streak:0,done:false},
-  {id:'gr3',m:'grind',t:'daily', n:'No social media before noon',                           s:'SEN',xp:12,g:5, mp:0,streak:0,done:false},
   {id:'gr4',m:'grind',t:'daily', n:'15 min evening tidy — clothes, desk, floor',            s:'SEN',xp:10,g:4, mp:0,streak:0,done:false},
   {id:'gr5',m:'grind',t:'weekly',n:'Clean your room — full tidy, vacuum, surfaces (×1/week)',s:'STA',xp:35,g:14,mp:0,streak:0,done:false,weekDone:0},
+  {id:'gr9',m:'grind',t:'weekly',n:'Deep clean — kitchen, bathroom, floors top to bottom (×1/week)',s:'STA',xp:50,g:20,mp:0,streak:0,done:false,weekDone:0},
   {id:'gr6',m:'grind',t:'weekly',n:'Do laundry — wash, dry, put away (×1/week)',            s:'STA',xp:20,g:8, mp:0,streak:0,done:false,weekDone:0},
   {id:'gr7',m:'grind',t:'weekly',n:'Grooming maintenance — trim / haircut / nails (×1/week)',s:'SEN',xp:25,g:10,mp:0,streak:0,done:false,weekDone:0},
   {id:'gr8',m:'grind',t:'weekly',n:'Plan next 7 days — goals, tasks, schedule (×1/week)',   s:'INT',xp:30,g:12,mp:-15,streak:0,done:false,weekDone:0},
@@ -2448,38 +2447,38 @@ const URGENT_POOL=[
 // SHOP — built-in (Treats + System only; gear categories removed)
 const BUILTIN_SHOP=[
   // ── TREATS ──
-  {id:'candy',   cat:'Treats',icon:'🍬',n:'Bag of Candy',         d:'150g of whatever you want. Earned, not given.',              cost:80, coolDays:14,cons:true,rar:'normal'},
-  {id:'choc',    cat:'Treats',icon:'🍫',n:'Chocolate Bar',         d:'One proper chocolate bar. You did the work.',                cost:45, coolDays:7, cons:true,rar:'normal'},
-  {id:'soda',    cat:'Treats',icon:'🥤',n:'Soda',                  d:'One cold can or bottle. Refreshing. Earned.',                cost:30, coolDays:3, cons:true,rar:'normal'},
-  {id:'takeaway',cat:'Treats',icon:'🍕',n:'Takeaway Meal',         d:'Order whatever you want. One proper cheat meal.',            cost:120,coolDays:7, cons:true,rar:'magic'},
-  {id:'cinema',  cat:'Treats',icon:'🎬',n:'Cinema Trip',           d:'A full cinema trip. Get the popcorn too.',                   cost:200,coolDays:21,cons:true,rar:'rare'},
-  {id:'icecream',cat:'Treats',icon:'🍦',n:'Ice Cream',             d:'One tub or scoop. You earned this.',                        cost:50, coolDays:7, cons:true,rar:'normal'},
-  {id:'purchase',cat:'Treats',icon:'📦',n:'Online Purchase ≤£20', d:'One guilt-free online buy under £20. No justification needed.',cost:300,coolDays:30,cons:true,rar:'rare'},
-  {id:'snack',   cat:'Treats',icon:'🥐',n:'Fancy Snack',           d:'Pastry, croissant, nice crisps — something premium.',        cost:35, coolDays:4, cons:true,rar:'normal'},
+  {id:'candy',   cat:'Treats',icon:'🍬',n:'Bag of Candy',         d:'150g of whatever you want. Only the disciplined may indulge.',cost:300,coolDays:7, cons:true,rar:'rare',reqPct:90},
+  {id:'choc',    cat:'Treats',icon:'🍫',n:'Chocolate Bar',         d:'One proper chocolate bar. You did the work.',                cost:200,coolDays:7, cons:true,rar:'normal'},
+  {id:'soda',    cat:'Treats',icon:'🥤',n:'Soda',                  d:'One cold can or bottle. Refreshing. Earned.',                cost:120,coolDays:3, cons:true,rar:'normal'},
+  {id:'takeaway',cat:'Treats',icon:'🍕',n:'Takeaway Meal',         d:'Order whatever you want. One proper cheat meal.',            cost:500,coolDays:7, cons:true,rar:'magic'},
+  {id:'cinema',  cat:'Treats',icon:'🎬',n:'Cinema Trip',           d:'A full cinema trip. Get the popcorn too.',                   cost:800,coolDays:21,cons:true,rar:'rare'},
+  {id:'icecream',cat:'Treats',icon:'🍦',n:'Ice Cream',             d:'One tub or scoop. You earned this.',                        cost:180,coolDays:7, cons:true,rar:'normal'},
+  {id:'purchase',cat:'Treats',icon:'📦',n:'Online Purchase ≤£20', d:'One guilt-free online buy under £20. No justification needed.',cost:1000,coolDays:30,cons:true,rar:'rare'},
+  {id:'snack',   cat:'Treats',icon:'🥐',n:'Fancy Snack',           d:'Pastry, croissant, nice crisps — something premium.',        cost:140,coolDays:4, cons:true,rar:'normal'},
   // ── SYSTEM ──
-  {id:'shield',  cat:'System',icon:'🛡',n:'Streak Shield',         d:'Protects all streaks if you miss a day. One-time use.',      cost:90, coolDays:0, cons:true,rar:'magic',    e:'shield'},
-  {id:'randbox', cat:'System',icon:'🎲',n:'Random Reward Box',     d:'Opens a random treat from the shop. Luck is a stat.',        cost:70, coolDays:0, cons:true,rar:'magic',    e:'rand'},
-  {id:'restday', cat:'System',icon:'🛋',n:'Rest Day Pass',         d:'Skip ALL fitness quests today with zero penalty. This costs nearly three weeks of consistent grinding. Use it wisely.',cost:2500,coolDays:0,cons:true,rar:'legendary',e:'skipfit'},
+  {id:'shield',  cat:'System',icon:'🛡',n:'Streak Shield',         d:'Protects all streaks if you miss a day. One-time use.',      cost:350,coolDays:0, cons:true,rar:'magic',    e:'shield'},
+  {id:'randbox', cat:'System',icon:'🎲',n:'Random Reward Box',     d:'Opens a random treat from the shop. Luck is a stat.',        cost:250,coolDays:0, cons:true,rar:'magic',    e:'rand'},
+  {id:'restday', cat:'System',icon:'🛋',n:'Rest Day Pass',         d:'Skip ALL fitness quests today with zero penalty. This costs nearly three weeks of consistent grinding. Use it wisely.',cost:5000,coolDays:0,cons:true,rar:'legendary',e:'skipfit'},
   // ── KNIGHT\'S ARMOURY (unlocked by extracting Igris) ──
-  {id:'ka_shoes',  cat:"Knight's Armoury",icon:'👟',n:'New Training Shoes',   d:'Treat yourself to a proper pair of gym shoes.',              cost:350,coolDays:90,cons:true,rar:'epic'},
-  {id:'ka_gloves', cat:"Knight's Armoury",icon:'🥊',n:'Boxing / Gym Gloves',  d:'A quality pair of gloves. Igris would approve.',             cost:120,coolDays:30,cons:true,rar:'rare'},
-  {id:'ka_bar',    cat:"Knight's Armoury",icon:'🍫',n:'Protein Bar (×5)',      d:'Five quality protein bars. Earned fuel.',                    cost:80, coolDays:7, cons:true,rar:'magic'},
-  {id:'ka_leisure',cat:"Knight's Armoury",icon:'🏅',n:'Leisure Session',       d:'One guilt-free leisure session of your choice. Earned.',     cost:150,coolDays:14,cons:true,rar:'rare'},
+  {id:'ka_shoes',  cat:"Knight's Armoury",icon:'👟',n:'New Training Shoes',   d:'Treat yourself to a proper pair of gym shoes.',              cost:1200,coolDays:90,cons:true,rar:'epic'},
+  {id:'ka_gloves', cat:"Knight's Armoury",icon:'🥊',n:'Boxing / Gym Gloves',  d:'A quality pair of gloves. Igris would approve.',             cost:450,coolDays:30,cons:true,rar:'rare'},
+  {id:'ka_bar',    cat:"Knight's Armoury",icon:'🍫',n:'Protein Bar (×5)',      d:'Five quality protein bars. Earned fuel.',                    cost:280,coolDays:7, cons:true,rar:'magic'},
+  {id:'ka_leisure',cat:"Knight's Armoury",icon:'🏅',n:'Leisure Session',       d:'One guilt-free leisure session of your choice. Earned.',     cost:500,coolDays:14,cons:true,rar:'rare'},
   // ── RECOVERY (unlocked by extracting Beru) ──
-  {id:'rec_massage',cat:'Recovery',icon:'💆',n:'Massage or Spa Visit', d:'A full professional recovery session. Beru heals his king.',  cost:400,coolDays:30,cons:true,rar:'legendary'},
-  {id:'rec_bath',   cat:'Recovery',icon:'🛁',n:'Full Recovery Bath',   d:'Epsom salts, candles, phone off. 45 full minutes.',          cost:60, coolDays:7, cons:true,rar:'magic'},
-  {id:'rec_sleep',  cat:'Recovery',icon:'😴',n:'Lie-In Pass',          d:'One weekend morning of guilt-free sleeping in.',             cost:90, coolDays:14,cons:true,rar:'rare'},
-  {id:'rec_movie',  cat:'Recovery',icon:'🎬',n:'Movie Night',          d:'Pick a film, full screen, no interruptions.',                cost:70, coolDays:7, cons:true,rar:'normal'},
+  {id:'rec_massage',cat:'Recovery',icon:'💆',n:'Massage or Spa Visit', d:'A full professional recovery session. Beru heals his king.',  cost:1500,coolDays:30,cons:true,rar:'legendary'},
+  {id:'rec_bath',   cat:'Recovery',icon:'🛁',n:'Full Recovery Bath',   d:'Epsom salts, candles, phone off. 45 full minutes.',          cost:220,coolDays:7, cons:true,rar:'magic'},
+  {id:'rec_sleep',  cat:'Recovery',icon:'😴',n:'Lie-In Pass',          d:'One weekend morning of guilt-free sleeping in.',             cost:350,coolDays:14,cons:true,rar:'rare'},
+  {id:'rec_movie',  cat:'Recovery',icon:'🎬',n:'Movie Night',          d:'Pick a film, full screen, no interruptions.',                cost:250,coolDays:7, cons:true,rar:'normal'},
   // ── SOLDIER\'S RATIONS (unlocked by extracting Tank) ──
-  {id:'sr_meal',      cat:"Soldier's Rations",icon:'🍔',n:'Cheat Meal',       d:'One full cheat meal, no rules. Tank approves.',              cost:100,coolDays:7, cons:true,rar:'magic'},
-  {id:'sr_coffee',    cat:"Soldier's Rations",icon:'☕',n:'Premium Coffee',    d:'A proper coffee from a real café. Not instant.',             cost:30, coolDays:3, cons:true,rar:'normal'},
-  {id:'sr_dessert',   cat:"Soldier's Rations",icon:'🍰',n:'Dessert',          d:'One proper dessert. Any dessert. You pick.',                 cost:55, coolDays:5, cons:true,rar:'normal'},
-  {id:'sr_restaurant',cat:"Soldier's Rations",icon:'🍽',n:'Restaurant Meal',  d:'A sit-down restaurant meal. Fully earned.',                  cost:200,coolDays:21,cons:true,rar:'rare'},
+  {id:'sr_meal',      cat:"Soldier's Rations",icon:'🍔',n:'Cheat Meal',       d:'One full cheat meal, no rules. Tank approves.',              cost:400,coolDays:7, cons:true,rar:'magic'},
+  {id:'sr_coffee',    cat:"Soldier's Rations",icon:'☕',n:'Premium Coffee',    d:'A proper coffee from a real café. Not instant.',             cost:120,coolDays:3, cons:true,rar:'normal'},
+  {id:'sr_dessert',   cat:"Soldier's Rations",icon:'🍰',n:'Dessert',          d:'One proper dessert. Any dessert. You pick.',                 cost:200,coolDays:5, cons:true,rar:'normal'},
+  {id:'sr_restaurant',cat:"Soldier's Rations",icon:'🍽',n:'Restaurant Meal',  d:'A sit-down restaurant meal. Fully earned.',                  cost:800,coolDays:21,cons:true,rar:'rare'},
   // ── SCHOLAR\'S DEN (unlocked by extracting Fangs) ──
-  {id:'sd_manga',  cat:"Scholar's Den",icon:'📚',n:'Manga Volume (×3)', d:'Three manga volumes. Immersion reading counts.',             cost:100,coolDays:0, cons:true,rar:'magic'},
-  {id:'sd_game',   cat:"Scholar's Den",icon:'🎮',n:'Gaming Session',    d:'Two hours of guilt-free gaming. Earned.',                   cost:80, coolDays:7, cons:true,rar:'normal'},
-  {id:'sd_course', cat:"Scholar's Den",icon:'🎓',n:'Online Course',     d:'Buy one online course. Invest in yourself.',                cost:300,coolDays:60,cons:true,rar:'epic'},
-  {id:'sd_book',   cat:"Scholar's Den",icon:'📖',n:'Book of Your Choice',d:'Any book, any genre. Fangs demands you keep learning.',    cost:60, coolDays:0, cons:true,rar:'normal'},
+  {id:'sd_manga',  cat:"Scholar's Den",icon:'📚',n:'Manga Volume (×3)', d:'Three manga volumes. Immersion reading counts.',             cost:400,coolDays:0, cons:true,rar:'magic'},
+  {id:'sd_game',   cat:"Scholar's Den",icon:'🎮',n:'Gaming Session',    d:'Two hours of guilt-free gaming. Earned.',                   cost:300,coolDays:7, cons:true,rar:'normal'},
+  {id:'sd_course', cat:"Scholar's Den",icon:'🎓',n:'Online Course',     d:'Buy one online course. Invest in yourself.',                cost:1000,coolDays:60,cons:true,rar:'epic'},
+  {id:'sd_book',   cat:"Scholar's Den",icon:'📖',n:'Book of Your Choice',d:'Any book, any genre. Fangs demands you keep learning.',    cost:220,coolDays:0, cons:true,rar:'normal'},
 ];
 
 const SHOP_CATS_LIST=['All','Treats','System',"Knight's Armoury",'Recovery',"Soldier's Rations","Scholar's Den"];
@@ -2554,7 +2553,7 @@ let G={
   fx:{shield:false,skipfit:false,fitb:false,intb:false,str3:0,slp2x:false,
       read7:0,read10:0,sta5:false,str6:false,str12:false,agi8:false,
       mind7:false,anki10:false,water5:false,gld20:false,all5:false},
-  shopCooldowns:{},lastDate:'',weekDate:'',
+  shopCooldowns:{},lastDate:'',weekDate:'',dailyLog:[],
   urgentQuest:null,urgentExpiry:null,urgentNextDate:null,lastUrgentId:-1,
 };
 let curTab='home',qFilter='all',shopCat='All';
@@ -2582,6 +2581,7 @@ function ld(){
       G.qsd={STR:0,AGI:0,STA:0,INT:0,SEN:0,savings:0,...(p.qsd||{})};
       G.fx={...G.fx,...(p.fx||{})};
       G.shopCooldowns=p.shopCooldowns||{};
+      G.dailyLog=p.dailyLog||[];
       G.urgentNextDate=p.urgentNextDate||null;
       G.lastUrgentId=p.lastUrgentId||-1;
       G.customShop=p.customShop||[];
@@ -2608,6 +2608,18 @@ function dayCheck(){
       else{G.quests.filter(q=>q.t==='daily').forEach(q=>q.streak=0);setTimeout(()=>showPenaltyZone(inc),1000);}
     }
     if(new Date().getDay()===0&&SKILLS.find(s=>s.id==='sl').f(G)){G.stats.INT+=3;showStatUpCine({INT:3},'Sunday Language Absorption bonus');}
+  }
+  // Log yesterday's daily completion rate
+  if(G.lastDate){
+    const dl=G.quests.filter(q=>q.t==='daily'&&!q.penaltyTask);
+    const dDone=dl.filter(q=>q.done).length;
+    const dTotal=dl.length;
+    if(dTotal>0){
+      if(!G.dailyLog)G.dailyLog=[];
+      G.dailyLog.push({date:G.lastDate,done:dDone,total:dTotal});
+      // Keep only last 14 days
+      while(G.dailyLog.length>14)G.dailyLog.shift();
+    }
   }
   G.quests.filter(q=>!q.penaltyTask).forEach(q=>{if(q.t==='daily')q.done=false;});
   G.quests=G.quests.filter(q=>!q.penaltyTask);
@@ -2912,14 +2924,16 @@ function rShop(){
     const owned=!item.cons&&G.inventory.some(i=>i.id===item.id);
     const cdInfo=item.coolDays>0?checkCooldown(item.id,item.coolDays):null;
     const onCd=!!cdInfo;
-    const cant=!owned&&!onCd&&G.gold<item.cost;
+    const reqLocked=item.reqPct?weeklyDailyPct()<item.reqPct:false;
+    const cant=!owned&&!onCd&&!reqLocked&&G.gold<item.cost;
     const rarClass='r-'+item.rar;
     const cdText=onCd?`${cdInfo}d left`:'';
-    return `<div class="sitem${item.cons?'':' perm'} ${rarClass}${cant?' cant':''}${onCd?' on-cooldown':''}" style="--ic:${RAR_COL[item.rar]||'var(--b2)'};">
+    return `<div class="sitem${item.cons?'':' perm'} ${rarClass}${cant||reqLocked?' cant':''}${onCd?' on-cooldown':''}" style="--ic:${RAR_COL[item.rar]||'var(--b2)'};">
       <div class="si-icon-box" style="background:${RAR_COL[item.rar]||'var(--b1)'}18;">${item.icon}</div>
       <div class="si-body">
         <div class="si-name">${item.n}${isCustom?'<span style="font-family:\'Share Tech Mono\',monospace;font-size:7px;color:rgba(160,96,255,.35);margin-left:5px;letter-spacing:1px;">CUSTOM</span>':''}</div>
         <div class="si-desc">${item.d}</div>
+        ${reqLocked?`<div style="font-family:'Share Tech Mono',monospace;font-size:7px;color:var(--red);letter-spacing:1px;margin-top:2px;">🔒 REQUIRES ${item.reqPct}% WEEKLY COMPLETION (${weeklyDailyPct()}% CURRENT)</div>`:''}
         <div class="si-meta">
           ${owned?`<span class="si-owned">OWNED</span>`:onCd?`<span class="si-cd">⏱ ${cdText}</span>`:`<span class="si-price">${item.cost}</span>`}
           ${item.coolDays>0?`<span class="si-cd">·${item.coolDays}d CD</span>`:''}
@@ -2927,11 +2941,20 @@ function rShop(){
         </div>
       </div>
       <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end;flex-shrink:0;">
-        ${owned?'':`<button class="si-buy ${item.cons?'cons':'prm'}${onCd?' cd-btn':''}" onclick="event.stopPropagation();buyItem('${item.id}')" ${onCd?'disabled':''}>${onCd?'⏱':cant?'◈'+item.cost:'BUY'}</button>`}
+        ${owned?'':`<button class="si-buy ${item.cons?'cons':'prm'}${onCd?' cd-btn':''}" onclick="event.stopPropagation();buyItem('${item.id}')" ${onCd||reqLocked?'disabled':''}>${reqLocked?'🔒':onCd?'⏱':cant?'◈'+item.cost:'BUY'}</button>`}
         ${isCustom?`<button onclick="event.stopPropagation();removeShopItem('${item.id}')" style="padding:3px 7px;background:rgba(255,40,70,.1);border:1px solid rgba(255,40,70,.25);color:var(--red);font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;letter-spacing:1px;cursor:pointer;clip-path:polygon(0 0,calc(100% - 3px) 0,100% 3px,100% 100%,3px 100%,0 calc(100% - 3px));">✕ REMOVE</button>`:''}
       </div>
     </div>`;
   }).join('')||`<div style="text-align:center;padding:40px;color:rgba(160,96,255,.2);font-family:'Share Tech Mono',monospace;font-size:8px;letter-spacing:2px;">NO ITEMS</div>`;
+}
+
+function weeklyDailyPct(){
+  if(!G.dailyLog||G.dailyLog.length===0)return 0;
+  // Look at last 7 logged days
+  const recent=G.dailyLog.slice(-7);
+  const totalDone=recent.reduce((s,d)=>s+d.done,0);
+  const totalPossible=recent.reduce((s,d)=>s+d.total,0);
+  return totalPossible>0?Math.round(totalDone/totalPossible*100):0;
 }
 
 function checkCooldown(id,days){
@@ -3167,6 +3190,7 @@ function buyItem(id){
   const item=allShop.find(x=>x.id===id);if(!item)return;
   if(G.gold<item.cost){sfx('cantBuy');showError('Not Enough Gold','Need ◈'+item.cost);return;}
   if(item.coolDays>0&&checkCooldown(id,item.coolDays)){showError('On Cooldown','This item has a cooldown');return;}
+  if(item.reqPct){const pct=weeklyDailyPct();if(pct<item.reqPct){sfx('cantBuy');showError('Not Unlocked','Need '+item.reqPct+'% weekly daily completion (current: '+pct+'%)');return;}}
   G.gold-=item.cost;
   if(item.coolDays>0)G.shopCooldowns[id]=new Date().toISOString();
   if(!item.cons){
@@ -3861,6 +3885,7 @@ function mergeRemote(data){
     merged.unlockedTitles=data.unlockedTitles||G.unlockedTitles;
     merged.unlockedSkills=data.unlockedSkills||G.unlockedSkills;
     merged.shopCooldowns=data.shopCooldowns||G.shopCooldowns;
+    merged.dailyLog=data.dailyLog||G.dailyLog||[];
     Object.assign(G,merged);
     localStorage.setItem('sl_v4',JSON.stringify(G));
     renderAll();
