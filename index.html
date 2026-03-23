@@ -1544,6 +1544,97 @@ body{font-family:'Barlow Condensed',sans-serif;color:var(--white);}
 /* Shadow-unlocked shop categories special border */
 .scat.shadow-unlocked{border-color:rgba(160,80,255,.45);color:var(--purple);}
 .scat.shadow-unlocked.act{background:rgba(80,20,160,.2);border-color:var(--purple);color:var(--purple);}
+
+/* ── BOSS COMBAT ── */
+.boss-section{padding:0 14px 6px;}
+.boss-sec-hdr{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:800;letter-spacing:3px;color:rgba(255,60,90,.45);margin-bottom:7px;display:flex;align-items:center;gap:6px;}
+.boss-sec-hdr::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,rgba(255,40,70,.2),transparent);}
+.boss-card{background:rgba(20,5,12,.7);border:1px solid rgba(255,40,70,.2);padding:9px 12px;margin-bottom:8px;clip-path:polygon(0 0,calc(100% - 6px) 0,100% 6px,100% 100%,6px 100%,0 calc(100% - 6px));transition:border-color .3s;}
+.boss-card.dead{opacity:.35;border-color:rgba(0,232,150,.2);}
+.boss-card.weekly-boss{border-color:rgba(160,80,255,.25);background:rgba(10,4,22,.7);}
+.boss-card.weekly-boss.dead{border-color:rgba(0,232,150,.2);}
+.boss-top{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+.boss-icon{font-size:20px;line-height:1;}
+.boss-name{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:900;letter-spacing:1px;flex:1;}
+.boss-type{font-family:'Share Tech Mono',monospace;font-size:7px;letter-spacing:2px;padding:2px 5px;border:1px solid rgba(255,40,70,.25);color:rgba(255,60,90,.5);}
+.boss-type.weekly{border-color:rgba(160,80,255,.3);color:rgba(180,100,255,.5);}
+.boss-hp-row{display:flex;align-items:center;gap:8px;}
+.boss-hp-lbl{font-family:'Share Tech Mono',monospace;font-size:8px;color:rgba(255,60,90,.45);width:18px;}
+.boss-hp-lbl.weekly{color:rgba(160,80,255,.5);}
+.boss-hp-track{flex:1;height:7px;background:rgba(255,40,70,.08);overflow:hidden;position:relative;}
+.boss-hp-fill{height:100%;background:linear-gradient(90deg,#660015,#ff3355);transition:width .7s cubic-bezier(.22,1,.36,1);}
+.boss-hp-fill.weekly{background:linear-gradient(90deg,#440080,#b040ff);}
+.boss-hp-val{font-family:'Share Tech Mono',monospace;font-size:8px;color:rgba(255,60,90,.4);min-width:64px;text-align:right;white-space:nowrap;}
+.boss-hp-val.weekly{color:rgba(160,80,255,.4);}
+.boss-dead-lbl{font-family:'Share Tech Mono',monospace;font-size:7px;letter-spacing:3px;color:rgba(0,232,150,.5);margin-top:4px;}
+.boss-dmg-num{position:fixed;pointer-events:none;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:24px;color:#ff3355;text-shadow:0 0 12px rgba(255,40,70,.8);animation:bossHit .75s ease forwards;z-index:9999;}
+.boss-dmg-num.weekly{color:#c040ff;text-shadow:0 0 12px rgba(160,80,255,.8);}
+@keyframes bossHit{0%{transform:translateY(0) scale(1.3);opacity:1;}100%{transform:translateY(-52px) scale(.6);opacity:0;}}
+
+/* ── DUNGEON RUNS ── */
+.dung-section{padding:0 14px 6px;}
+.dung-sec-hdr{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:800;letter-spacing:3px;color:rgba(160,96,255,.4);margin-bottom:7px;display:flex;align-items:center;gap:6px;}
+.dung-sec-hdr::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,rgba(120,60,255,.2),transparent);}
+.dung-card{background:rgba(12,8,24,.65);border:1px solid var(--b2);padding:9px 12px;margin-bottom:8px;clip-path:polygon(0 0,calc(100% - 6px) 0,100% 6px,100% 100%,6px 100%,0 calc(100% - 6px));transition:border-color .3s;}
+.dung-card.cleared{border-color:rgba(0,232,150,.35);background:rgba(0,50,30,.15);}
+.dung-top{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+.dung-icon{font-size:18px;width:24px;text-align:center;line-height:1;}
+.dung-info{flex:1;}
+.dung-name{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;letter-spacing:1px;}
+.dung-lore{font-family:'Share Tech Mono',monospace;font-size:7px;color:rgba(160,96,255,.35);letter-spacing:.5px;margin-top:1px;}
+.dung-reward{font-family:'Share Tech Mono',monospace;font-size:7px;letter-spacing:1px;color:var(--gold);background:rgba(232,168,32,.06);border:1px solid rgba(232,168,32,.2);padding:2px 7px;}
+.dung-prog-row{display:flex;align-items:center;gap:8px;}
+.dung-prog-lbl{font-family:'Share Tech Mono',monospace;font-size:7px;color:rgba(160,96,255,.35);width:18px;}
+.dung-prog-track{flex:1;height:4px;background:rgba(255,255,255,.05);overflow:hidden;}
+.dung-prog-fill{height:100%;background:linear-gradient(90deg,#5010b0,#9050ff);transition:width .4s ease;}
+.dung-prog-fill.full{background:linear-gradient(90deg,#003318,#00e896);}
+.dung-prog-cnt{font-family:'Share Tech Mono',monospace;font-size:8px;color:rgba(160,96,255,.35);min-width:28px;text-align:right;}
+.dung-cleared-lbl{font-family:'Share Tech Mono',monospace;font-size:7px;letter-spacing:3px;color:rgba(0,232,150,.55);margin-top:4px;}
+.dung-unlock-tag{font-family:'Share Tech Mono',monospace;font-size:7px;letter-spacing:1px;color:rgba(255,208,96,.5);margin-top:2px;}
+/* Dungeon type badge + quest list + locked chips */
+.dung-type-badge{display:inline-block;font-family:'Barlow Condensed',sans-serif;font-size:8px;font-weight:800;letter-spacing:2px;padding:2px 6px;border-radius:2px;margin-bottom:7px;}
+.dung-boss{border-color:rgba(255,60,60,.35)!important;background:rgba(40,4,4,.7)!important;}
+.dung-hidden{border-color:rgba(255,208,60,.3)!important;background:rgba(40,28,0,.7)!important;}
+.dung-q-list{display:flex;flex-direction:column;gap:3px;margin:6px 0 4px;}
+.dung-q-row{font-family:'Share Tech Mono',monospace;font-size:7.5px;color:rgba(200,180,255,.5);display:flex;align-items:center;gap:5px;letter-spacing:.3px;transition:color .25s;}
+.dung-q-row.dung-q-done{color:rgba(0,232,150,.6);text-decoration:line-through;text-decoration-color:rgba(0,232,150,.3);}
+.dung-q-dot{font-size:8px;line-height:1;flex-shrink:0;}
+.dung-locked-hdr{font-family:'Share Tech Mono',monospace;font-size:7px;letter-spacing:2px;color:rgba(160,96,255,.25);margin:10px 0 5px;text-align:center;}
+.dung-others-row{display:flex;flex-wrap:wrap;gap:5px;justify-content:center;margin-bottom:4px;}
+.dung-other-chip{font-family:'Share Tech Mono',monospace;font-size:7px;color:rgba(160,96,255,.3);background:rgba(40,20,60,.3);border:1px solid rgba(160,96,255,.1);padding:2px 6px;letter-spacing:.5px;opacity:.7;}
+.dung-other-hidden{color:rgba(255,208,60,.3);border-color:rgba(255,208,60,.1);}
+/* ── SHADOW SOLDIERS ── */
+.sol-hdr{display:flex;align-items:center;justify-content:space-between;margin:10px 0 6px;padding-top:8px;border-top:1px solid rgba(160,96,255,.12);}
+.sol-hdr-label{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:800;letter-spacing:3px;color:rgba(160,96,255,.4);}
+.sol-hdr-count{font-family:'Share Tech Mono',monospace;font-size:7px;color:rgba(160,96,255,.3);}
+.sol-card{display:flex;align-items:center;gap:9px;padding:6px 8px;margin-bottom:5px;background:rgba(10,5,20,.5);border:1px solid rgba(160,96,255,.1);transition:border-color .2s;}
+.sol-card:hover{border-color:rgba(var(--sc),.3,160,96,255);}
+.sol-icon{font-size:18px;line-height:1;width:22px;text-align:center;}
+.sol-body{flex:1;min-width:0;}
+.sol-name{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:.5px;color:rgba(230,215,255,.85);}
+.sol-type{font-family:'Share Tech Mono',monospace;font-size:7px;letter-spacing:1px;margin-top:1px;}
+.sol-xp-track{width:100%;height:3px;background:rgba(255,255,255,.06);margin-top:4px;overflow:hidden;}
+.sol-xp-fill{height:100%;transition:width .5s ease;opacity:.7;}
+/* Profile soldier card variant */
+.sha-sol-card{background:rgba(10,5,20,.5);border:1px solid rgba(var(--sc),0.15);padding:10px 8px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:4px;}
+/* Shadow equip modal */
+.sh-equip-sub{font-family:'Share Tech Mono',monospace;font-size:7.5px;color:rgba(160,96,255,.5);letter-spacing:.5px;margin-bottom:4px;}
+.sh-sel-card{display:flex;align-items:center;gap:10px;padding:9px 12px;margin-bottom:6px;background:rgba(20,10,40,.5);border:1px solid rgba(160,96,255,.15);cursor:pointer;transition:border-color .2s,background .2s;}
+.sh-sel-card:hover{border-color:rgba(160,96,255,.4);background:rgba(30,15,55,.5);}
+.sh-sel-icon{font-size:20px;line-height:1;width:24px;text-align:center;}
+.sh-sel-info{flex:1;}
+.sh-sel-name{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:.5px;}
+.sh-sel-meta{font-family:'Share Tech Mono',monospace;font-size:7px;letter-spacing:1px;margin-top:2px;}
+.sh-sel-equip{font-family:'Share Tech Mono',monospace;font-size:7px;color:rgba(255,208,60,.5);margin-top:2px;}
+
+/* ── DEBUFF INDICATOR ── */
+.debuff-bar{background:rgba(255,40,70,.07);border:1px solid rgba(255,40,70,.3);padding:5px 14px;margin:0 14px 8px;display:flex;align-items:center;gap:8px;clip-path:polygon(0 0,calc(100% - 5px) 0,100% 5px,100% 100%,5px 100%,0 calc(100% - 5px));animation:urgGlow 1.5s ease-in-out infinite alternate;}
+.db-icon{font-size:14px;}
+.db-text{font-family:'Share Tech Mono',monospace;font-size:8px;color:rgba(255,60,90,.7);letter-spacing:1px;flex:1;}
+.db-dur{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;letter-spacing:1px;color:rgba(255,60,90,.35);}
+
+/* ── STREAK UNLOCK MILESTONE ── */
+.streak-milestone-badge{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:800;letter-spacing:2px;color:var(--gold2);background:rgba(255,208,96,.06);border:1px solid rgba(255,208,96,.25);padding:2px 8px;display:inline-block;margin-top:2px;}
 </style>
 </head>
 <body>
@@ -1725,6 +1816,46 @@ body{font-family:'Barlow Condensed',sans-serif;color:var(--white);}
   <button class="pz-btn" onclick="completePenalty()">ESCAPE THE ZONE</button>
 </div>
 
+<!-- EDIT SHOP ITEM MODAL -->
+<div class="modal-ov" id="shop-edit-modal" onclick="closeOvIf(event)">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Edit Shop Item</div>
+    <div id="sei-builtin-note" style="font-family:'Share Tech Mono',monospace;font-size:7px;color:rgba(160,96,255,.4);letter-spacing:1px;margin-bottom:10px;display:none;">◆ BUILT-IN ITEM — CHANGES SAVED AS OVERRIDE</div>
+    <label class="mf-lbl">ICON (emoji)</label>
+    <input class="mf-inp" id="sei-icon" maxlength="4" placeholder="🍬">
+    <label class="mf-lbl">NAME</label>
+    <input class="mf-inp" id="sei-name" maxlength="40" placeholder="Item name...">
+    <label class="mf-lbl">DESCRIPTION</label>
+    <input class="mf-inp" id="sei-desc" maxlength="80" placeholder="What is this reward?">
+    <label class="mf-lbl">GOLD COST</label>
+    <div class="xp-row"><input type="range" id="sei-cost" min="10" max="2000" step="10" value="200" oninput="document.getElementById('sei-costv').textContent='◈ '+this.value"><span class="xp-rv" id="sei-costv" style="color:var(--gold2)">◈ 200</span></div>
+    <label class="mf-lbl">COOLDOWN</label>
+    <div class="mf-cdrow" id="sei-cd-grid">
+      <button class="mf-cdopt" data-d="0" onclick="seiCd(0)">None</button>
+      <button class="mf-cdopt" data-d="1" onclick="seiCd(1)">Daily</button>
+      <button class="mf-cdopt" data-d="3" onclick="seiCd(3)">3 Days</button>
+      <button class="mf-cdopt" data-d="7" onclick="seiCd(7)">Weekly</button>
+      <button class="mf-cdopt" data-d="14" onclick="seiCd(14)">2 Weeks</button>
+      <button class="mf-cdopt" data-d="21" onclick="seiCd(21)">3 Weeks</button>
+      <button class="mf-cdopt" data-d="30" onclick="seiCd(30)">Monthly</button>
+    </div>
+    <button class="mbtn mbtn-p" onclick="saveShopEdit()">SAVE CHANGES</button>
+    <button class="mbtn" id="sei-reset-btn" onclick="resetShopEdit()" style="background:rgba(255,200,68,.06);border:1px solid rgba(255,200,68,.2);color:rgba(255,200,68,.5);margin-top:4px;">↺ RESET TO DEFAULT</button>
+    <button class="mbtn mbtn-c" onclick="closeModal('shop-edit-modal')">CANCEL</button>
+  </div>
+</div>
+
+<!-- SHADOW EQUIP MODAL -->
+<div class="modal-ov" id="sh-equip-modal" onclick="closeOvIf(event)">
+  <div class="modal-sheet">
+    <div class="modal-title" id="sh-equip-title">SELECT A SHADOW</div>
+    <div class="sh-equip-sub" id="sh-equip-sub"></div>
+    <div id="sh-equip-list" style="margin:10px 0;"></div>
+    <button class="mbtn mbtn-c" onclick="closeModal('sh-equip-modal')">CANCEL</button>
+  </div>
+</div>
+
 <!-- EDIT QUEST MODAL -->
 <div class="modal-ov" id="edit-modal" onclick="closeOvIf(event)">
   <div class="modal-sheet">
@@ -1750,7 +1881,7 @@ body{font-family:'Barlow Condensed',sans-serif;color:var(--white);}
     <label class="mf-lbl">XP REWARD</label>
     <div class="xp-row"><input type="range" id="eq-xp" min="5" max="100" step="5" value="25" oninput="document.getElementById('eq-xpv').textContent='+'+this.value+' XP'"><span class="xp-rv" id="eq-xpv">+25 XP</span></div>
     <label class="mf-lbl">GOLD REWARD</label>
-    <div class="xp-row"><input type="range" id="eq-gold" min="0" max="40" step="2" value="10" oninput="document.getElementById('eq-goldv').textContent='+'+this.value+' ◈'"><span class="xp-rv" id="eq-goldv" style="color:var(--gold2)">+10 ◈</span></div>
+    <div class="xp-row"><input type="range" id="eq-gold" min="0" max="500" step="5" value="10" oninput="document.getElementById('eq-goldv').textContent='+'+this.value+' ◈'"><span class="xp-rv" id="eq-goldv" style="color:var(--gold2)">+10 ◈</span></div>
     <label class="mf-lbl">MP COST</label>
     <div class="xp-row"><input type="range" id="eq-mp" min="0" max="40" step="5" value="0" oninput="document.getElementById('eq-mpv').textContent='-'+this.value+' MP'"><span class="xp-rv" id="eq-mpv" style="color:var(--blue2)">-0 MP</span></div>
     <button class="mbtn mbtn-p" onclick="saveEditQuest()">SAVE QUEST</button>
@@ -1873,6 +2004,14 @@ body{font-family:'Barlow Condensed',sans-serif;color:var(--white);}
           <span class="hsw-count" id="h-shadow-count">0 extracted</span>
         </div>
         <div id="h-shadow-body"></div>
+        <!-- DUNGEON SOLDIERS -->
+        <div id="h-shadow-soldiers" style="display:none">
+          <div class="sol-hdr">
+            <span class="sol-hdr-label">⚔ SOLDIERS</span>
+            <span class="sol-hdr-count" id="h-soldier-count"></span>
+          </div>
+          <div id="h-soldier-list"></div>
+        </div>
       </div>
       <div class="urgent-banner" id="urg-banner"><div class="ub-title">⚡ URGENT QUEST ACTIVE</div><div class="ub-name" id="urg-banner-name"></div></div>
       <div class="daily-card">
@@ -1886,6 +2025,52 @@ body{font-family:'Barlow Condensed',sans-serif;color:var(--white);}
           <div class="ring-pct" id="ring-pct">0% COMPLETE</div>
         </div>
       </div>
+      <!-- DEBUFF BAR (shown when XP debuff active) -->
+      <div class="debuff-bar" id="h-debuff-bar" style="display:none">
+        <span class="db-icon">⬇</span>
+        <span class="db-text">DEBUFF ACTIVE — <strong>−20% XP</strong> TODAY (penalty for yesterday's failures)</span>
+        <span class="db-dur" id="h-debuff-dur">EXPIRES TONIGHT</span>
+      </div>
+
+      <!-- BOSS COMBAT -->
+      <div class="boss-section" id="h-boss-section">
+        <div class="boss-sec-hdr">◆ DUNGEON ASSAULT</div>
+        <!-- Daily Dungeon Boss -->
+        <div class="boss-card" id="boss-daily-card">
+          <div class="boss-top">
+            <span class="boss-icon">👹</span>
+            <span class="boss-name" id="boss-daily-name">Daily Dungeon Boss</span>
+            <span class="boss-type">DAILY</span>
+          </div>
+          <div class="boss-hp-row">
+            <span class="boss-hp-lbl">HP</span>
+            <div class="boss-hp-track"><div class="boss-hp-fill" id="boss-daily-fill" style="width:100%"></div></div>
+            <span class="boss-hp-val" id="boss-daily-val">1000/1000</span>
+          </div>
+          <div class="boss-dead-lbl" id="boss-daily-dead" style="display:none">◆ DUNGEON CLEARED ◆</div>
+        </div>
+        <!-- Weekly Boss -->
+        <div class="boss-card weekly-boss" id="boss-weekly-card">
+          <div class="boss-top">
+            <span class="boss-icon">💀</span>
+            <span class="boss-name" id="boss-weekly-name">Weekly Boss</span>
+            <span class="boss-type weekly">WEEKLY</span>
+          </div>
+          <div class="boss-hp-row">
+            <span class="boss-hp-lbl weekly">HP</span>
+            <div class="boss-hp-track"><div class="boss-hp-fill weekly" id="boss-weekly-fill" style="width:100%"></div></div>
+            <span class="boss-hp-val weekly" id="boss-weekly-val">1000/1000</span>
+          </div>
+          <div class="boss-dead-lbl" id="boss-weekly-dead" style="display:none">◆ BOSS DEFEATED ◆</div>
+        </div>
+      </div>
+
+      <!-- DUNGEON RUNS -->
+      <div class="dung-section" id="h-dung-section">
+        <div class="dung-sec-hdr">⚔ DUNGEON RUNS</div>
+        <div id="h-dung-list"></div>
+      </div>
+
       <div class="home-quests">
         <div class="hq-hdr"><span class="hq-title">Today's Quests</span><span class="hq-link" onclick="goTab('quests')">SEE ALL →</span></div>
         <div id="h-notice" class="notice-panel" style="display:none;margin:0 0 8px;">
@@ -2468,10 +2653,50 @@ const URGENT_POOL=[
   {n:'Do grooming maintenance you\'ve been putting off',           s:'SEN',xp:25,g:10,mp:0,  desc:'A hunter who looks sharp fights sharp.'},
 ];
 
+// ── DUNGEON DEFINITIONS ──
+// Each dungeon groups habit quest IDs into a "run". Complete all → bonus loot.
+const DUNGEONS=[
+  {id:'morning',    name:'Morning Dungeon',     icon:'🌅', type:'mini',
+   questIds:['gr2','gr1','h2','s5'],
+   reward:{gold:50,icon:'🌅',name:"Dawn's Spoils",desc:'Morning dungeon cleared. The day belongs to you.'},
+   lore:'Control the morning — control the day.',
+   unlockStreak:0},
+  {id:'iron_body',  name:'Iron Body Dungeon',   icon:'⚔', type:'standard',
+   questIds:['f4','f5','f6','f7','f8'],
+   reward:{gold:75,icon:'⚔',name:'Iron Body Cleared',desc:'Five physical missions complete. Your body is the dungeon.'},
+   lore:'Five physical quests. No excuses.',
+   unlockStreak:0},
+  {id:'scholar',    name:"Scholar's Dungeon",   icon:'📖', type:'standard',
+   questIds:['j1','j2','j3','j4','h1'],
+   reward:{gold:60,icon:'📖',name:"Scholar's Reward",desc:'Five quests of the mind. Intelligence sharpened.'},
+   lore:'Intelligence is the weapon of the elite.',
+   unlockStreak:0},
+  {id:'grind',      name:'The Grind Dungeon',   icon:'🏠', type:'mini',
+   questIds:['gr2','gr4','c2','sa1','c1'],
+   reward:{gold:55,icon:'🏠',name:'Grind Complete',desc:'Discipline in small things. Five daily grind quests done.'},
+   lore:'Discipline in small things. Every. Single. Day.',
+   unlockStreak:0},
+  {id:'stack',      name:'Supplement Stack',    icon:'💊', type:'mini',
+   questIds:['s3','s4','s5','s6','s7'],
+   reward:{gold:45,icon:'💊',name:'Stack Protocol Done',desc:'Full supplement stack complete. Recovery optimised.'},
+   lore:'The full stack. Every single one. No excuses.',
+   unlockStreak:0},
+  {id:'gauntlet',   name:'The Gauntlet',         icon:'💀', type:'boss',
+   questIds:['f4','f5','f6','f7','f8','j1','j2','j3'],
+   reward:{gold:120,icon:'💀',name:'Gauntlet Conquered',desc:'Body and mind pushed to the limit. You are the dungeon.'},
+   lore:'Body and mind. Eight missions. No quarter given.',
+   unlockStreak:0},
+  {id:'shadow_run', name:'Shadow Dungeon',       icon:'🌑', type:'boss',
+   questIds:['f4','f6','f7','f8','j1','j2','h2','gr2'],
+   reward:{gold:150,icon:'🌑',name:'Shadow Run Complete',desc:'Eight quests. The hardest run. Only the elite clear this.'},
+   lore:'Unlocked at 14-day streak. Eight quests. No mercy.',
+   unlockStreak:14},
+];
+
 // SHOP — built-in (Treats + System only; gear categories removed)
 const BUILTIN_SHOP=[
   // ── TREATS ──
-  {id:'candy',   cat:'Treats',icon:'🍬',n:'Bag of Candy',         d:'150g of whatever you want. Only the disciplined may indulge.',cost:300,coolDays:7, cons:true,rar:'rare',reqPct:90},
+  {id:'candy',   cat:'Treats',icon:'🍬',n:'Bag of Candy',         d:'150g of whatever you want. Only the disciplined may indulge.',cost:300,coolDays:7, cons:true,rar:'gold'},
   {id:'choc',    cat:'Treats',icon:'🍫',n:'Chocolate Bar',         d:'One proper chocolate bar. You did the work.',                cost:200,coolDays:7, cons:true,rar:'normal'},
   {id:'soda',    cat:'Treats',icon:'🥤',n:'Soda',                  d:'One cold can or bottle. Refreshing. Earned.',                cost:120,coolDays:3, cons:true,rar:'normal'},
   {id:'takeaway',cat:'Treats',icon:'🍕',n:'Takeaway Meal',         d:'Order whatever you want. One proper cheat meal.',            cost:500,coolDays:7, cons:true,rar:'magic'},
@@ -2503,9 +2728,14 @@ const BUILTIN_SHOP=[
   {id:'sd_game',   cat:"Scholar's Den",icon:'🎮',n:'Gaming Session',    d:'Two hours of guilt-free gaming. Earned.',                   cost:300,coolDays:7, cons:true,rar:'normal'},
   {id:'sd_course', cat:"Scholar's Den",icon:'🎓',n:'Online Course',     d:'Buy one online course. Invest in yourself.',                cost:1000,coolDays:60,cons:true,rar:'epic'},
   {id:'sd_book',   cat:"Scholar's Den",icon:'📖',n:'Book of Your Choice',d:'Any book, any genre. Fangs demands you keep learning.',    cost:220,coolDays:0, cons:true,rar:'normal'},
+  // ── SHADOW GEAR — unlocked by extracting your first dungeon soldier ──
+  {id:'sh_shackle',cat:'Shadow Gear',icon:'⛓',n:'Shadow Shackle',    d:'Bind to a shadow — they gain +30% XP from every dungeon run. Permanent once equipped.',  cost:400,coolDays:0,cons:true,rar:'magic',   e:'shackle'},
+  {id:'sh_core',   cat:'Shadow Gear',icon:'💜',n:'Dark Core',         d:'Fuse into a shadow — permanently doubles their XP gain from all future dungeon clears.', cost:800,coolDays:0,cons:true,rar:'rare',    e:'core'},
+  {id:'sh_rune',   cat:'Shadow Gear',icon:'🔷',n:'Power Rune',        d:'Infuse into a shadow — instantly grants +2 levels (max level 5). One-time use.',          cost:600,coolDays:0,cons:true,rar:'rare',    e:'rune'},
+  {id:'sh_crystal',cat:'Shadow Gear',icon:'🔹',n:'Army Crystal',      d:'Activate — all shadows gain double XP from the very next dungeon run. Single use.',       cost:300,coolDays:7,cons:true,rar:'magic',   e:'crystal'},
 ];
 
-const SHOP_CATS_LIST=['All','Treats','System',"Knight's Armoury",'Recovery',"Soldier's Rations","Scholar's Den"];
+const SHOP_CATS_LIST=['All','Treats','System',"Knight's Armoury",'Recovery',"Soldier's Rations","Scholar's Den",'Shadow Gear'];
 
 // Shadow-unlocked categories
 const SHADOW_SHOP_UNLOCK={
@@ -2522,6 +2752,8 @@ function visibleShopCats(){
     const cat=SHADOW_SHOP_UNLOCK[sh.id];
     if(cat)unlocked.add(cat);
   });
+  // Shadow Gear unlocked once you have any dungeon soldier
+  if((G.shadowArmy||[]).length>0)unlocked.add('Shadow Gear');
   // Add shadow-unlocked from static list
   const base=SHOP_CATS_LIST.filter(c=>unlocked.has(c));
   // Add user custom categories (appear after built-ins, sorted)
@@ -2540,7 +2772,9 @@ const TITLES=[
   {id:'ts', icon:'💰',n:'The Frugal',        e:'+3 gold per savings quest',      r:'10 savings quests',   f:G=>(G.qsd?.savings||0)>=10},
   {id:'tt', icon:'🏹',n:'True Hunter',       e:'+10% all quest XP',              r:'Level 10',            f:G=>G.level>=10},
   {id:'tv', icon:'📺',n:'Viral Shadow',      e:'+15% SEN quest XP',             r:'30 SEN quests done',  f:G=>(G.qsd?.SEN||0)>=30},
-  {id:'tm', icon:'👑',n:'Shadow Monarch',    e:'+20% all XP and gold',           r:'S-Rank',              f:G=>G.totalXp>=15000},
+  {id:'tm',        icon:'👑',n:'Shadow Monarch',    e:'+20% all XP and gold',           r:'S-Rank',              f:G=>G.totalXp>=15000},
+  {id:'t7streak',  icon:'🔥',n:'Streak of Iron',   e:'+5% all XP',                     r:'7-day streak reward', f:G=>(G.streakUnlocksGiven||[]).includes('7')},
+  {id:'t30streak', icon:'💎',n:'The Unbroken',      e:'+8% all XP',                     r:'30-day streak reward',f:G=>(G.streakUnlocksGiven||[]).includes('30')},
 ];
 
 // SKILLS
@@ -2553,6 +2787,37 @@ const SKILLS=[
   {id:'sk',icon:'👁',n:"Ruler's Authority",   d:'Every 10th quest grants a free EXP Stone.',                  r:'Level 15',     f:G=>G.level>=15},
   {id:'sa',icon:'👑',n:'Arise',               d:'All dailies complete: +100 XP and +50 gold.',                r:'S-Rank',       f:G=>G.totalXp>=15000},
 ];
+
+// ── DUNGEON SHADOW SPAWN POOL ──
+// Soldiers extracted from dungeon runs — different from milestone shadows
+const SHADOW_SPAWN_POOL={
+  basic:[
+    {id:'sh_soldier',  n:'Shadow Soldier',   icon:'🗡', type:'BASIC'},
+    {id:'sh_scout',    n:'Shadow Scout',      icon:'👁', type:'BASIC'},
+    {id:'sh_grunt',    n:'Iron Grunt',        icon:'⚔', type:'BASIC'},
+    {id:'sh_wraith',   n:'Shadow Wraith',     icon:'👻', type:'BASIC'},
+  ],
+  elite:[
+    {id:'sh_knight',   n:'Shadow Knight',     icon:'🛡', type:'ELITE'},
+    {id:'sh_mage',     n:'Shadow Mage',       icon:'🔮', type:'ELITE'},
+    {id:'sh_assassin', n:'Dark Assassin',     icon:'🌑', type:'ELITE'},
+  ],
+  boss:[
+    {id:'sh_commander',n:'Shadow Commander',  icon:'💀', type:'BOSS'},
+    {id:'sh_titan',    n:'Iron Titan',        icon:'🗿', type:'BOSS'},
+  ],
+  special:[
+    {id:'sh_spectre',  n:'The Spectre',       icon:'⭐', type:'SPECIAL'},
+    {id:'sh_herald',   n:'Shadow Herald',     icon:'🔱', type:'SPECIAL'},
+  ],
+};
+// Shadow spawn chance & tier weights by dungeon type
+const SHADOW_SPAWN_CHANCES={
+  mini:    {chance:0.22, tiers:[{t:'basic',w:100}]},
+  standard:{chance:0.32, tiers:[{t:'basic',w:60},{t:'elite',w:40}]},
+  boss:    {chance:0.55, tiers:[{t:'basic',w:25},{t:'elite',w:35},{t:'boss',w:30},{t:'special',w:10}]},
+  hidden:  {chance:0.45, tiers:[{t:'basic',w:15},{t:'elite',w:40},{t:'boss',w:25},{t:'special',w:20}]},
+};
 
 // SHADOWS — earned by milestones
 const SHADOW_DEFS=[
@@ -2572,13 +2837,19 @@ let G={
   stats:{STR:0,AGI:0,STA:0,INT:0,SEN:0},
   quests:[],customShop:[],customCategories:[],inventory:[],
   equippedTitle:null,unlockedTitles:['tw'],
-  unlockedSkills:[],shadows:[],jobClass:null,
+  unlockedSkills:[],shadows:[],shadowArmy:[],shadowCrystal:false,jobClass:null,
   questsTotal:0,qsd:{STR:0,AGI:0,STA:0,INT:0,SEN:0,savings:0},
   fx:{shield:false,skipfit:false,fitb:false,intb:false,str3:0,slp2x:false,
       read7:0,read10:0,sta5:false,str6:false,str12:false,agi8:false,
       mind7:false,anki10:false,water5:false,gld20:false,all5:false},
-  shopCooldowns:{},lastDate:'',weekDate:'',dailyLog:[],
+  shopCooldowns:{},shopOverrides:{},lastDate:'',weekDate:'',dailyLog:[],
   urgentQuest:null,urgentExpiry:null,urgentNextDate:null,lastUrgentId:-1,
+  dungeonToday:{},         // {dungeonId: true} if cleared today
+  activeDungeonId:null,    // which dungeon is active today
+  activeDungeonDate:'',    // date string when active dungeon was selected
+  hiddenDungeon:null,      // {questIds, gold, names} for hidden dungeon runs
+  debuff:{xp:false,expiry:null},   // xp debuff from missing quests yesterday
+  streakUnlocksGiven:[],   // tracks which streak milestone unlocks have been given
 };
 let curTab='home',qFilter='all',shopCat='All';
 let editQId=null,editQStat='STR',editQType='daily';
@@ -2611,6 +2882,17 @@ function ld(){
       G.customShop=p.customShop||[];
       G.customCategories=p.customCategories||[];
       G.shadows=p.shadows||[];
+      G.shadowArmy=p.shadowArmy||[];
+      G.shadowCrystal=p.shadowCrystal||false;
+      G.dungeonToday=p.dungeonToday||{};
+      G.activeDungeonId=p.activeDungeonId||null;
+      G.activeDungeonDate=p.activeDungeonDate||'';
+      G.hiddenDungeon=p.hiddenDungeon||null;
+      G.debuff=p.debuff||{xp:false,expiry:null};
+      G.streakUnlocksGiven=p.streakUnlocksGiven||[];
+      G.shopOverrides=p.shopOverrides||{};
+      // Scrub any stale reqPct from candy (should only be gold-locked)
+      if(G.shopOverrides.candy)delete G.shopOverrides.candy.reqPct;
       // Purge gear/removed items from inventory
       G.inventory=(p.inventory||[]).filter(i=>!REMOVED_IDS.has(i.id));
       // ── QUEST MIGRATION v2 ──
@@ -2642,6 +2924,7 @@ function ld(){
     sv();
   }
   dayCheck();weekCheck();
+  selectDailyDungeon();
   if(!G.urgentQuest) maybeSpawnUrgent();
 }
 
@@ -2649,10 +2932,29 @@ function dayCheck(){
   const today=new Date().toDateString();
   if(G.lastDate===today)return;
   if(G.lastDate){
-    const inc=G.quests.filter(q=>q.t==='daily'&&!q.done).length;
+    const inc=G.quests.filter(q=>q.t==='daily'&&!q.done&&!q.penaltyTask).length;
     if(inc>0){
-      if(G.fx.shield){G.fx.shield=false;showItemCine({icon:'🛡',n:'Streak Shield Activated',d:'All streaks protected — no penalty applied'});}
-      else{G.quests.filter(q=>q.t==='daily').forEach(q=>q.streak=0);setTimeout(()=>showPenaltyZone(inc),1000);}
+      if(G.fx.shield){
+        G.fx.shield=false;
+        showItemCine({icon:'🛡',n:'Streak Shield Activated',d:'All streaks protected — no penalty applied'});
+      } else {
+        // ── ENHANCED PENALTY SYSTEM ──
+        // Lose HP proportional to missed quests (8 HP each, max 40)
+        const hpLoss=Math.min(40, inc*8);
+        G.hp=Math.max(1, G.hp-hpLoss);
+        // Lose gold (5 gold per missed quest, max 60)
+        const goldLoss=Math.min(60, inc*5);
+        G.gold=Math.max(0, G.gold-goldLoss);
+        // Apply XP debuff for today (−20% XP)
+        G.debuff={xp:true, expiry:today};
+        // Reset streaks on all incomplete dailies
+        G.quests.filter(q=>q.t==='daily').forEach(q=>q.streak=0);
+        // Show penalty zone after delay
+        setTimeout(()=>showPenaltyZone(inc),1000);
+      }
+    } else {
+      // Clear debuff if all quests were done
+      G.debuff={xp:false,expiry:null};
     }
     if(new Date().getDay()===0&&SKILLS.find(s=>s.id==='sl').f(G)){G.stats.INT+=3;showStatUpCine({INT:3},'Sunday Language Absorption bonus');}
   }
@@ -2670,6 +2972,11 @@ function dayCheck(){
   }
   G.quests.filter(q=>!q.penaltyTask).forEach(q=>{if(q.t==='daily')q.done=false;});
   G.quests=G.quests.filter(q=>!q.penaltyTask);
+  // Reset dungeon runs for new day
+  G.dungeonToday={};
+  G.activeDungeonId=null;
+  G.activeDungeonDate='';
+  G.hiddenDungeon=null;
   // Clear urgent quest if it's from a previous day (completed or not shown)
   if(G.urgentExpiry&&G.urgentExpiry!==today&&G.urgentQuest?.done){
     G.urgentQuest=null;G.urgentExpiry=null;
@@ -2688,29 +2995,64 @@ function getMondayStr(){
   const d=new Date();d.setDate(d.getDate()-((d.getDay()+6)%7));d.setHours(0,0,0,0);return d.toDateString();
 }
 
+// Stat-specific pressure lines for personalised urgent quests
+const URGENT_PRESSURE={
+  STR:['Iron doesn\'t forge itself. Complete this now.','Your STR stat is stalling. The System will not wait.','Physical output required. No more delays.'],
+  AGI:['Your cardio is falling behind. Move.','Speed is earned through repetition. Do it now.','The gap between you and the next rank is one session.'],
+  STA:['Recovery is not optional. Patch your stamina now.','The System detected a discipline gap. Fix it.','Consistency builds the body. You are inconsistent here.'],
+  INT:['Your INT stat is bleeding. Fill the gap now.','The mind sharpens only through use. Use it.','You have been neglecting this. The System noticed.'],
+  SEN:['Your creative output has dropped. Fix it today.','The algorithm doesn\'t wait for motivation. Post.','Content discipline is the same as physical discipline.'],
+};
+
 function maybeSpawnUrgent(){
   const today=new Date().toDateString();
-  // If there's an active uncompleted urgent from today, don't spawn another
-  if(G.urgentQuest&&!G.urgentQuest.done&&G.urgentExpiry===today) return;
-  // Check cooldown — urgent quests spawn once every 1–3 days randomly
-  // We store the next spawn date in G.urgentNextDate
-  if(G.urgentNextDate&&new Date()<new Date(G.urgentNextDate)) return;
-  // Spawn one now
-  const pool=URGENT_POOL;
-  // Avoid repeating the last quest
-  const lastId=G.lastUrgentId;
-  const available=pool.filter((_,i)=>i!==lastId);
-  const idx=~~(Math.random()*available.length);
-  const pick=available[idx];
-  G.urgentQuest={...pick,id:'urg_'+Date.now(),m:'urgent',t:'urgent',done:false,streak:0};
+  if(G.urgentQuest&&!G.urgentQuest.done&&G.urgentExpiry===today)return;
+  if(G.urgentNextDate&&new Date()<new Date(G.urgentNextDate))return;
+
+  // ── PERSONALISED URGENT: pull from weak or missed daily quests ──
+  const dailies=G.quests.filter(q=>q.t==='daily'&&!q.penaltyTask);
+
+  // Tier 1: incomplete today AND no streak at all (chronically skipped)
+  const t1=dailies.filter(q=>!q.done&&(q.streak||0)===0);
+  // Tier 2: incomplete today with a weak streak (< 3 days)
+  const t2=dailies.filter(q=>!q.done&&(q.streak||0)<3);
+  // Tier 3: any quest incomplete today
+  const t3=dailies.filter(q=>!q.done);
+  // Tier 4: any quest with a weak streak (even if done today)
+  const t4=dailies.filter(q=>(q.streak||0)<3);
+
+  const candidates=t1.length?t1:t2.length?t2:t3.length?t3:t4.length?t4:null;
+
+  if(candidates&&candidates.length){
+    // Don't repeat the same quest as last time
+    const filtered=candidates.filter(q=>q.id!==(G.lastUrgentQuestId||''));
+    const base=(filtered.length?filtered:candidates)[~~(Math.random()*(filtered.length||candidates.length))];
+    const pressureLines=URGENT_PRESSURE[base.s]||['The System has flagged this quest. Complete it now.'];
+    const desc=pressureLines[~~(Math.random()*pressureLines.length)];
+    G.urgentQuest={
+      ...base,
+      id:'urg_'+Date.now(),
+      m:'urgent',t:'urgent',done:false,streak:0,
+      xp:Math.round(base.xp*1.6),   // +60% XP bonus for urgency
+      g:Math.round((base.g||0)*1.6),
+      desc,
+    };
+    G.lastUrgentQuestId=base.id;
+  } else {
+    // Fallback to static pool when all habits are strong
+    const pool=URGENT_POOL;
+    const available=pool.filter((_,i)=>i!==(G.lastUrgentId||-1));
+    const pick=available[~~(Math.random()*available.length)];
+    G.urgentQuest={...pick,id:'urg_'+Date.now(),m:'urgent',t:'urgent',done:false,streak:0};
+    G.lastUrgentId=pool.indexOf(pick);
+  }
+
   G.urgentExpiry=today;
-  G.lastUrgentId=pool.indexOf(pick);
-  // Next urgent spawns in 1–3 days from now
-  const daysUntilNext=1+Math.floor(Math.random()*3); // 1, 2, or 3
+  // ── FREQUENCY: 3–5 days between urgents (1–2 per week max) ──
+  const daysUntilNext=3+Math.floor(Math.random()*3); // 3, 4, or 5
   const next=new Date();next.setDate(next.getDate()+daysUntilNext);next.setHours(~~(Math.random()*14)+7,~~(Math.random()*60),0,0);
   G.urgentNextDate=next.toISOString();
   sv();
-  // Show cinematic after a short delay so app loads first
   const delay=G.lastDate?2500:7000;
   setTimeout(()=>{if(G.urgentQuest&&!G.urgentQuest.done){showUrgentCine(G.urgentQuest);renderAll();}},delay);
 }
@@ -2766,6 +3108,10 @@ function rHdr(){
 
 function rHome(){
   if(curTab!=='home')return;
+  // Render new combat features
+  renderBossSection();
+  renderDungeons();
+  renderDebuff();
   const daily=G.quests.filter(q=>q.t==='daily');
   const done=daily.filter(q=>q.done).length,total=daily.length;
   const pct=total?Math.round(done/total*100):0;
@@ -2843,6 +3189,33 @@ function rHome(){
         <div class="hsw-stat">${sh.stats[0]||''}</div>
       </div>`;
     }).join('')}</div>`;
+  }
+  // ── SHADOW SOLDIERS (dungeon-spawned army) ──
+  const army=G.shadowArmy||[];
+  const soldierDiv=document.getElementById('h-shadow-soldiers');
+  if(soldierDiv){
+    if(!army.length){
+      soldierDiv.innerHTML='';soldierDiv.style.display='none';
+    } else {
+      const stc={BASIC:'#00e896',ELITE:'#a678ff',BOSS:'#ffd060',SPECIAL:'#ff8099'};
+      document.getElementById('h-soldier-count').textContent=army.length+' soldier'+(army.length!==1?'s':'');
+      soldierDiv.style.display='block';
+      document.getElementById('h-soldier-list').innerHTML=army.map(sh=>{
+        const col=stc[sh.type]||'#a678ff';
+        const xpNext=SHADOW_XP_THRESHOLDS[Math.min(5,sh.level+1)]||SHADOW_XP_THRESHOLDS[5];
+        const xpPrev=SHADOW_XP_THRESHOLDS[sh.level]||0;
+        const pct=sh.level>=5?100:Math.round(((sh.xp-xpPrev)/(xpNext-xpPrev))*100);
+        const equipIcons=(sh.equip||[]).map(e=>e==='shackle'?'⛓':e==='core'?'💜':'').join('');
+        return `<div class="sol-card" style="--sc:${col}">
+          <span class="sol-icon">${sh.icon}</span>
+          <div class="sol-body">
+            <div class="sol-name">${sh.n} ${equipIcons}</div>
+            <div class="sol-type" style="color:${col}">${sh.type} · LV ${sh.level}</div>
+            <div class="sol-xp-track"><div class="sol-xp-fill" style="width:${pct}%;background:${col}"></div></div>
+          </div>
+        </div>`;
+      }).join('');
+    }
   }
 }
 
@@ -2965,9 +3338,12 @@ function rShop(){
   const items=shopCat==='All'
     ? allShop.filter(i=>cats.includes(i.cat)||['Treats','System'].includes(i.cat))
     : allShop.filter(i=>i.cat===shopCat);
-  document.getElementById('shop-grid').innerHTML=items.map(item=>{
+  document.getElementById('shop-grid').innerHTML=items.map(baseItem=>{
+    // Merge any saved overrides (name, icon, desc, cost, coolDays)
+    const item={...baseItem,...(G.shopOverrides?.[baseItem.id]||{})};
+    // Candy is always gold-only — strip any reqPct that snuck in
+    if(item.id==='candy')delete item.reqPct;
     const isCustom=G.customShop.some(x=>x.id===item.id);
-    const isBuiltinRemovable=false; // only custom items show remove
     const owned=!item.cons&&G.inventory.some(i=>i.id===item.id);
     const cdInfo=item.coolDays>0?checkCooldown(item.id,item.coolDays):null;
     const onCd=!!cdInfo;
@@ -2975,7 +3351,9 @@ function rShop(){
     const cant=!owned&&!onCd&&!reqLocked&&G.gold<item.cost;
     const rarClass='r-'+item.rar;
     const cdText=onCd?`${cdInfo}d left`:'';
-    return `<div class="sitem${item.cons?'':' perm'} ${rarClass}${cant||reqLocked?' cant':''}${onCd?' on-cooldown':''}" style="--ic:${RAR_COL[item.rar]||'var(--b2)'};">
+    return `<div class="sitem${item.cons?'':' perm'} ${rarClass}${cant||reqLocked?' cant':''}${onCd?' on-cooldown':''}" style="--ic:${RAR_COL[item.rar]||'var(--b2)'};position:relative;">
+      <!-- hidden edit button — tucked in top-right corner, barely visible -->
+      <button onclick="event.stopPropagation();openShopEdit('${item.id}')" style="position:absolute;top:4px;right:4px;background:none;border:none;color:rgba(160,96,255,1);font-size:11px;cursor:pointer;padding:2px 4px;opacity:0.06;line-height:1;z-index:2;" title="Edit item">✎</button>
       <div class="si-icon-box" style="background:${RAR_COL[item.rar]||'var(--b1)'}18;">${item.icon}</div>
       <div class="si-body">
         <div class="si-name">${item.n}${isCustom?'<span style="font-family:\'Share Tech Mono\',monospace;font-size:7px;color:rgba(160,96,255,.35);margin-left:5px;letter-spacing:1px;">CUSTOM</span>':''}</div>
@@ -3056,10 +3434,13 @@ function rProf(){
 
   // ── SHADOW ARMY ──
   const shadowIcons={igris:'⚔',beru:'🐜',iron:'🗿',tank:'🛡',fangs:'🦷'};
-  if(!G.shadows.length){
-    document.getElementById('sha-grid').innerHTML=`<div class="sha-locked">Shadow Army Empty<br><br>Unlock <strong>Shadow Extraction</strong> at B-Rank<br>Then complete milestones to extract shadows<br><br>◆ &nbsp; ◆ &nbsp; ◆</div>`;
+  const army=G.shadowArmy||[];
+  const totalShadows=G.shadows.length+army.length;
+  if(!totalShadows){
+    document.getElementById('sha-grid').innerHTML=`<div class="sha-locked">Shadow Army Empty<br><br>Unlock <strong>Shadow Extraction</strong> at B-Rank<br>Then clear dungeons to recruit soldiers<br><br>◆ &nbsp; ◆ &nbsp; ◆</div>`;
   } else {
-    document.getElementById('sha-grid').innerHTML=G.shadows.map(sh=>{
+    const stc={BASIC:'#00e896',ELITE:'#a678ff',BOSS:'#ffd060',SPECIAL:'#ff8099'};
+    const milestoneCards=G.shadows.map(sh=>{
       const col=gc[sh.grade]||'#a678ff';
       return `<div class="sha-card" style="--sc:${col}">
         <div class="sha-grade-badge" style="background:${col}18;color:${col};border:1px solid ${col}44">${sh.grade}</div>
@@ -3069,6 +3450,22 @@ function rProf(){
         <div class="sha-stat">${sh.stats[0]||''}</div>
       </div>`;
     }).join('');
+    const soldierCards=army.map(sh=>{
+      const col=stc[sh.type]||'#a678ff';
+      const xpNext=SHADOW_XP_THRESHOLDS[Math.min(5,sh.level+1)]||SHADOW_XP_THRESHOLDS[5];
+      const xpPrev=SHADOW_XP_THRESHOLDS[sh.level]||0;
+      const pct=sh.level>=5?100:Math.round(((sh.xp-xpPrev)/(xpNext-xpPrev))*100);
+      const equipIcons=(sh.equip||[]).map(e=>e==='shackle'?'⛓':e==='core'?'💜':'').join('');
+      return `<div class="sha-sol-card" style="--sc:${col}">
+        <div class="sha-grade-badge" style="background:${col}18;color:${col};border:1px solid ${col}44">${sh.type.slice(0,3)}</div>
+        <span class="sha-icon">${sh.icon}</span>
+        <div class="sha-name">${sh.n}</div>
+        <span class="sha-type">LV ${sh.level} ${equipIcons}</span>
+        <div class="sol-xp-track" style="margin-top:4px"><div class="sol-xp-fill" style="width:${pct}%;background:${col}"></div></div>
+      </div>`;
+    }).join('');
+    document.getElementById('sha-grid').innerHTML=milestoneCards+
+      (army.length?`<div style="width:100%;font-family:'Share Tech Mono',monospace;font-size:7px;letter-spacing:2px;color:rgba(160,96,255,.3);margin:8px 0 4px;padding:4px 0;border-top:1px solid rgba(160,96,255,.1);">⚔ DUNGEON SOLDIERS</div>${soldierCards}`:'');
   }
 
   // ── INVENTORY 3-COL ──
@@ -3118,9 +3515,71 @@ function togQ(id,evt){
     }
     gainXp(xp,q.s);G.gold+=gold;
     setTimeout(()=>showQuestCine(q,xp,gold),120);
+    // ── BOSS COMBAT — deal damage ──
+    if(q.t==='daily'||q.t==='urgent'){
+      const dmg=q.xp;
+      if(evt)showBossDmg(dmg,evt.clientX,evt.clientY,false);
+    } else if(q.t==='weekly'){
+      const dmg=q.xp;
+      if(evt)showBossDmg(dmg,evt.clientX,evt.clientY,true);
+    }
+    // ── DUNGEON CHECK — did completing this quest clear today's dungeon run? ──
+    if(!G.dungeonToday)G.dungeonToday={};
+    if(G.activeDungeonId){
+      const aid=G.activeDungeonId;
+      if(!G.dungeonToday[aid]){
+        let questIds,dungIcon,dungName,dungGold,dungDesc;
+        if(aid==='hidden'&&G.hiddenDungeon){
+          questIds=G.hiddenDungeon.questIds;
+          dungIcon='❓';dungName='Hidden Dungeon';dungGold=G.hiddenDungeon.gold;
+          dungDesc='You faced your weak habits head-on. The hidden dungeon falls.';
+        } else {
+          const dung=DUNGEONS.find(d=>d.id===aid);
+          if(dung){questIds=dung.questIds;dungIcon=dung.icon;dungName=dung.name;dungGold=dung.reward.gold;dungDesc=dung.reward.desc;}
+        }
+        if(questIds){
+          const allDone=questIds.every(qid=>{const dq=G.quests.find(x=>x.id===qid);return dq&&dq.done;});
+          if(allDone){
+            G.dungeonToday[aid]=true;
+            G.gold+=dungGold;
+            // ── Shadow Army: XP gain for all soldiers ──
+            const _dungType=aid==='hidden'?'hidden':(DUNGEONS.find(d=>d.id===aid)?.type||'standard');
+            const _xpMap={mini:10,standard:20,boss:50,hidden:30};
+            const _leveled=gainShadowXp(_xpMap[_dungType]||20);
+            sv();
+            setTimeout(()=>{sfx('chest');showItemCine({icon:dungIcon,n:'DUNGEON CLEARED: '+dungName,d:'Bonus loot: +'+dungGold+'◈  '+dungDesc});},1800);
+            // Shadow level-up notifications
+            _leveled.forEach((lv,i)=>setTimeout(()=>showItemCine({icon:lv.sh.icon,n:lv.sh.n+' — Level Up!',d:lv.sh.type+' shadow now Level '+lv.newLevel}),2800+i*600));
+            // Shadow spawn chance
+            setTimeout(()=>{
+              const _spawned=trySpawnShadow(_dungType);
+              if(_spawned)setTimeout(()=>showShadowSpawnCine(_spawned),600);
+            },_leveled.length?3800:2400);
+          }
+        }
+      }
+    }
     // streak milestones
     const miles=[7,14,30,50,100];
     if(miles.includes(q.streak))setTimeout(()=>showStreakCine(q.streak,q.n),700);
+    // ── STREAK UNLOCKS ──
+    if(!G.streakUnlocksGiven)G.streakUnlocksGiven=[];
+    if(q.streak===7&&!G.streakUnlocksGiven.includes('7')){
+      G.streakUnlocksGiven.push('7');
+      // Award a Streak Shield
+      G.inventory.push({id:'shield',n:'Streak Shield'});
+      setTimeout(()=>showItemCine({icon:'🛡',n:'7-Day Streak Reward',d:'Streak Shield earned. Miss one day — your streaks are protected.'}),1100);
+    }
+    if(q.streak===14&&!G.streakUnlocksGiven.includes('14')){
+      G.streakUnlocksGiven.push('14');
+      // Shadow Dungeon unlocked (it's in DUNGEONS with unlockStreak:14)
+      setTimeout(()=>showItemCine({icon:'🌑',n:'Shadow Dungeon Unlocked',d:'14-day streak achieved. The Shadow Dungeon is now available. Eight quests. No mercy.'}),1100);
+    }
+    if(q.streak===30&&!G.streakUnlocksGiven.includes('30')){
+      G.streakUnlocksGiven.push('30');
+      if(!G.unlockedTitles.includes('t30streak'))G.unlockedTitles.push('t30streak');
+      setTimeout(()=>showTitleCine({icon:'💎',n:'The Unbroken',e:'+8% all XP'}),1100);
+    }
     // ruler's authority
     if(SKILLS.find(s=>s.id==='sk').f(G)&&G.questsTotal%10===0){G.inventory.push({id:'expstone',n:'EXP Stone'});setTimeout(()=>showItemCine({icon:'⬡',n:"Ruler's Authority",d:'Free EXP Stone added'}),900);}
     // all daily complete
@@ -3178,6 +3637,11 @@ function calcXP(q){
   if(et==='tl'&&q.s==='INT')x=Math.floor(x*1.05);
   if(et==='ti'&&q.s==='STR')x=Math.floor(x*1.05);
   if(et==='tv'&&q.s==='SEN')x=Math.floor(x*1.15);
+  // streak unlock title bonuses
+  if(et==='t7streak')x=Math.floor(x*1.05);
+  if(et==='t30streak')x=Math.floor(x*1.08);
+  // ── DEBUFF — miss quests yesterday → −20% XP today ──
+  if(G.debuff?.xp&&G.debuff.expiry===new Date().toDateString())x=Math.floor(x*0.8);
   return x;
 }
 function calcGold(q){
@@ -3232,9 +3696,73 @@ function gainXp(amt,tStat){
 // SHOP
 // ══════════════════════════════════════════════
 function setShopCat(c){sfx('filter');shopCat=c;rShop();}
+
+// ── SHOP ITEM EDITOR ──
+let _seiEditId=null, _seiCdVal=0;
+
+function openShopEdit(id){
+  sfx('modal');
+  const allShop=[...BUILTIN_SHOP,...G.customShop];
+  const base=allShop.find(x=>x.id===id);
+  if(!base)return;
+  const item={...base,...((G.shopOverrides||{})[id]||{})};
+  _seiEditId=id;
+  _seiCdVal=item.coolDays||0;
+  const isBuiltin=BUILTIN_SHOP.some(x=>x.id===id);
+  document.getElementById('sei-builtin-note').style.display=isBuiltin?'block':'none';
+  document.getElementById('sei-icon').value=item.icon||'';
+  document.getElementById('sei-name').value=item.n||'';
+  document.getElementById('sei-desc').value=item.d||'';
+  const costEl=document.getElementById('sei-cost');
+  costEl.value=Math.min(2000,Math.max(10,item.cost||100));
+  document.getElementById('sei-costv').textContent='◈ '+costEl.value;
+  // Highlight active cooldown
+  document.querySelectorAll('#sei-cd-grid .mf-cdopt').forEach(b=>{
+    b.classList.toggle('act',Number(b.dataset.d)===_seiCdVal);
+  });
+  // Show/hide reset button for built-in items that have been overridden
+  const hasOverride=isBuiltin&&G.shopOverrides&&G.shopOverrides[id];
+  document.getElementById('sei-reset-btn').style.display=hasOverride?'block':'none';
+  openModal('shop-edit-modal');
+}
+
+function seiCd(d){
+  _seiCdVal=d;
+  document.querySelectorAll('#sei-cd-grid .mf-cdopt').forEach(b=>b.classList.toggle('act',Number(b.dataset.d)===d));
+}
+
+function saveShopEdit(){
+  if(!_seiEditId)return;
+  const icon=document.getElementById('sei-icon').value.trim()||'📦';
+  const name=document.getElementById('sei-name').value.trim();
+  const desc=document.getElementById('sei-desc').value.trim();
+  const cost=parseInt(document.getElementById('sei-cost').value)||100;
+  if(!name){showError('Missing Name','Item needs a name');return;}
+  const isCustom=G.customShop.some(x=>x.id===_seiEditId);
+  if(isCustom){
+    // Edit custom item in-place
+    const idx=G.customShop.findIndex(x=>x.id===_seiEditId);
+    if(idx>=0){G.customShop[idx]={...G.customShop[idx],icon,n:name,d:desc,cost,coolDays:_seiCdVal};}
+  } else {
+    // Store override for built-in item
+    if(!G.shopOverrides)G.shopOverrides={};
+    G.shopOverrides[_seiEditId]={icon,n:name,d:desc,cost,coolDays:_seiCdVal};
+  }
+  sv();closeModal('shop-edit-modal');rShop();
+}
+
+function resetShopEdit(){
+  if(!_seiEditId)return;
+  if(!G.shopOverrides)return;
+  delete G.shopOverrides[_seiEditId];
+  sv();closeModal('shop-edit-modal');rShop();
+}
 function buyItem(id){
   const allShop=[...BUILTIN_SHOP,...G.customShop];
-  const item=allShop.find(x=>x.id===id);if(!item)return;
+  const base=allShop.find(x=>x.id===id);if(!base)return;
+  const item={...base,...(G.shopOverrides?.[id]||{})};
+  // Candy is always gold-only
+  if(id==='candy')delete item.reqPct;
   if(G.gold<item.cost){sfx('cantBuy');showError('Not Enough Gold','Need ◈'+item.cost);return;}
   if(item.coolDays>0&&checkCooldown(id,item.coolDays)){showError('On Cooldown','This item has a cooldown');return;}
   if(item.reqPct){const pct=weeklyDailyPct();if(pct<item.reqPct){sfx('cantBuy');showError('Not Unlocked','Need '+item.reqPct+'% weekly daily completion (current: '+pct+'%)');return;}}
@@ -3270,8 +3798,57 @@ function useItem(idx){
   else if(e==='read10'){G.fx.read10=(G.fx.read10||0)+10;showItemCine(item);}
   else if(e==='cook2wk'){G.fx.cook2wk=14;showItemCine(item);}
   else if(e==='rand'){const r=applyRandBox();showItemCine({icon:'🎲',n:'Random Reward Box',d:r+' added to your inventory!'});}
+  else if(e==='shackle'||e==='core'||e==='rune'){
+    // Needs shadow selection — defer removal until shadow is chosen
+    openShadowEquip(idx,e);
+    return;
+  }
+  else if(e==='crystal'){
+    G.shadowCrystal=true;
+    showItemCine({icon:'🔹',n:'Army Crystal Activated',d:'All soldiers gain ×2 XP from the next dungeon run.'});
+  }
   else showItemCine(item);
   sfx('useItem');G.inventory.splice(idx,1);sv();renderAll();
+}
+let _shPendingInvIdx=null,_shPendingEffect=null;
+function openShadowEquip(invIdx,effect){
+  if(!G.shadowArmy||!G.shadowArmy.length){
+    showError('No Soldiers','Clear dungeons to extract shadow soldiers first');return;
+  }
+  _shPendingInvIdx=invIdx;_shPendingEffect=effect;
+  const labels={shackle:'Choose a shadow to bind this Shackle to (+30% XP)',core:'Choose a shadow to fuse the Dark Core into (×2 XP)',rune:'Choose a shadow to infuse the Power Rune (+2 levels)'};
+  document.getElementById('sh-equip-title').textContent=effect==='shackle'?'BIND SHACKLE':effect==='core'?'FUSE DARK CORE':'APPLY POWER RUNE';
+  document.getElementById('sh-equip-sub').textContent=labels[effect]||'Select a shadow';
+  const gc={BASIC:'#00e896',ELITE:'#a678ff',BOSS:'#ffd060',SPECIAL:'#ff8099'};
+  document.getElementById('sh-equip-list').innerHTML=G.shadowArmy.map(sh=>`
+    <div class="sh-sel-card" onclick="confirmShadowEquip('${sh.uid}')">
+      <span class="sh-sel-icon">${sh.icon}</span>
+      <div class="sh-sel-info">
+        <div class="sh-sel-name">${sh.n}</div>
+        <div class="sh-sel-meta" style="color:${gc[sh.type]||'#a678ff'}">${sh.type} · LV ${sh.level} · ${sh.xp} XP</div>
+        ${(sh.equip||[]).length?`<div class="sh-sel-equip">${sh.equip.map(e=>e==='shackle'?'⛓ Shackle':e==='core'?'💜 Core':'').join('  ')}</div>`:''}
+      </div>
+    </div>`).join('');
+  openModal('sh-equip-modal');
+}
+function confirmShadowEquip(uid){
+  const sh=(G.shadowArmy||[]).find(s=>s.uid===uid);
+  if(!sh||_shPendingInvIdx===null)return;
+  const inv=G.inventory[_shPendingInvIdx];if(!inv)return;
+  const e=_shPendingEffect;
+  if(!sh.equip)sh.equip=[];
+  if(e==='shackle'||e==='core'){
+    sh.equip.push(e);
+    showItemCine({icon:e==='shackle'?'⛓':'💜',n:e==='shackle'?'Shackle Bound':'Core Fused',d:sh.n+' gains '+(e==='shackle'?'+30% XP':'×2 XP')+' from all dungeon runs.'});
+  } else if(e==='rune'){
+    const newLv=Math.min(5,sh.level+2);
+    sh.xp=Math.max(sh.xp,getShadowXpForLevel(newLv));
+    sh.level=getShadowLevel(sh.xp);
+    showItemCine({icon:'🔷',n:'Power Rune — '+sh.n,d:'Shadow advanced to Level '+sh.level+'!'});
+  }
+  G.inventory.splice(_shPendingInvIdx,1);
+  _shPendingInvIdx=null;_shPendingEffect=null;
+  sfx('useItem');sv();closeModal('sh-equip-modal');renderAll();
 }
 function applyRandBox(){
   // picks a random consumable treat or wellness item from the built-in shop
@@ -3308,6 +3885,71 @@ function checkShadows(){
     }
   });
 }
+// ══════════════════════════════════════════════
+// SHADOW ARMY — DUNGEON MECHANICS
+// ══════════════════════════════════════════════
+const SHADOW_XP_THRESHOLDS=[0,0,40,100,250,500];
+function getShadowLevel(xp){
+  for(let lv=5;lv>=2;lv--)if(xp>=SHADOW_XP_THRESHOLDS[lv])return lv;
+  return 1;
+}
+function getShadowXpForLevel(lv){return SHADOW_XP_THRESHOLDS[Math.max(1,Math.min(5,lv))]||0;}
+
+function trySpawnShadow(dungType){
+  if(!G.shadowArmy)G.shadowArmy=[];
+  const cfg=SHADOW_SPAWN_CHANCES[dungType]||SHADOW_SPAWN_CHANCES.standard;
+  if(Math.random()>cfg.chance)return null;
+  // Pick tier by weight
+  const totalW=cfg.tiers.reduce((s,t)=>s+t.w,0);
+  let r=Math.random()*totalW;
+  let tier='basic';
+  for(const t of cfg.tiers){r-=t.w;if(r<=0){tier=t.t;break;}}
+  const pool=SHADOW_SPAWN_POOL[tier];
+  if(!pool||!pool.length)return null;
+  const tmpl=pool[Math.floor(Math.random()*pool.length)];
+  const uid=Date.now().toString(36)+Math.random().toString(36).slice(2,5);
+  const soldier={uid,id:tmpl.id,n:tmpl.n,icon:tmpl.icon,type:tmpl.type,xp:0,level:1,equip:[]};
+  G.shadowArmy.push(soldier);
+  sv();
+  return soldier;
+}
+
+function gainShadowXp(baseAmount){
+  if(!G.shadowArmy||!G.shadowArmy.length)return[];
+  const doubled=!!G.shadowCrystal;
+  if(doubled)G.shadowCrystal=false;
+  const amount=doubled?baseAmount*2:baseAmount;
+  const leveled=[];
+  G.shadowArmy.forEach(sh=>{
+    const oldLv=getShadowLevel(sh.xp);
+    let boost=1;
+    (sh.equip||[]).forEach(eq=>{
+      if(eq==='shackle')boost+=0.30;
+      if(eq==='core')  boost+=1.00;
+    });
+    sh.xp+=Math.floor(amount*boost);
+    sh.level=getShadowLevel(sh.xp);
+    if(sh.level>oldLv)leveled.push({sh,newLevel:sh.level});
+  });
+  sv();
+  return leveled;
+}
+
+function showShadowSpawnCine(soldier){
+  const gradeMap={BASIC:'D',ELITE:'B',BOSS:'A',SPECIAL:'S'};
+  const gc={D:'#00e896',B:'#a678ff',A:'#ffd060',S:'#ff8099'};
+  const grade=gradeMap[soldier.type]||'C';
+  const col=gc[grade]||'#a678ff';
+  document.getElementById('se-icon').textContent=soldier.icon;
+  document.getElementById('se-name').textContent=soldier.n;
+  document.getElementById('se-grade').textContent=grade+'-RANK SOLDIER';
+  document.getElementById('se-grade').style.color=col;
+  document.getElementById('se-type').textContent=soldier.type;
+  document.getElementById('se-stat').textContent='SHADOW EXTRACTED FROM DUNGEON';
+  document.getElementById('shadow-extract').classList.add('show');
+  sfx('shadowExtract');
+}
+
 function checkTitles(){
   if(!G.unlockedTitles)G.unlockedTitles=['tw'];
   TITLES.forEach(t=>{if(t.f(G)&&!G.unlockedTitles.includes(t.id)){G.unlockedTitles.push(t.id);showTitleCine(t);sv();}});
@@ -3593,6 +4235,168 @@ function showPenaltyZone(){sfx('penalty');
 }
 function togPZTask(i){const t=document.getElementById('pzt'+i),c=document.getElementById('pztck'+i);t.classList.toggle('done');c.textContent=t.classList.contains('done')?'✓':'';}
 function completePenalty(){if(penTimer){clearInterval(penTimer);penTimer=null;}document.getElementById('pz').classList.remove('show');showItemCine({icon:'🏜',n:'Penalty Zone Escaped',d:'You survived the Poison-fanged Desert'});}
+
+// ══════════════════════════════════════════════
+// BOSS COMBAT
+// ══════════════════════════════════════════════
+
+// Returns {daily:{hp,maxHp,dead}, weekly:{hp,maxHp,dead}}
+function getBossState(){
+  const dailyQs=G.quests.filter(q=>q.t==='daily'&&!q.penaltyTask);
+  const weeklyQs=G.quests.filter(q=>q.t==='weekly');
+  const dailyMax=Math.max(100,dailyQs.reduce((s,q)=>s+q.xp,0));
+  const weeklyMax=Math.max(200,weeklyQs.reduce((s,q)=>s+(q.xp*(q.weekDone!==undefined?2:1)),0));
+  const dailyDmg=dailyQs.filter(q=>q.done).reduce((s,q)=>s+q.xp,0);
+  const weeklyDmg=weeklyQs.filter(q=>q.done).reduce((s,q)=>s+q.xp,0);
+  return {
+    daily:{hp:Math.max(0,dailyMax-dailyDmg),maxHp:dailyMax,dead:dailyDmg>=dailyMax},
+    weekly:{hp:Math.max(0,weeklyMax-weeklyDmg),maxHp:weeklyMax,dead:weeklyDmg>=weeklyMax},
+  };
+}
+
+// Render boss HP bars in home screen
+function renderBossSection(){
+  const bs=getBossState();
+  // Daily boss
+  const dc=document.getElementById('boss-daily-card');
+  const df=document.getElementById('boss-daily-fill');
+  const dv=document.getElementById('boss-daily-val');
+  const dd=document.getElementById('boss-daily-dead');
+  if(dc){
+    dc.classList.toggle('dead',bs.daily.dead);
+    df.style.width=bs.daily.maxHp>0?Math.max(0,(bs.daily.hp/bs.daily.maxHp)*100)+'%':'0%';
+    dv.textContent=bs.daily.hp+'/'+bs.daily.maxHp;
+    dd.style.display=bs.daily.dead?'block':'none';
+  }
+  // Weekly boss
+  const wc=document.getElementById('boss-weekly-card');
+  const wf=document.getElementById('boss-weekly-fill');
+  const wv=document.getElementById('boss-weekly-val');
+  const wd=document.getElementById('boss-weekly-dead');
+  if(wc){
+    wc.classList.toggle('dead',bs.weekly.dead);
+    wf.style.width=bs.weekly.maxHp>0?Math.max(0,(bs.weekly.hp/bs.weekly.maxHp)*100)+'%':'0%';
+    wv.textContent=bs.weekly.hp+'/'+bs.weekly.maxHp;
+    wd.style.display=bs.weekly.dead?'block':'none';
+  }
+}
+
+// Floating damage number on boss hit
+function showBossDmg(dmg,cx,cy,isWeekly){
+  const el=document.createElement('div');
+  el.className='boss-dmg-num'+(isWeekly?' weekly':'');
+  el.textContent='-'+dmg;
+  el.style.left=(cx-24)+'px';
+  el.style.top=(cy-32)+'px';
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(),800);
+}
+
+// ══════════════════════════════════════════════
+// DAILY DUNGEON SELECTION
+// ══════════════════════════════════════════════
+function selectDailyDungeon(){
+  const today=new Date().toDateString();
+  if(G.activeDungeonDate===today&&G.activeDungeonId)return; // already set
+  const maxStreak=G.quests.reduce((m,q)=>Math.max(m,q.streak||0),0);
+  const available=DUNGEONS.filter(d=>d.unlockStreak===0||maxStreak>=d.unlockStreak);
+  if(!available.length)return;
+  // Weak quests = low streak dailies
+  const weakQ=G.quests.filter(q=>q.t==='daily'&&(q.streak||0)<3);
+  const hiddenChance=weakQ.length>=4?0.22:(weakQ.length>=2?0.12:0);
+  if(Math.random()<hiddenChance&&weakQ.length>=2){
+    // Hidden dungeon — built from the user's weakest habits
+    const picks=[...weakQ].sort(()=>Math.random()-0.5).slice(0,Math.min(4,weakQ.length));
+    const hGold=Math.max(80,picks.reduce((s,q)=>s+Math.floor((q.g||10)*1.8),0));
+    G.hiddenDungeon={questIds:picks.map(q=>q.id),gold:hGold,names:picks.map(q=>q.n)};
+    G.activeDungeonId='hidden';
+  } else {
+    // Weighted pick by type: mini=3, standard=4, boss=2
+    const tw={mini:3,standard:4,boss:2};
+    const pool=available.flatMap(d=>Array(tw[d.type]||3).fill(d.id));
+    G.activeDungeonId=pool[Math.floor(Math.random()*pool.length)];
+    G.hiddenDungeon=null;
+  }
+  G.activeDungeonDate=today;
+  sv();
+}
+
+// ══════════════════════════════════════════════
+// DUNGEON RUNS RENDER
+// ══════════════════════════════════════════════
+function renderDungeons(){
+  if(!G.dungeonToday)G.dungeonToday={};
+  const list=document.getElementById('h-dung-list');
+  if(!list)return;
+  const aid=G.activeDungeonId;
+  if(!aid){list.innerHTML='<div style="font-family:\'Share Tech Mono\',monospace;font-size:7px;color:rgba(160,96,255,.25);letter-spacing:2px;text-align:center;padding:12px 8px;">NO DUNGEON ASSIGNED</div>';return;}
+  // Resolve active dungeon data
+  let active,questIds,activeIcon,activeName,activeGold,activeLore,activeType;
+  if(aid==='hidden'&&G.hiddenDungeon){
+    questIds=G.hiddenDungeon.questIds;
+    activeIcon='❓';activeName='Hidden Dungeon';activeGold=G.hiddenDungeon.gold;
+    activeLore='A dungeon born from your weakest habits. Face them.';
+    activeType='hidden';
+  } else {
+    active=DUNGEONS.find(d=>d.id===aid);
+    if(!active){list.innerHTML='';return;}
+    questIds=active.questIds;activeIcon=active.icon;activeName=active.name;
+    activeGold=active.reward.gold;activeLore=active.lore;activeType=active.type;
+  }
+  const cleared=!!G.dungeonToday[aid];
+  const done=questIds.filter(qid=>{const q=G.quests.find(x=>x.id===qid);return q&&q.done;}).length;
+  const total=questIds.length;
+  const pct=total?Math.round((done/total)*100):0;
+  // Type badge config
+  const typeMeta={
+    mini:   {label:'MINI',    color:'rgba(100,200,255,.85)', bg:'rgba(20,60,90,.4)'},
+    standard:{label:'STD',   color:'rgba(160,96,255,.85)',  bg:'rgba(40,10,80,.4)'},
+    boss:   {label:'BOSS',   color:'rgba(255,60,60,.85)',   bg:'rgba(80,5,5,.4)'},
+    hidden: {label:'HIDDEN', color:'rgba(255,208,60,.9)',   bg:'rgba(60,40,0,.4)'},
+  };
+  const tm=typeMeta[activeType]||typeMeta.standard;
+  // Quest list preview
+  const questPreview=questIds.map(qid=>{
+    const q=G.quests.find(x=>x.id===qid);
+    if(!q)return'';
+    return`<div class="dung-q-row${q.done?' dung-q-done':''}"><span class="dung-q-dot">${q.done?'◆':'◇'}</span>${q.n}</div>`;
+  }).join('');
+  // Other dungeons (locked footer)
+  const maxStreak=G.quests.reduce((m,q)=>Math.max(m,q.streak||0),0);
+  const others=DUNGEONS.filter(d=>d.id!==aid&&(d.unlockStreak===0||maxStreak>=d.unlockStreak));
+  const othersHtml=others.length?`<div class="dung-others-row">${others.map(d=>`<span class="dung-other-chip" title="${d.lore}">${d.icon} ${d.name}</span>`).join('')}${aid!=='hidden'?'<span class="dung-other-chip dung-other-hidden" title="Appears when you have weak habits">❓ Hidden</span>':''}</div>`:'';
+  list.innerHTML=`
+    <div class="dung-card${cleared?' cleared':''}${activeType==='boss'?' dung-boss':activeType==='hidden'?' dung-hidden':''}">
+      <div class="dung-type-badge" style="background:${tm.bg};color:${tm.color}">${tm.label}</div>
+      <div class="dung-top">
+        <span class="dung-icon">${activeIcon}</span>
+        <div class="dung-info">
+          <div class="dung-name">${activeName}</div>
+          <div class="dung-lore">${activeLore}</div>
+        </div>
+        <span class="dung-reward">+${activeGold}◈</span>
+      </div>
+      <div class="dung-q-list">${questPreview}</div>
+      <div class="dung-prog-row" style="margin-top:8px">
+        <span class="dung-prog-lbl">RUN</span>
+        <div class="dung-prog-track"><div class="dung-prog-fill${done===total?' full':''}" style="width:${pct}%"></div></div>
+        <span class="dung-prog-cnt">${done}/${total}</span>
+      </div>
+      ${cleared?'<div class="dung-cleared-lbl">◆ DUNGEON CLEARED ◆</div>':''}
+    </div>
+    ${others.length?`<div class="dung-locked-hdr">⊘ LOCKED TODAY — NEXT DUNGEONS TOMORROW</div>${othersHtml}`:''}
+  `;
+}
+
+// ══════════════════════════════════════════════
+// DEBUFF RENDER
+// ══════════════════════════════════════════════
+function renderDebuff(){
+  const bar=document.getElementById('h-debuff-bar');
+  if(!bar)return;
+  const active=G.debuff?.xp&&G.debuff.expiry===new Date().toDateString();
+  bar.style.display=active?'flex':'none';
+}
 
 // ══════════════════════════════════════════════
 // MODALS
@@ -3933,6 +4737,17 @@ function mergeRemote(data){
     merged.unlockedSkills=data.unlockedSkills||G.unlockedSkills;
     merged.shopCooldowns=data.shopCooldowns||G.shopCooldowns;
     merged.dailyLog=data.dailyLog||G.dailyLog||[];
+    // ── New fields: boss combat, dungeons, debuff, streak unlocks ──
+    merged.dungeonToday=data.dungeonToday||G.dungeonToday||{};
+    merged.activeDungeonId=data.activeDungeonId!==undefined?data.activeDungeonId:G.activeDungeonId||null;
+    merged.activeDungeonDate=data.activeDungeonDate||G.activeDungeonDate||'';
+    merged.hiddenDungeon=data.hiddenDungeon||G.hiddenDungeon||null;
+    // ── Shadow Army soldiers (dungeon-spawned) ──
+    merged.shadowArmy=data.shadowArmy||G.shadowArmy||[];
+    merged.shadowCrystal=data.shadowCrystal!==undefined?data.shadowCrystal:G.shadowCrystal||false;
+    merged.debuff=data.debuff||G.debuff||{xp:false,expiry:null};
+    merged.streakUnlocksGiven=data.streakUnlocksGiven||G.streakUnlocksGiven||[];
+    merged.shopOverrides=data.shopOverrides||G.shopOverrides||{};
     Object.assign(G,merged);
     // Run quest migration on Firebase data too
     if(!G._qmig2){
