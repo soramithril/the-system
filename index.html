@@ -2043,7 +2043,26 @@ body{font-family:'Barlow Condensed',sans-serif;color:var(--white);}
 const SFX=(()=>{
   let AC=null;
   let muted=false;
+  let iosUnlocked=false;
   const vol=()=>muted?0:0.75;
+
+  // iOS Safari requires AudioContext to be created AND resumed on a user gesture.
+  // We unlock it on the very first touch/click and keep it alive.
+  function unlockiOS(){
+    if(iosUnlocked)return;
+    const c=ctx();
+    // Play a silent buffer to fully unlock the audio pipeline on iOS
+    const buf=c.createBuffer(1,1,22050);
+    const src=c.createBufferSource();
+    src.buffer=buf;src.connect(c.destination);
+    src.start(0);
+    if(c.state==='suspended')c.resume();
+    iosUnlocked=true;
+  }
+  // Attach unlock to first user interaction
+  ['touchstart','touchend','click','keydown'].forEach(evt=>{
+    document.addEventListener(evt,unlockiOS,{once:true,passive:true});
+  });
 
   function ctx(){
     if(!AC)AC=new(window.AudioContext||window.webkitAudioContext)();
@@ -2230,6 +2249,11 @@ const SFX=(()=>{
     // Extras
     streakCine:()=>{const c=ctx(),t=c.currentTime;shimmer(.08,.5,t,2500,600);tone(165,.12,.08,.6,t+.05);bellArp([330,415,523,659,784],.22,1.0,.14,t+.1);bell(1047,.15,1.2,t+.85);},
   };
+
+  // Resume AudioContext when returning from background (iOS suspends it)
+  document.addEventListener('visibilitychange',()=>{
+    if(document.visibilityState==='visible'&&AC&&AC.state==='suspended')AC.resume();
+  });
 
   // Public API
   return {
@@ -3927,6 +3951,8 @@ function mergeRemote(data){
         }
       });
       G._qmig2=true;
+      // Push migrated data back to Firebase so all devices get it
+      fbPush();
     }
     localStorage.setItem('sl_v4',JSON.stringify(G));
     renderAll();
