@@ -2729,10 +2729,30 @@ const BUILTIN_SHOP=[
   {id:'sd_course', cat:"Scholar's Den",icon:'🎓',n:'Online Course',     d:'Buy one online course. Invest in yourself.',                cost:1000,coolDays:60,cons:true,rar:'epic'},
   {id:'sd_book',   cat:"Scholar's Den",icon:'📖',n:'Book of Your Choice',d:'Any book, any genre. Fangs demands you keep learning.',    cost:220,coolDays:0, cons:true,rar:'normal'},
   // ── SHADOW GEAR — unlocked by extracting your first dungeon soldier ──
-  {id:'sh_shackle',cat:'Shadow Gear',icon:'⛓',n:'Shadow Shackle',    d:'Bind to a shadow — they gain +30% XP from every dungeon run. Permanent once equipped.',  cost:400,coolDays:0,cons:true,rar:'magic',   e:'shackle'},
-  {id:'sh_core',   cat:'Shadow Gear',icon:'💜',n:'Dark Core',         d:'Fuse into a shadow — permanently doubles their XP gain from all future dungeon clears.', cost:800,coolDays:0,cons:true,rar:'rare',    e:'core'},
-  {id:'sh_rune',   cat:'Shadow Gear',icon:'🔷',n:'Power Rune',        d:'Infuse into a shadow — instantly grants +2 levels (max level 5). One-time use.',          cost:600,coolDays:0,cons:true,rar:'rare',    e:'rune'},
-  {id:'sh_crystal',cat:'Shadow Gear',icon:'🔹',n:'Army Crystal',      d:'Activate — all shadows gain double XP from the very next dungeon run. Single use.',       cost:300,coolDays:7,cons:true,rar:'magic',   e:'crystal'},
+  // ◈ COMMON ◈
+  {id:'sh_fragment',cat:'Shadow Gear',icon:'💠',n:'Soul Fragment',     d:'Feed a soldier — grants +30 XP immediately. Small but steady growth.',                    cost:80,  coolDays:0,cons:true,rar:'normal',  e:'fragment'},
+  {id:'sh_mana',   cat:'Shadow Gear',icon:'🔵',n:'Mana Crystal',      d:'Pulse through the whole army — all soldiers gain +15 XP instantly.',                       cost:100, coolDays:0,cons:true,rar:'normal',  e:'mana'},
+  {id:'sh_medal',  cat:'Shadow Gear',icon:'🏅',n:'Iron Medal',         d:'Awarded to the basics — all Basic-tier soldiers gain +20 XP.',                            cost:140, coolDays:0,cons:true,rar:'normal',  e:'medal'},
+  {id:'sh_vial',   cat:'Shadow Gear',icon:'🧪',n:"Monarch's Vial",    d:'A surge across all ranks — every soldier gains +35 XP.',                                  cost:200, coolDays:0,cons:true,rar:'magic',   e:'vial'},
+  // ◈ MAGIC ◈
+  {id:'sh_pendant',cat:'Shadow Gear',icon:'🔮',n:'Dark Pendant',       d:'Activate — army XP gains are ×1.5 for the rest of today.',                               cost:280, coolDays:1,cons:true,rar:'magic',   e:'pendant'},
+  {id:'sh_sigil',  cat:'Shadow Gear',icon:'🌀',n:'Dark Sigil',         d:'Inscribe before a dungeon — next clear has ×2 shadow spawn chance.',                      cost:350, coolDays:0,cons:true,rar:'magic',   e:'sigil'},
+  {id:'sh_scroll', cat:'Shadow Gear',icon:'📜',n:'Ancient Scroll',     d:'Force the next dungeon selection to be a Hidden Dungeon.',                               cost:420, coolDays:0,cons:true,rar:'magic',   e:'scroll'},
+  {id:'sh_badge',  cat:'Shadow Gear',icon:'🎖',n:'Iron Badge',         d:'Pin to a chosen soldier — instantly +1 level (max 5).',                                  cost:480, coolDays:0,cons:true,rar:'magic',   e:'badge'},
+  {id:'sh_shackle',cat:'Shadow Gear',icon:'⛓',n:'Shadow Shackle',     d:'Bind to a shadow — they gain +30% XP from every dungeon run. Permanent once equipped.',  cost:400, coolDays:0,cons:true,rar:'magic',   e:'shackle'},
+  // ◈ RARE ◈
+  {id:'sh_token',  cat:'Shadow Gear',icon:'🎴',n:'Extraction Token',   d:'Use to immediately extract a random soldier — no dungeon required.',                     cost:500, coolDays:0,cons:true,rar:'rare',    e:'token'},
+  {id:'sh_elixir', cat:'Shadow Gear',icon:'⚗',n:'Shadow Elixir',      d:'Inject into a chosen soldier — grants +80 XP immediately.',                              cost:560, coolDays:0,cons:true,rar:'rare',    e:'elixir'},
+  {id:'sh_essence',cat:'Shadow Gear',icon:'✨',n:'Pure Essence',        d:'Upgrade a Basic soldier to Elite tier. Their power evolves permanently.',                cost:700, coolDays:0,cons:true,rar:'rare',    e:'essence'},
+  {id:'sh_seal',   cat:'Shadow Gear',icon:'🔱',n:"Monarch's Seal",     d:'Guarantee a Boss-tier shadow spawns on your next dungeon clear.',                        cost:750, coolDays:0,cons:true,rar:'rare',    e:'seal'},
+  {id:'sh_core',   cat:'Shadow Gear',icon:'💜',n:'Dark Core',          d:'Fuse into a shadow — permanently doubles their XP gain from all future dungeon clears.', cost:800, coolDays:0,cons:true,rar:'rare',    e:'core'},
+  // ◈ EPIC / LEGENDARY ◈
+  {id:'sh_rune',   cat:'Shadow Gear',icon:'🔷',n:'Power Rune',         d:'Infuse into a shadow — instantly grants +2 levels (max level 5).',                       cost:600, coolDays:0,cons:true,rar:'rare',    e:'rune'},
+  {id:'sh_tome',   cat:'Shadow Gear',icon:'📕',n:'Forbidden Tome',     d:'The weakest soldier in your army is found and given +3 levels automatically.',           cost:900, coolDays:0,cons:true,rar:'epic',    e:'tome'},
+  {id:'sh_blade',  cat:'Shadow Gear',icon:'🗡',n:'Shadow Blade',       d:'Plunge into a chosen soldier — they immediately reach max Level 5.',                    cost:1000,coolDays:0,cons:true,rar:'epic',    e:'blade'},
+  {id:'sh_crown',  cat:'Shadow Gear',icon:'👑',n:'Shadow Crown',       d:'Don the crown — every soldier in your army gains 1 level instantly.',                   cost:1200,coolDays:0,cons:true,rar:'epic',    e:'crown'},
+  {id:'sh_crystal',cat:'Shadow Gear',icon:'🔹',n:'Army Crystal',       d:'Activate — all shadows gain double XP from the very next dungeon run.',                 cost:300, coolDays:7,cons:true,rar:'magic',   e:'crystal'},
+  {id:'sh_herald_call',cat:'Shadow Gear',icon:'⭐',n:"Herald's Call",  d:'Sound the call — a Special-tier shadow is extracted from the void immediately.',         cost:2500,coolDays:0,cons:true,rar:'legendary',e:'herald'},
 ];
 
 const SHOP_CATS_LIST=['All','Treats','System',"Knight's Armoury",'Recovery',"Soldier's Rations","Scholar's Den",'Shadow Gear'];
@@ -2837,7 +2857,13 @@ let G={
   stats:{STR:0,AGI:0,STA:0,INT:0,SEN:0},
   quests:[],customShop:[],customCategories:[],inventory:[],
   equippedTitle:null,unlockedTitles:['tw'],
-  unlockedSkills:[],shadows:[],shadowArmy:[],shadowCrystal:false,jobClass:null,
+  unlockedSkills:[],shadows:[],shadowArmy:[],
+  shadowCrystal:false,   // ×2 XP next dungeon
+  shadowSigil:false,     // ×2 spawn chance next dungeon
+  shadowSeal:false,      // guarantee Boss spawn next dungeon
+  shadowScrollPending:false, // force Hidden dungeon next selection
+  shadowPendant:'',      // date string — army ×1.5 XP if matches today
+  jobClass:null,
   questsTotal:0,qsd:{STR:0,AGI:0,STA:0,INT:0,SEN:0,savings:0},
   fx:{shield:false,skipfit:false,fitb:false,intb:false,str3:0,slp2x:false,
       read7:0,read10:0,sta5:false,str6:false,str12:false,agi8:false,
@@ -2884,6 +2910,10 @@ function ld(){
       G.shadows=p.shadows||[];
       G.shadowArmy=p.shadowArmy||[];
       G.shadowCrystal=p.shadowCrystal||false;
+      G.shadowSigil=p.shadowSigil||false;
+      G.shadowSeal=p.shadowSeal||false;
+      G.shadowScrollPending=p.shadowScrollPending||false;
+      G.shadowPendant=p.shadowPendant||'';
       G.dungeonToday=p.dungeonToday||{};
       G.activeDungeonId=p.activeDungeonId||null;
       G.activeDungeonDate=p.activeDungeonDate||'';
@@ -3177,7 +3207,7 @@ function rHome(){
   const sb=document.getElementById('h-shadow-body');
   if(!G.shadows.length){
     const hasExtract=SKILLS.find(s=>s.id==='se').f(G);
-    sb.innerHTML=`<div class="hsw-empty">${hasExtract?'Shadow Extraction unlocked.<br>Complete milestones to extract shadows.':'Reach <strong>B-Rank</strong> to unlock Shadow Extraction.<br>Then your fallen enemies will serve you.'}</div>`;
+    sb.innerHTML=`<div class="hsw-empty">${hasExtract?'Shadow Extraction active.<br>Clear dungeons to recruit soldiers. Complete milestones for named shadows.':'Clear your first dungeon — a shadow soldier may emerge.<br>Named shadows (Igris, Beru…) unlock at <strong>B-Rank</strong>.'}</div>`;
   } else {
     sb.innerHTML=`<div class="hsw-army">${G.shadows.map(sh=>{
       const col=gc[sh.grade]||'#a678ff';
@@ -3798,35 +3828,86 @@ function useItem(idx){
   else if(e==='read10'){G.fx.read10=(G.fx.read10||0)+10;showItemCine(item);}
   else if(e==='cook2wk'){G.fx.cook2wk=14;showItemCine(item);}
   else if(e==='rand'){const r=applyRandBox();showItemCine({icon:'🎲',n:'Random Reward Box',d:r+' added to your inventory!'});}
-  else if(e==='shackle'||e==='core'||e==='rune'){
-    // Needs shadow selection — defer removal until shadow is chosen
-    openShadowEquip(idx,e);
-    return;
+  // Shadow gear — shadow-select required
+  else if(['shackle','core','rune','fragment','elixir','badge','essence','blade'].includes(e)){
+    openShadowEquip(idx,e);return;
   }
-  else if(e==='crystal'){
-    G.shadowCrystal=true;
-    showItemCine({icon:'🔹',n:'Army Crystal Activated',d:'All soldiers gain ×2 XP from the next dungeon run.'});
+  // Shadow gear — immediate effects
+  else if(e==='crystal'){G.shadowCrystal=true;showItemCine({icon:'🔹',n:'Army Crystal Activated',d:'All soldiers gain ×2 XP from the next dungeon run.'});}
+  else if(e==='mana'){gainShadowXp(15);showItemCine({icon:'🔵',n:'Mana Crystal',d:'All soldiers gained +15 XP.'});}
+  else if(e==='vial'){gainShadowXp(35);showItemCine({icon:'🧪',n:"Monarch's Vial",d:'All soldiers gained +35 XP.'});}
+  else if(e==='medal'){
+    if(!G.shadowArmy||!G.shadowArmy.length){showError('No Soldiers','Extract shadows from dungeons first');return;}
+    G.shadowArmy.forEach(sh=>{if(sh.type==='BASIC'){sh.xp+=20;sh.level=getShadowLevel(sh.xp);}});
+    sv();showItemCine({icon:'🏅',n:'Iron Medal',d:'All Basic soldiers gained +20 XP.'});
+  }
+  else if(e==='pendant'){G.shadowPendant=new Date().toDateString();showItemCine({icon:'🔮',n:'Dark Pendant',d:'Army XP gains are ×1.5 for the rest of today.'});}
+  else if(e==='sigil'){G.shadowSigil=true;showItemCine({icon:'🌀',n:'Dark Sigil',d:'Next dungeon clear has ×2 shadow spawn chance.'});}
+  else if(e==='scroll'){G.shadowScrollPending=true;showItemCine({icon:'📜',n:'Ancient Scroll',d:'The next dungeon selection will be a Hidden Dungeon.'});}
+  else if(e==='seal'){G.shadowSeal=true;showItemCine({icon:'🔱',n:"Monarch's Seal Active",d:'The next dungeon clear will guarantee a Boss-tier shadow spawn.'});}
+  else if(e==='token'){
+    if(!G.shadowArmy)G.shadowArmy=[];
+    const tiers=['basic','basic','basic','elite','elite','boss'];
+    const tier=tiers[Math.floor(Math.random()*tiers.length)];
+    const pool=SHADOW_SPAWN_POOL[tier];
+    const tmpl=pool[Math.floor(Math.random()*pool.length)];
+    const uid=Date.now().toString(36)+Math.random().toString(36).slice(2,5);
+    const sol={uid,id:tmpl.id,n:tmpl.n,icon:tmpl.icon,type:tmpl.type,xp:0,level:1,equip:[]};
+    G.shadowArmy.push(sol);sv();
+    setTimeout(()=>showShadowSpawnCine(sol),200);
+  }
+  else if(e==='crown'){
+    if(!G.shadowArmy||!G.shadowArmy.length){showError('No Soldiers','Extract shadows from dungeons first');return;}
+    G.shadowArmy.forEach(sh=>{const nl=Math.min(5,sh.level+1);sh.xp=Math.max(sh.xp,getShadowXpForLevel(nl));sh.level=getShadowLevel(sh.xp);});
+    sv();showItemCine({icon:'👑',n:'Shadow Crown',d:'All soldiers gained 1 level!'});
+  }
+  else if(e==='tome'){
+    if(!G.shadowArmy||!G.shadowArmy.length){showError('No Soldiers','Extract shadows from dungeons first');return;}
+    const weakest=G.shadowArmy.reduce((a,b)=>a.level<b.level?a:b);
+    const nl=Math.min(5,weakest.level+3);
+    weakest.xp=Math.max(weakest.xp,getShadowXpForLevel(nl));weakest.level=getShadowLevel(weakest.xp);
+    sv();showItemCine({icon:'📕',n:'Forbidden Tome',d:weakest.n+' advanced to Level '+weakest.level+'!'});
+  }
+  else if(e==='herald'){
+    if(!G.shadowArmy)G.shadowArmy=[];
+    const pool=SHADOW_SPAWN_POOL.special;
+    const tmpl=pool[Math.floor(Math.random()*pool.length)];
+    const uid=Date.now().toString(36)+Math.random().toString(36).slice(2,5);
+    const sol={uid,id:tmpl.id,n:tmpl.n,icon:tmpl.icon,type:tmpl.type,xp:0,level:1,equip:[]};
+    G.shadowArmy.push(sol);sv();
+    setTimeout(()=>showShadowSpawnCine(sol),200);
   }
   else showItemCine(item);
   sfx('useItem');G.inventory.splice(idx,1);sv();renderAll();
 }
 let _shPendingInvIdx=null,_shPendingEffect=null;
 function openShadowEquip(invIdx,effect){
-  if(!G.shadowArmy||!G.shadowArmy.length){
-    showError('No Soldiers','Clear dungeons to extract shadow soldiers first');return;
-  }
+  if(!G.shadowArmy||!G.shadowArmy.length){showError('No Soldiers','Clear dungeons to extract shadow soldiers first');return;}
   _shPendingInvIdx=invIdx;_shPendingEffect=effect;
-  const labels={shackle:'Choose a shadow to bind this Shackle to (+30% XP)',core:'Choose a shadow to fuse the Dark Core into (×2 XP)',rune:'Choose a shadow to infuse the Power Rune (+2 levels)'};
-  document.getElementById('sh-equip-title').textContent=effect==='shackle'?'BIND SHACKLE':effect==='core'?'FUSE DARK CORE':'APPLY POWER RUNE';
-  document.getElementById('sh-equip-sub').textContent=labels[effect]||'Select a shadow';
+  const cfg={
+    shackle:{title:'BIND SHACKLE',     sub:'Choose a soldier — +30% XP permanently'},
+    core:   {title:'FUSE DARK CORE',   sub:'Choose a soldier — ×2 XP permanently'},
+    rune:   {title:'APPLY POWER RUNE', sub:'Choose a soldier — +2 levels instantly'},
+    fragment:{title:'SOUL FRAGMENT',   sub:'Choose a soldier — +30 XP'},
+    elixir: {title:'SHADOW ELIXIR',    sub:'Choose a soldier — +80 XP'},
+    badge:  {title:'IRON BADGE',       sub:'Choose a soldier — +1 level instantly'},
+    essence:{title:'PURE ESSENCE',     sub:'Choose a Basic soldier — upgrade to Elite tier'},
+    blade:  {title:'SHADOW BLADE',     sub:'Choose a soldier — reach max Level 5'},
+  };
+  const c=cfg[effect]||{title:'SELECT SHADOW',sub:'Choose a soldier'};
+  document.getElementById('sh-equip-title').textContent=c.title;
+  document.getElementById('sh-equip-sub').textContent=c.sub;
   const gc={BASIC:'#00e896',ELITE:'#a678ff',BOSS:'#ffd060',SPECIAL:'#ff8099'};
-  document.getElementById('sh-equip-list').innerHTML=G.shadowArmy.map(sh=>`
+  // For essence, only show Basic soldiers
+  const candidates=(effect==='essence')?G.shadowArmy.filter(s=>s.type==='BASIC'):G.shadowArmy;
+  if(!candidates.length){showError('No Valid Soldiers',effect==='essence'?'No Basic soldiers to upgrade':'No soldiers available');return;}
+  document.getElementById('sh-equip-list').innerHTML=candidates.map(sh=>`
     <div class="sh-sel-card" onclick="confirmShadowEquip('${sh.uid}')">
       <span class="sh-sel-icon">${sh.icon}</span>
       <div class="sh-sel-info">
         <div class="sh-sel-name">${sh.n}</div>
-        <div class="sh-sel-meta" style="color:${gc[sh.type]||'#a678ff'}">${sh.type} · LV ${sh.level} · ${sh.xp} XP</div>
-        ${(sh.equip||[]).length?`<div class="sh-sel-equip">${sh.equip.map(e=>e==='shackle'?'⛓ Shackle':e==='core'?'💜 Core':'').join('  ')}</div>`:''}
+        <div class="sh-sel-meta" style="color:${gc[sh.type]||'#a678ff'}">${sh.type} · LV ${sh.level} · ${sh.xp}XP</div>
+        ${(sh.equip||[]).length?`<div class="sh-sel-equip">${sh.equip.map(e=>e==='shackle'?'⛓+30%':e==='core'?'💜×2':'').join(' ')}</div>`:''}
       </div>
     </div>`).join('');
   openModal('sh-equip-modal');
@@ -3841,19 +3922,72 @@ function confirmShadowEquip(uid){
     sh.equip.push(e);
     showItemCine({icon:e==='shackle'?'⛓':'💜',n:e==='shackle'?'Shackle Bound':'Core Fused',d:sh.n+' gains '+(e==='shackle'?'+30% XP':'×2 XP')+' from all dungeon runs.'});
   } else if(e==='rune'){
-    const newLv=Math.min(5,sh.level+2);
-    sh.xp=Math.max(sh.xp,getShadowXpForLevel(newLv));
-    sh.level=getShadowLevel(sh.xp);
-    showItemCine({icon:'🔷',n:'Power Rune — '+sh.n,d:'Shadow advanced to Level '+sh.level+'!'});
+    const nl=Math.min(5,sh.level+2);sh.xp=Math.max(sh.xp,getShadowXpForLevel(nl));sh.level=getShadowLevel(sh.xp);
+    showItemCine({icon:'🔷',n:'Power Rune — '+sh.n,d:'Reached Level '+sh.level+'!'});
+  } else if(e==='fragment'){
+    sh.xp+=30;sh.level=getShadowLevel(sh.xp);
+    showItemCine({icon:'💠',n:'Soul Fragment — '+sh.n,d:'+30 XP. Now Level '+sh.level+'.'});
+  } else if(e==='elixir'){
+    sh.xp+=80;sh.level=getShadowLevel(sh.xp);
+    showItemCine({icon:'⚗',n:'Shadow Elixir — '+sh.n,d:'+80 XP. Now Level '+sh.level+'.'});
+  } else if(e==='badge'){
+    const nl=Math.min(5,sh.level+1);sh.xp=Math.max(sh.xp,getShadowXpForLevel(nl));sh.level=getShadowLevel(sh.xp);
+    showItemCine({icon:'🎖',n:'Iron Badge — '+sh.n,d:'Reached Level '+sh.level+'!'});
+  } else if(e==='essence'){
+    sh.type='ELITE';sh.icon='🛡';
+    showItemCine({icon:'✨',n:'Pure Essence — '+sh.n,d:'Basic shadow evolved to ELITE tier!'});
+  } else if(e==='blade'){
+    sh.xp=SHADOW_XP_THRESHOLDS[5];sh.level=5;
+    showItemCine({icon:'🗡',n:'Shadow Blade — '+sh.n,d:'Shadow reached maximum Level 5!'});
   }
   G.inventory.splice(_shPendingInvIdx,1);
   _shPendingInvIdx=null;_shPendingEffect=null;
   sfx('useItem');sv();closeModal('sh-equip-modal');renderAll();
 }
+// Random Reward Box — shadow gear drop table (weight per item)
+// Normal treats = 700 combined weight; shadow total ≈ 376 → ~35% shadow chance overall
+const SHADOW_BOX_POOL=[
+  {id:'sh_fragment',  w:50},  // ~4.65%
+  {id:'sh_mana',      w:50},  // ~4.65%
+  {id:'sh_medal',     w:40},  // ~3.72%
+  {id:'sh_vial',      w:40},  // ~3.72%
+  {id:'sh_crystal',   w:30},  // ~2.79%
+  {id:'sh_pendant',   w:25},  // ~2.33%
+  {id:'sh_sigil',     w:20},  // ~1.86%
+  {id:'sh_scroll',    w:18},  // ~1.67%
+  {id:'sh_badge',     w:15},  // ~1.39%
+  {id:'sh_shackle',   w:15},  // ~1.39%
+  {id:'sh_token',     w:12},  // ~1.12%
+  {id:'sh_elixir',    w:10},  // ~0.93%
+  {id:'sh_rune',      w:10},  // ~0.93%
+  {id:'sh_essence',   w:8},   // ~0.74%
+  {id:'sh_seal',      w:8},   // ~0.74%
+  {id:'sh_core',      w:5},   // ~0.46%
+  {id:'sh_blade',     w:5},   // ~0.46%
+  {id:'sh_tome',      w:5},   // ~0.46%
+  {id:'sh_crown',     w:5},   // ~0.46%
+  {id:'sh_herald_call',w:5},  // ~0.46%
+];
 function applyRandBox(){
-  // picks a random consumable treat or wellness item from the built-in shop
-  const pool=BUILTIN_SHOP.filter(x=>x.cons&&['Treats','Wellness'].includes(x.cat)&&x.coolDays>0);
-  const pick=pool[~~(Math.random()*pool.length)];
+  const treatPool=BUILTIN_SHOP.filter(x=>x.cons&&['Treats','Wellness'].includes(x.cat)&&x.coolDays>0);
+  const TREAT_W=700;
+  const shadowW=SHADOW_BOX_POOL.reduce((s,x)=>s+x.w,0);
+  const grand=TREAT_W+shadowW;
+  let r=Math.floor(Math.random()*grand);
+  if(r>=TREAT_W){
+    // Shadow gear drop
+    r-=TREAT_W;
+    let cum=0;
+    for(const entry of SHADOW_BOX_POOL){
+      cum+=entry.w;
+      if(r<cum){
+        const item=BUILTIN_SHOP.find(x=>x.id===entry.id);
+        if(item){G.inventory.push({id:item.id,n:item.n});return'★ '+item.n+' (Shadow Gear!)';}
+      }
+    }
+  }
+  // Normal treat
+  const pick=treatPool[~~(Math.random()*treatPool.length)];
   G.inventory.push({id:pick.id,n:pick.n});
   return pick.n;
 }
@@ -3897,8 +4031,20 @@ function getShadowXpForLevel(lv){return SHADOW_XP_THRESHOLDS[Math.max(1,Math.min
 
 function trySpawnShadow(dungType){
   if(!G.shadowArmy)G.shadowArmy=[];
+  // Monarch's Seal — guarantee Boss spawn
+  if(G.shadowSeal){
+    G.shadowSeal=false;sv();
+    const pool=SHADOW_SPAWN_POOL.boss;
+    const tmpl=pool[Math.floor(Math.random()*pool.length)];
+    const uid=Date.now().toString(36)+Math.random().toString(36).slice(2,5);
+    const sol={uid,id:tmpl.id,n:tmpl.n,icon:tmpl.icon,type:tmpl.type,xp:0,level:1,equip:[]};
+    G.shadowArmy.push(sol);sv();return sol;
+  }
   const cfg=SHADOW_SPAWN_CHANCES[dungType]||SHADOW_SPAWN_CHANCES.standard;
-  if(Math.random()>cfg.chance)return null;
+  // Dark Sigil — double spawn chance
+  let chance=cfg.chance;
+  if(G.shadowSigil){chance=Math.min(0.95,chance*2);G.shadowSigil=false;sv();}
+  if(Math.random()>chance)return null;
   // Pick tier by weight
   const totalW=cfg.tiers.reduce((s,t)=>s+t.w,0);
   let r=Math.random()*totalW;
@@ -3918,7 +4064,9 @@ function gainShadowXp(baseAmount){
   if(!G.shadowArmy||!G.shadowArmy.length)return[];
   const doubled=!!G.shadowCrystal;
   if(doubled)G.shadowCrystal=false;
-  const amount=doubled?baseAmount*2:baseAmount;
+  const pendant=G.shadowPendant===new Date().toDateString();
+  let amount=doubled?baseAmount*2:baseAmount;
+  if(pendant)amount=Math.floor(amount*1.5);
   const leveled=[];
   G.shadowArmy.forEach(sh=>{
     const oldLv=getShadowLevel(sh.xp);
@@ -4297,6 +4445,14 @@ function showBossDmg(dmg,cx,cy,isWeekly){
 // ══════════════════════════════════════════════
 function selectDailyDungeon(){
   const today=new Date().toDateString();
+  // Ancient Scroll override — force Hidden Dungeon (even if today already has one)
+  if(G.shadowScrollPending&&!G.dungeonToday?.[G.activeDungeonId]){
+    G.shadowScrollPending=false;
+    const allD=G.quests.filter(q=>q.t==='daily');
+    const picks=[...allD].sort(()=>Math.random()-0.5).slice(0,4);
+    G.hiddenDungeon={questIds:picks.map(q=>q.id),gold:130,names:picks.map(q=>q.n)};
+    G.activeDungeonId='hidden';G.activeDungeonDate=today;sv();return;
+  }
   if(G.activeDungeonDate===today&&G.activeDungeonId)return; // already set
   const maxStreak=G.quests.reduce((m,q)=>Math.max(m,q.streak||0),0);
   const available=DUNGEONS.filter(d=>d.unlockStreak===0||maxStreak>=d.unlockStreak);
@@ -4742,9 +4898,13 @@ function mergeRemote(data){
     merged.activeDungeonId=data.activeDungeonId!==undefined?data.activeDungeonId:G.activeDungeonId||null;
     merged.activeDungeonDate=data.activeDungeonDate||G.activeDungeonDate||'';
     merged.hiddenDungeon=data.hiddenDungeon||G.hiddenDungeon||null;
-    // ── Shadow Army soldiers (dungeon-spawned) ──
+    // ── Shadow Army soldiers + all item flags ──
     merged.shadowArmy=data.shadowArmy||G.shadowArmy||[];
-    merged.shadowCrystal=data.shadowCrystal!==undefined?data.shadowCrystal:G.shadowCrystal||false;
+    merged.shadowCrystal=data.shadowCrystal!==undefined?data.shadowCrystal:(G.shadowCrystal||false);
+    merged.shadowSigil=data.shadowSigil!==undefined?data.shadowSigil:(G.shadowSigil||false);
+    merged.shadowSeal=data.shadowSeal!==undefined?data.shadowSeal:(G.shadowSeal||false);
+    merged.shadowScrollPending=data.shadowScrollPending!==undefined?data.shadowScrollPending:(G.shadowScrollPending||false);
+    merged.shadowPendant=data.shadowPendant||G.shadowPendant||'';
     merged.debuff=data.debuff||G.debuff||{xp:false,expiry:null};
     merged.streakUnlocksGiven=data.streakUnlocksGiven||G.streakUnlocksGiven||[];
     merged.shopOverrides=data.shopOverrides||G.shopOverrides||{};
