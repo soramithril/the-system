@@ -2589,6 +2589,29 @@ function ld(){
       G.shadows=p.shadows||[];
       // Purge gear/removed items from inventory
       G.inventory=(p.inventory||[]).filter(i=>!REMOVED_IDS.has(i.id));
+      // ── QUEST MIGRATION v2 ──
+      // Sync saved quests with DEFAULT_QUESTS: update names, remove deleted, add new
+      if(!G._qmig2){
+        const defMap=new Map(DEFAULT_QUESTS.map(q=>[q.id,q]));
+        const savedIds=new Set(G.quests.map(q=>q.id));
+        // Update existing quests to match new defaults (name, xp, gold, stat, type)
+        G.quests=G.quests.map(q=>{
+          const def=defMap.get(q.id);
+          if(def)return {...q, n:def.n, s:def.s, xp:def.xp, g:def.g, mp:def.mp, t:def.t};
+          return q;
+        });
+        // Remove quests that no longer exist in defaults (except custom quests)
+        const REMOVED_QUEST_IDS=new Set(['h3','h4','gr3','s1','s2','j5']);
+        G.quests=G.quests.filter(q=>!REMOVED_QUEST_IDS.has(q.id)||q.m==='custom');
+        // Add new quests that don't exist in saved data
+        DEFAULT_QUESTS.forEach(dq=>{
+          if(!savedIds.has(dq.id)&&!REMOVED_QUEST_IDS.has(dq.id)){
+            G.quests.push({...dq});
+          }
+        });
+        G._qmig2=true;
+        sv();
+      }
     }catch(e){}
   } else {
     G.quests=DEFAULT_QUESTS.map(q=>({...q}));
@@ -3887,6 +3910,24 @@ function mergeRemote(data){
     merged.shopCooldowns=data.shopCooldowns||G.shopCooldowns;
     merged.dailyLog=data.dailyLog||G.dailyLog||[];
     Object.assign(G,merged);
+    // Run quest migration on Firebase data too
+    if(!G._qmig2){
+      const defMap=new Map(DEFAULT_QUESTS.map(q=>[q.id,q]));
+      const savedIds=new Set(G.quests.map(q=>q.id));
+      G.quests=G.quests.map(q=>{
+        const def=defMap.get(q.id);
+        if(def)return {...q, n:def.n, s:def.s, xp:def.xp, g:def.g, mp:def.mp, t:def.t};
+        return q;
+      });
+      const REMOVED_QUEST_IDS=new Set(['h3','h4','gr3','s1','s2','j5']);
+      G.quests=G.quests.filter(q=>!REMOVED_QUEST_IDS.has(q.id)||q.m==='custom');
+      DEFAULT_QUESTS.forEach(dq=>{
+        if(!savedIds.has(dq.id)&&!REMOVED_QUEST_IDS.has(dq.id)){
+          G.quests.push({...dq});
+        }
+      });
+      G._qmig2=true;
+    }
     localStorage.setItem('sl_v4',JSON.stringify(G));
     renderAll();
     showFbStatus('◆ SYNCED FROM CLOUD','#00e896');
