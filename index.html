@@ -2770,69 +2770,70 @@ const MISSIONS=[
 ];
 
 // DEFAULT QUESTS — full quest list
+// System v12 — 4-Tier Structure: Discipline / Core / Weekly / Main
+// XP Weighting: INT & SEN = highest | STR & AGI = moderate | STA = lowest
 const DEFAULT_QUESTS=[
-  // ── FITNESS ──
-  {id:'f1',m:'fitness',t:'weekly',n:'Push workout — chest, shoulders, triceps (×2/week)',   s:'STR',xp:45,g:18,mp:0,streak:0,done:false,weekDone:0},
-  {id:'f2',m:'fitness',t:'weekly',n:'Pull workout — back and biceps (×2/week)',              s:'STR',xp:45,g:18,mp:0,streak:0,done:false,weekDone:0},
-  {id:'f3',m:'fitness',t:'weekly',n:'Leg workout — quads, hamstrings, glutes (×1/week)',     s:'STR',xp:45,g:18,mp:0,streak:0,done:false,weekDone:0},
-  {id:'f4',m:'fitness',t:'daily', n:'20 min Peloton or cardio session',                      s:'AGI',xp:25,g:10,mp:0,streak:0,done:false},
-  {id:'f5',m:'fitness',t:'daily', n:'Hit daily protein target',                              s:'STA',xp:15,g:6, mp:0,streak:0,done:false},
-  {id:'f6',m:'fitness',t:'daily', n:'20 push-ups (any sets, any time)',                      s:'STR',xp:15,g:6, mp:0,streak:0,done:false},
-  {id:'f7',m:'fitness',t:'daily', n:'20 sit-ups (any sets, any time)',                       s:'STR',xp:12,g:5, mp:0,streak:0,done:false},
-  {id:'f8',m:'fitness',t:'daily', n:'20 squats (any sets, any time)',                        s:'STR',xp:12,g:5, mp:0,streak:0,done:false},
-  {id:'f9',m:'fitness',t:'daily', n:'30 min run or walk outside',                            s:'AGI',xp:30,g:12,mp:0,streak:0,done:false},
-  {id:'f12',m:'fitness',t:'daily', n:'10 minutes of stretching',                             s:'AGI',xp:12,g:5, mp:0,streak:0,done:false},
-  {id:'f10',m:'fitness',t:'main', n:'Reach 15% body fat',                                   s:'STR',xp:200,g:80,mp:0,streak:0,done:false},
-  {id:'f11',m:'fitness',t:'main', n:'Reach 12% body fat',                                   s:'STR',xp:400,g:160,mp:0,streak:0,done:false},
-  // ── YOUTUBE ──
-  {id:'y1',m:'youtube',t:'daily', n:'Upload a YouTube Short',                                s:'SEN',xp:35,g:14,mp:15,streak:0,done:false},
-  {id:'y2',m:'youtube',t:'daily', n:'Film or script content for 30 min',                    s:'SEN',xp:22,g:9, mp:20,streak:0,done:false},
-  {id:'y3',m:'youtube',t:'weekly',n:'Upload a full YouTube video (×1/week)',                 s:'SEN',xp:70,g:28,mp:25,streak:0,done:false,weekDone:0},
-  {id:'y4',m:'youtube',t:'main',  n:'Reach 100 subscribers',                                s:'SEN',xp:100,g:40,mp:0,streak:0,done:false},
-  {id:'y5',m:'youtube',t:'main',  n:'Reach 1,000 subscribers',                              s:'SEN',xp:250,g:100,mp:0,streak:0,done:false},
-  {id:'y6',m:'youtube',t:'main',  n:'Reach 10,000 subscribers',                             s:'SEN',xp:500,g:200,mp:0,streak:0,done:false},
-  {id:'y7',m:'youtube',t:'main',  n:'Reach 100,000 subscribers',                            s:'SEN',xp:1000,g:400,mp:0,streak:0,done:false},
-  // ── JAPANESE ──
-  {id:'j1',m:'japanese',t:'daily', n:'Review yesterday\'s kana',                             s:'INT',xp:20,g:8, mp:15,streak:0,done:false},
-  {id:'j2',m:'japanese',t:'daily', n:'Anki — add 10 new vocabulary cards',                  s:'INT',xp:18,g:7, mp:10,streak:0,done:false},
-  {id:'j3',m:'japanese',t:'daily', n:'Japanese grammar study — 15 min',                     s:'INT',xp:20,g:8, mp:15,streak:0,done:false},
-  {id:'j4',m:'japanese',t:'daily', n:'Japanese immersion — watch, read or listen 20 min',   s:'INT',xp:18,g:7, mp:10,streak:0,done:false},
-  {id:'j5',m:'japanese',t:'daily', n:'Learn 5–10 hiragana/katakana',                        s:'INT',xp:15,g:6, mp:10,streak:0,done:false},
-  {id:'j12',m:'japanese',t:'daily', n:'Practice writing one row of kana from memory',       s:'INT',xp:12,g:5, mp:10,streak:0,done:false},
-  {id:'j6',m:'japanese',t:'weekly',n:'Full Japanese listening session (×3/week)',            s:'INT',xp:35,g:14,mp:20,streak:0,done:false,weekDone:0},
-  {id:'j7',m:'japanese',t:'weekly',n:'Write a short journal entry in Japanese (×1/week)',    s:'INT',xp:30,g:12,mp:15,streak:0,done:false,weekDone:0},
-  {id:'j8',m:'japanese',t:'main',  n:'Complete Genki I textbook',                           s:'INT',xp:200,g:80,mp:0,streak:0,done:false},
-  {id:'j9',m:'japanese',t:'main',  n:'Pass JLPT N5',                                        s:'INT',xp:300,g:120,mp:0,streak:0,done:false},
-  {id:'j10',m:'japanese',t:'main', n:'Pass JLPT N4',                                        s:'INT',xp:400,g:160,mp:0,streak:0,done:false},
-  {id:'j11',m:'japanese',t:'main', n:'Pass JLPT N2',                                        s:'INT',xp:800,g:320,mp:0,streak:0,done:false},
-  // ── HEALTHY LIFE ──
-  {id:'h1',m:'health',t:'daily', n:'Read for 30 minutes',                                   s:'INT',xp:20,g:8, mp:10,streak:0,done:false},
-  {id:'h2',m:'health',t:'daily', n:'Meditate for 10 minutes',                               s:'STA',xp:15,g:6, mp:-20,streak:0,done:false},
-  {id:'h5',m:'health',t:'weekly',n:'Cold shower — end with 60 sec cold (×3/week)',          s:'STA',xp:18,g:7, mp:-20,streak:0,done:false,weekDone:0},
-  // ── COOKING ──
-  {id:'c1',m:'cooking',t:'daily', n:'Cook a proper meal from scratch',                      s:'SEN',xp:22,g:9, mp:0,streak:0,done:false},
-  {id:'c2',m:'cooking',t:'daily', n:'No junk food today',                                   s:'STA',xp:14,g:6, mp:0,streak:0,done:false},
-  {id:'c3',m:'cooking',t:'weekly',n:'Meal prep for the week (×1/week)',                     s:'SEN',xp:45,g:18,mp:0,streak:0,done:false,weekDone:0},
-  // ── SUPPLEMENTS ──
-  {id:'s3',m:'supps',t:'daily', n:'Omega-3 fish oil',                                       s:'STA',xp:7, g:3, mp:0,streak:0,done:false},
-  {id:'s4',m:'supps',t:'daily', n:'Magnesium + Zinc + B6',                                  s:'STA',xp:7, g:3, mp:0,streak:0,done:false},
-  {id:'s5',m:'supps',t:'daily', n:'Drink 3 litres of water',                                s:'STA',xp:10,g:5, mp:0,streak:0,done:false},
-  {id:'s6',m:'supps',t:'daily', n:'Collagen',                                               s:'STA',xp:7, g:3, mp:0,streak:0,done:false},
-  {id:'s7',m:'supps',t:'daily', n:'2 protein shakes',                                       s:'STA',xp:10,g:5, mp:0,streak:0,done:false},
-  // ── SAVINGS ──
-  {id:'sa1',m:'savings',t:'daily', n:'No unnecessary spending today',                       s:'SEN',xp:10,g:5, mp:0,streak:0,done:false},
-  {id:'sa2',m:'savings',t:'weekly',n:'Review weekly budget',                                s:'SEN',xp:25,g:10,mp:0,streak:0,done:false,weekDone:0},
-  {id:'sa3',m:'savings',t:'main',  n:'Save first £1,000',                                   s:'SEN',xp:200,g:80,mp:0,streak:0,done:false},
-  {id:'sa4',m:'savings',t:'main',  n:'Save first £5,000',                                   s:'SEN',xp:500,g:200,mp:0,streak:0,done:false},
-  // ── THE GRIND (Grooming, Discipline, Room) ──
-  {id:'gr1',m:'grind',t:'daily', n:'Full morning grooming — shower, skincare, hair',        s:'SEN',xp:15,g:6, mp:-10,streak:0,done:false},
-  {id:'gr2',m:'grind',t:'daily', n:'Make your bed — first thing, no excuses',               s:'SEN',xp:8, g:3, mp:0,streak:0,done:false},
-  {id:'gr4',m:'grind',t:'daily', n:'15 min evening tidy — clothes, desk, floor',            s:'SEN',xp:10,g:4, mp:0,streak:0,done:false},
-  {id:'gr5',m:'grind',t:'weekly',n:'Clean your room — full tidy, vacuum, surfaces (×1/week)',s:'STA',xp:35,g:14,mp:0,streak:0,done:false,weekDone:0},
-  {id:'gr9',m:'grind',t:'weekly',n:'Deep clean — kitchen, bathroom, floors top to bottom (×1/week)',s:'STA',xp:50,g:20,mp:0,streak:0,done:false,weekDone:0},
-  {id:'gr6',m:'grind',t:'weekly',n:'Do laundry — wash, dry, put away (×1/week)',            s:'STA',xp:20,g:8, mp:0,streak:0,done:false,weekDone:0},
-  {id:'gr7',m:'grind',t:'weekly',n:'Grooming maintenance — trim / haircut / nails (×1/week)',s:'SEN',xp:25,g:10,mp:0,streak:0,done:false,weekDone:0},
-  {id:'gr8',m:'grind',t:'weekly',n:'Plan next 7 days — goals, tasks, schedule (×1/week)',   s:'INT',xp:30,g:12,mp:-15,streak:0,done:false,weekDone:0},
+
+  // ══════════════════════════════════════════════════════
+  // TIER 1 — DAILY QUEST (Discipline Layer — Non-Negotiable)
+  // Simple. Finite. Achievable on the worst day. ≤45 min total.
+  // ══════════════════════════════════════════════════════
+  {id:'f6',  m:'fitness',  t:'daily', layer:'discipline', n:'20 push-ups',                                          s:'STR',xp:20,g:8, mp:0, streak:0,done:false},
+  {id:'f7',  m:'fitness',  t:'daily', layer:'discipline', n:'20 sit-ups',                                           s:'STR',xp:20,g:8, mp:0, streak:0,done:false},
+  {id:'f8',  m:'fitness',  t:'daily', layer:'discipline', n:'20 squats',                                            s:'STR',xp:20,g:8, mp:0, streak:0,done:false},
+  {id:'f13', m:'fitness',  t:'daily', layer:'discipline', n:'10,000 steps',                                         s:'AGI',xp:25,g:10,mp:0, streak:0,done:false},
+  {id:'f12', m:'fitness',  t:'daily', layer:'discipline', n:'10 minutes of stretching (optional)',                  s:'AGI',xp:12,g:5, mp:0, streak:0,done:false},
+
+  // ══════════════════════════════════════════════════════
+  // TIER 2 — DAILY CORE (Identity Layer — Always Maintain)
+  // Low-friction habits that maintain baseline identity.
+  // ══════════════════════════════════════════════════════
+  {id:'f5',    m:'fitness',  t:'daily', layer:'core', n:'Hit daily protein target',                                 s:'STA',xp:12,g:5, mp:0, streak:0,done:false},
+  {id:'s5',    m:'supps',    t:'daily', layer:'core', n:'Drink 3 litres of water',                                  s:'STA',xp:10,g:4, mp:0, streak:0,done:false},
+  {id:'j_core',m:'japanese', t:'daily', layer:'core', n:'Japanese practice — minimum 15 min',                      s:'INT',xp:38,g:15,mp:15,streak:0,done:false},
+  {id:'y_core',m:'youtube',  t:'daily', layer:'core', n:'One content action — film, edit or upload',               s:'SEN',xp:40,g:16,mp:15,streak:0,done:false},
+  {id:'gr_core',m:'grind',   t:'daily', layer:'core', n:'Morning grooming + make bed',                             s:'SEN',xp:18,g:7, mp:0, streak:0,done:false},
+  // Daily Stack Protocol
+  {id:'s3',  m:'supps',    t:'daily', layer:'core', n:'Omega-3 fish oil',                                          s:'STA',xp:7, g:3, mp:0, streak:0,done:false},
+  {id:'s4',  m:'supps',    t:'daily', layer:'core', n:'Magnesium + Zinc + B6',                                     s:'STA',xp:7, g:3, mp:0, streak:0,done:false},
+  {id:'s6',  m:'supps',    t:'daily', layer:'core', n:'Collagen',                                                  s:'STA',xp:7, g:3, mp:0, streak:0,done:false},
+  {id:'s7',  m:'supps',    t:'daily', layer:'core', n:'2 protein shakes',                                          s:'STA',xp:8, g:3, mp:0, streak:0,done:false},
+
+  // ══════════════════════════════════════════════════════
+  // TIER 4 — WEEKLY QUESTS (Structure Layer — All Domains)
+  // Flexible completion. No daily pressure.
+  // ══════════════════════════════════════════════════════
+  // FITNESS
+  {id:'f1',  m:'fitness',  t:'weekly',layer:'weekly', n:'Push workout — chest, shoulders, triceps (×2/week)',      s:'STR',xp:50,g:20,mp:0, streak:0,done:false,weekDone:0},
+  {id:'f2',  m:'fitness',  t:'weekly',layer:'weekly', n:'Pull workout — back and biceps (×2/week)',                 s:'STR',xp:50,g:20,mp:0, streak:0,done:false,weekDone:0},
+  {id:'f3',  m:'fitness',  t:'weekly',layer:'weekly', n:'Leg workout — quads, hamstrings, glutes (×1/week)',        s:'STR',xp:50,g:20,mp:0, streak:0,done:false,weekDone:0},
+  // CONTENT
+  {id:'y3',  m:'youtube',  t:'weekly',layer:'weekly', n:'Upload a long-form YouTube video (×1/week)',               s:'SEN',xp:80,g:32,mp:25,streak:0,done:false,weekDone:0},
+  // JAPANESE
+  {id:'j6',  m:'japanese', t:'weekly',layer:'weekly', n:'Full Japanese listening session (×3/week)',                s:'INT',xp:40,g:16,mp:20,streak:0,done:false,weekDone:0},
+  {id:'j7',  m:'japanese', t:'weekly',layer:'weekly', n:'Write a short journal entry in Japanese (×1/week)',        s:'INT',xp:35,g:14,mp:15,streak:0,done:false,weekDone:0},
+  // LIFE
+  {id:'c3',  m:'cooking',  t:'weekly',layer:'weekly', n:'Meal prep for the week (×1/week)',                         s:'SEN',xp:45,g:18,mp:0, streak:0,done:false,weekDone:0},
+  {id:'gr5', m:'grind',    t:'weekly',layer:'weekly', n:'Clean your room — full tidy, vacuum, surfaces (×1/week)', s:'STA',xp:30,g:12,mp:0, streak:0,done:false,weekDone:0},
+  {id:'gr6', m:'grind',    t:'weekly',layer:'weekly', n:'Do laundry — wash, dry, put away (×1/week)',               s:'STA',xp:20,g:8, mp:0, streak:0,done:false,weekDone:0},
+  {id:'gr8', m:'grind',    t:'weekly',layer:'weekly', n:'Plan next 7 days — goals, tasks, schedule (×1/week)',      s:'INT',xp:35,g:14,mp:0, streak:0,done:false,weekDone:0},
+  {id:'h5',  m:'health',   t:'weekly',layer:'weekly', n:'Cold exposure — cold shower or cold water (×3/week)',      s:'STA',xp:22,g:9, mp:-20,streak:0,done:false,weekDone:0},
+
+  // ══════════════════════════════════════════════════════
+  // MAIN QUESTS — Long-term milestones
+  // ══════════════════════════════════════════════════════
+  {id:'f10', m:'fitness',  t:'main',  layer:'main', n:'Reach 15% body fat',                                        s:'STR',xp:200, g:80, mp:0,streak:0,done:false},
+  {id:'f11', m:'fitness',  t:'main',  layer:'main', n:'Reach 12% body fat',                                        s:'STR',xp:400, g:160,mp:0,streak:0,done:false},
+  {id:'y4',  m:'youtube',  t:'main',  layer:'main', n:'Reach 100 subscribers',                                     s:'SEN',xp:100, g:40, mp:0,streak:0,done:false},
+  {id:'y5',  m:'youtube',  t:'main',  layer:'main', n:'Reach 1,000 subscribers',                                   s:'SEN',xp:250, g:100,mp:0,streak:0,done:false},
+  {id:'y6',  m:'youtube',  t:'main',  layer:'main', n:'Reach 10,000 subscribers',                                  s:'SEN',xp:500, g:200,mp:0,streak:0,done:false},
+  {id:'y7',  m:'youtube',  t:'main',  layer:'main', n:'Reach 100,000 subscribers',                                 s:'SEN',xp:1000,g:400,mp:0,streak:0,done:false},
+  {id:'j8',  m:'japanese', t:'main',  layer:'main', n:'Complete Genki I textbook',                                  s:'INT',xp:200, g:80, mp:0,streak:0,done:false},
+  {id:'j9',  m:'japanese', t:'main',  layer:'main', n:'Pass JLPT N5',                                              s:'INT',xp:300, g:120,mp:0,streak:0,done:false},
+  {id:'j10', m:'japanese', t:'main',  layer:'main', n:'Pass JLPT N4',                                              s:'INT',xp:400, g:160,mp:0,streak:0,done:false},
+  {id:'j11', m:'japanese', t:'main',  layer:'main', n:'Pass JLPT N2',                                              s:'INT',xp:800, g:320,mp:0,streak:0,done:false},
+  {id:'sa3', m:'savings',  t:'main',  layer:'main', n:'Save first £1,000',                                         s:'SEN',xp:200, g:80, mp:0,streak:0,done:false},
+  {id:'sa4', m:'savings',  t:'main',  layer:'main', n:'Save first £5,000',                                         s:'SEN',xp:500, g:200,mp:0,streak:0,done:false},
 ];
 
 // URGENT QUEST POOL — spawns randomly once every 1–3 days
@@ -2903,41 +2904,42 @@ const URGENT_POOL=[
 ];
 
 // ── DUNGEON DEFINITIONS ──
-// Each dungeon groups habit quest IDs into a "run". Complete all → bonus loot.
+// Tier 3 — Dungeons (Progression Layer — High Effort, High Reward)
+// Limit to 1 dungeon per day (2 max occasionally). 45–120 min focus sessions.
 const DUNGEONS=[
-  {id:'morning',    name:'Morning Dungeon',     icon:'🌅', type:'mini',
-   questIds:['gr2','gr1','h2','s5'],
-   reward:{gold:50,icon:'🌅',name:"Dawn's Spoils",desc:'Morning dungeon cleared. The day belongs to you.'},
+  {id:'morning',        name:'Morning Protocol',        icon:'🌅', type:'mini',
+   questIds:['gr_core','s5','s3','s4'],
+   reward:{gold:55,icon:'🌅',name:"Dawn's Spoils",desc:'Morning protocol cleared. The day belongs to you.'},
    lore:'Control the morning — control the day.',
    unlockStreak:0},
-  {id:'iron_body',  name:'Iron Body Dungeon',   icon:'⚔', type:'standard',
-   questIds:['f4','f5','f6','f7','f8'],
-   reward:{gold:75,icon:'⚔',name:'Iron Body Cleared',desc:'Five physical missions complete. Your body is the dungeon.'},
-   lore:'Five physical quests. No excuses.',
+  {id:'iron_body',      name:'Iron Body Dungeon',        icon:'⚔', type:'standard',
+   questIds:['f6','f7','f8','f13','f12'],
+   reward:{gold:80,icon:'⚔',name:'Iron Body Cleared',desc:'Five physical missions complete. Your body is the dungeon.'},
+   lore:'Discipline builds the body. Five quests. No excuses.',
    unlockStreak:0},
-  {id:'scholar',    name:"Scholar's Dungeon",   icon:'📖', type:'standard',
-   questIds:['j1','j2','j3','j4','h1'],
-   reward:{gold:60,icon:'📖',name:"Scholar's Reward",desc:'Five quests of the mind. Intelligence sharpened.'},
-   lore:'Intelligence is the weapon of the elite.',
+  {id:'content_session',name:'Content Session',          icon:'🎬', type:'standard',
+   questIds:['y_core','y3'],
+   reward:{gold:95,icon:'🎬',name:'Content Session Complete',desc:'You created. You posted. The algorithm is fed.'},
+   lore:'Content compounds daily. Show up and create.',
    unlockStreak:0},
-  {id:'grind',      name:'The Grind Dungeon',   icon:'🏠', type:'mini',
-   questIds:['gr2','gr4','c2','sa1','c1'],
-   reward:{gold:55,icon:'🏠',name:'Grind Complete',desc:'Discipline in small things. Five daily grind quests done.'},
-   lore:'Discipline in small things. Every. Single. Day.',
+  {id:'deep_study',     name:'Deep Study Dungeon',       icon:'📖', type:'standard',
+   questIds:['j_core','j6','j7'],
+   reward:{gold:90,icon:'📖',name:'Deep Study Complete',desc:'Japanese immersion locked in. The language bends to your will.'},
+   lore:'One hour of deep focus is worth ten hours of distraction.',
    unlockStreak:0},
-  {id:'stack',      name:'Supplement Stack',    icon:'💊', type:'mini',
+  {id:'stack',          name:'Supplement Stack',         icon:'💊', type:'mini',
    questIds:['s3','s4','s5','s6','s7'],
    reward:{gold:45,icon:'💊',name:'Stack Protocol Done',desc:'Full supplement stack complete. Recovery optimised.'},
    lore:'The full stack. Every single one. No excuses.',
    unlockStreak:0},
-  {id:'gauntlet',   name:'The Gauntlet',         icon:'💀', type:'boss',
-   questIds:['f4','f5','f6','f7','f8','j1','j2','j3'],
-   reward:{gold:120,icon:'💀',name:'Gauntlet Conquered',desc:'Body and mind pushed to the limit. You are the dungeon.'},
-   lore:'Body and mind. Eight missions. No quarter given.',
+  {id:'gauntlet',       name:'The Gauntlet',             icon:'💀', type:'boss',
+   questIds:['f6','f7','f8','f13','j_core','y_core','gr_core','s5'],
+   reward:{gold:135,icon:'💀',name:'Gauntlet Conquered',desc:'Body, mind, and identity. All eight missions. You are the system.'},
+   lore:'Body. Mind. Identity. Eight missions. No quarter given.',
    unlockStreak:0},
-  {id:'shadow_run', name:'Shadow Dungeon',       icon:'🌑', type:'boss',
-   questIds:['f4','f6','f7','f8','j1','j2','h2','gr2'],
-   reward:{gold:150,icon:'🌑',name:'Shadow Run Complete',desc:'Eight quests. The hardest run. Only the elite clear this.'},
+  {id:'shadow_run',     name:'Shadow Dungeon',            icon:'🌑', type:'boss',
+   questIds:['f6','f7','f8','f13','j_core','y_core','gr_core','f5'],
+   reward:{gold:160,icon:'🌑',name:'Shadow Run Complete',desc:'Eight quests. The hardest run. Only the elite clear this.'},
    lore:'Unlocked at 14-day streak. Eight quests. No mercy.',
    unlockStreak:14},
 ];
