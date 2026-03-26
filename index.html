@@ -1635,6 +1635,93 @@ body{font-family:'Barlow Condensed',sans-serif;color:var(--white);}
 
 /* ── STREAK UNLOCK MILESTONE ── */
 .streak-milestone-badge{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:800;letter-spacing:2px;color:var(--gold2);background:rgba(255,208,96,.06);border:1px solid rgba(255,208,96,.25);padding:2px 8px;display:inline-block;margin-top:2px;}
+
+/* ── SYSTEM NOTICE POPUP ── */
+#sys-notice{
+  position:fixed;inset:0;z-index:870;display:none;align-items:center;justify-content:center;
+  background:rgba(4,2,14,.95);flex-direction:column;gap:14px;cursor:pointer;
+}
+#sys-notice.show{display:flex;animation:ovFd .3s ease;}
+.sn-border{
+  width:320px;max-width:90vw;
+  background:linear-gradient(135deg,rgba(18,8,45,.98),rgba(10,5,30,.99));
+  border:1px solid rgba(160,96,255,.4);
+  clip-path:polygon(0 0,calc(100% - 16px) 0,100% 16px,100% 100%,16px 100%,0 calc(100% - 16px));
+  padding:24px 20px;text-align:center;position:relative;overflow:hidden;
+}
+.sn-border::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--acc),var(--blue3),var(--acc),transparent);}
+.sn-border::after{content:'◆';position:absolute;top:6px;right:8px;font-size:8px;color:var(--acc);opacity:.5;}
+.sn-eyebrow{font-family:'Share Tech Mono',monospace;font-size:8px;letter-spacing:5px;color:rgba(160,96,255,.5);margin-bottom:10px;}
+.sn-title{font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:900;letter-spacing:4px;color:var(--white);text-shadow:0 0 24px rgba(160,96,255,.4);margin-bottom:6px;}
+.sn-icon{font-size:44px;display:block;margin:8px 0;}
+.sn-body{font-family:'Rajdhani',sans-serif;font-size:14px;color:rgba(200,180,255,.7);line-height:1.6;margin-bottom:10px;}
+.sn-body strong{color:var(--white);}
+.sn-divider{width:80px;height:1px;background:linear-gradient(90deg,transparent,var(--acc),transparent);margin:8px auto;}
+.sn-tap{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:4px;color:rgba(160,96,255,.3);margin-top:6px;animation:tapBlk 1s ease infinite alternate;}
+.sn-notice-img{width:100%;max-height:120px;object-fit:cover;margin:8px 0;opacity:.85;border:1px solid rgba(160,96,255,.15);}
+
+/* ── SOLO LEVELING ART ── */
+.sl-art-portal{
+  width:100%;height:80px;margin:6px 0;position:relative;overflow:hidden;
+  background:radial-gradient(ellipse 60% 100% at 50% 100%,rgba(100,30,200,.25) 0%,transparent 70%);
+}
+.sl-art-portal::before{
+  content:'';position:absolute;bottom:0;left:50%;transform:translateX(-50%);
+  width:120px;height:120px;border-radius:50%;
+  background:radial-gradient(circle,rgba(124,63,255,.3) 0%,rgba(80,20,200,.15) 40%,transparent 70%);
+  box-shadow:0 0 60px rgba(124,63,255,.4),0 0 120px rgba(80,20,200,.2);
+  animation:portalPulse 3s ease-in-out infinite alternate;
+}
+@keyframes portalPulse{0%{box-shadow:0 0 40px rgba(124,63,255,.3)}100%{box-shadow:0 0 80px rgba(124,63,255,.6),0 0 160px rgba(80,20,200,.3)}}
+.sl-art-portal::after{
+  content:'';position:absolute;bottom:10px;left:50%;transform:translateX(-50%);
+  width:80px;height:80px;border:2px solid rgba(160,96,255,.3);border-radius:50%;
+  animation:portalSpin 8s linear infinite;
+}
+@keyframes portalSpin{from{transform:translateX(-50%) rotate(0deg)}to{transform:translateX(-50%) rotate(360deg)}}
+
+.sl-art-shadow{
+  width:100%;height:60px;position:relative;overflow:hidden;
+  background:linear-gradient(180deg,transparent 0%,rgba(60,10,180,.08) 50%,transparent 100%);
+}
+.sl-art-shadow::before{
+  content:'';position:absolute;bottom:0;left:50%;transform:translateX(-50%);
+  width:40px;height:50px;
+  background:linear-gradient(180deg,rgba(160,96,255,.6) 0%,rgba(60,10,180,.3) 60%,transparent 100%);
+  clip-path:polygon(20% 0%,80% 0%,95% 30%,100% 100%,0% 100%,5% 30%);
+  filter:blur(2px);
+  animation:shadowFloat 4s ease-in-out infinite alternate;
+}
+@keyframes shadowFloat{0%{transform:translateX(-50%) translateY(0);opacity:.7}100%{transform:translateX(-50%) translateY(-4px);opacity:1}}
+
+.sl-dungeon-gate{
+  width:100%;height:70px;position:relative;overflow:hidden;margin:4px 0;
+  background:radial-gradient(ellipse 80% 80% at 50% 90%,rgba(255,40,70,.08) 0%,transparent 60%);
+}
+.sl-dungeon-gate::before{
+  content:'';position:absolute;bottom:5px;left:50%;transform:translateX(-50%);
+  width:50px;height:55px;
+  border:2px solid rgba(255,40,70,.25);border-bottom:none;
+  border-radius:25px 25px 0 0;
+  box-shadow:0 0 20px rgba(255,40,70,.15),inset 0 0 20px rgba(255,40,70,.08);
+}
+.sl-dungeon-gate::after{
+  content:'⚔';position:absolute;bottom:20px;left:50%;transform:translateX(-50%);
+  font-size:18px;opacity:.4;
+}
+
+.sl-quest-banner{
+  width:100%;height:3px;margin:8px 0 4px;
+  background:linear-gradient(90deg,transparent 5%,rgba(124,63,255,.3) 30%,rgba(160,96,255,.5) 50%,rgba(124,63,255,.3) 70%,transparent 95%);
+}
+
+/* Mission section image backgrounds */
+.msec{position:relative;overflow:hidden;}
+.msec::after{
+  content:'';position:absolute;right:-5px;top:50%;transform:translateY(-50%);
+  width:50px;height:50px;opacity:.06;
+  background:radial-gradient(circle,rgba(160,96,255,.8) 0%,transparent 70%);
+}
 </style>
 </head>
 <body>
@@ -1805,7 +1892,16 @@ body{font-family:'Barlow Condensed',sans-serif;color:var(--white);}
   <div class="arise-bonus" id="arise-bonus"></div>
 </div>
 
-<!-- PENALTY ZONE -->
+<!-- PENALTY ZONE ACCEPT POPUP -->
+<div class="pz" id="pz-accept" style="cursor:default;">
+  <div class="pz-warn">◈ SYSTEM ALERT ◈</div>
+  <div class="pz-title">PENALTY ZONE</div>
+  <div class="pz-sub">DAILY QUESTS FAILED — THE SYSTEM DEMANDS PENANCE</div>
+  <div class="pz-desc" style="margin-bottom:14px;">You failed to complete your daily quests.<br>A <strong style="color:var(--red)">1-hour Penalty Zone</strong> awaits you.<br><br>The countdown will begin when you accept.</div>
+  <button class="pz-btn" onclick="acceptPenalty()" style="margin-bottom:10px;background:rgba(255,40,70,.2);font-size:16px;padding:14px 36px;">ACCEPT PENALTY</button>
+  <div style="font-family:'Share Tech Mono',monospace;font-size:7px;color:rgba(255,60,90,.35);letter-spacing:2px;">YOU CANNOT AVOID THIS</div>
+</div>
+<!-- PENALTY ZONE (active countdown) -->
 <div class="pz" id="pz">
   <div class="pz-warn">◈ SYSTEM ALERT ◈</div>
   <div class="pz-title">PENALTY ZONE</div>
@@ -1924,11 +2020,24 @@ body{font-family:'Barlow Condensed',sans-serif;color:var(--white);}
   </div>
 </div>
 
+<!-- SYSTEM NOTICE POPUP -->
+<div id="sys-notice" onclick="closeSysNotice()">
+  <div class="sn-border">
+    <div class="sn-eyebrow">◆ &nbsp; SYSTEM MESSAGE &nbsp; ◆</div>
+    <div class="sn-title" id="sn-title">NOTICE</div>
+    <div class="sn-icon" id="sn-icon"></div>
+    <div class="sn-divider"></div>
+    <div class="sn-body" id="sn-body"></div>
+  </div>
+  <div class="sn-tap">TAP TO CONTINUE</div>
+</div>
+
 <div id="app">
   <div id="screens">
     <!-- HOME -->
     <div class="scr act" id="s-home">
       <div style="height:10px;"></div>
+      <div class="sl-art-portal"></div>
       <div class="status-window">
         <span class="sw-corner tl">◆</span>
         <span class="sw-corner tr">◆</span>
@@ -1996,6 +2105,8 @@ body{font-family:'Barlow Condensed',sans-serif;color:var(--white);}
         </div>
         <div class="hs-list" id="h-skills-list"></div>
       </div>
+
+      <div class="sl-art-shadow"></div>
 
       <!-- SHADOW ARMY WIDGET -->
       <div class="home-shadows" id="h-shadows-widget">
@@ -2065,11 +2176,15 @@ body{font-family:'Barlow Condensed',sans-serif;color:var(--white);}
         </div>
       </div>
 
+      <div class="sl-dungeon-gate"></div>
+
       <!-- DUNGEON RUNS -->
       <div class="dung-section" id="h-dung-section">
         <div class="dung-sec-hdr">⚔ DUNGEON RUNS</div>
         <div id="h-dung-list"></div>
       </div>
+
+      <div class="sl-quest-banner"></div>
 
       <div class="home-quests">
         <div class="hq-hdr"><span class="hq-title">Today's Quests</span><span class="hq-link" onclick="goTab('quests')">SEE ALL →</span></div>
@@ -2772,8 +2887,8 @@ function visibleShopCats(){
     const cat=SHADOW_SHOP_UNLOCK[sh.id];
     if(cat)unlocked.add(cat);
   });
-  // Shadow Gear unlocked once you have any dungeon soldier
-  if((G.shadowArmy||[]).length>0)unlocked.add('Shadow Gear');
+  // Shadow Gear always visible (items show if they can be used)
+  unlocked.add('Shadow Gear');
   // Add shadow-unlocked from static list
   const base=SHOP_CATS_LIST.filter(c=>unlocked.has(c));
   // Add user custom categories (appear after built-ins, sorted)
@@ -2876,6 +2991,7 @@ let G={
   hiddenDungeon:null,      // {questIds, gold, names} for hidden dungeon runs
   debuff:{xp:false,expiry:null},   // xp debuff from missing quests yesterday
   streakUnlocksGiven:[],   // tracks which streak milestone unlocks have been given
+  hiddenShopItems:[],      // IDs of built-in shop items that user has hidden
 };
 let curTab='home',qFilter='all',shopCat='All';
 let editQId=null,editQStat='STR',editQType='daily';
@@ -2921,6 +3037,7 @@ function ld(){
       G.debuff=p.debuff||{xp:false,expiry:null};
       G.streakUnlocksGiven=p.streakUnlocksGiven||[];
       G.shopOverrides=p.shopOverrides||{};
+      G.hiddenShopItems=p.hiddenShopItems||[];
       // Scrub any stale reqPct from candy (should only be gold-locked)
       if(G.shopOverrides.candy)delete G.shopOverrides.candy.reqPct;
       // Purge gear/removed items from inventory
@@ -2955,6 +3072,12 @@ function ld(){
   }
   dayCheck();weekCheck();
   selectDailyDungeon();
+  // Show dungeon notice once per day
+  if(G.activeDungeonId && !sessionStorage.getItem('dung_notice_'+new Date().toDateString())){
+    sessionStorage.setItem('dung_notice_'+new Date().toDateString(),'1');
+    const dung=G.activeDungeonId==='hidden'?{name:'Hidden Dungeon',icon:'❓',lore:'Your weakest habits have formed a hidden dungeon. Face them.'}:DUNGEONS.find(d=>d.id===G.activeDungeonId);
+    if(dung)setTimeout(()=>showNotice('DUNGEON AVAILABLE',dung.icon||'⚔','<strong>'+(dung.name||'Dungeon')+'</strong><br><br>'+(dung.lore||'A new challenge awaits.'),'var(--acc)'),1200);
+  }
   if(!G.urgentQuest) maybeSpawnUrgent();
 }
 
@@ -3110,7 +3233,7 @@ function toggleSec(id){
 // ══════════════════════════════════════════════
 function curRank(){let r=RANKS[0];for(let i=RANKS.length-1;i>=0;i--){if(G.totalXp>=RANKS[i].xp){r=RANKS[i];break;}}return r;}
 
-function renderAll(){rHdr();rHome();rQuests();rStats();rShop();rProf();}
+function renderAll(){rHdr();rHome();rQuests();rStats();rShop();rProf();renderBossSection();}
 
 function rHdr(){
   const r=curRank();
@@ -3310,7 +3433,10 @@ function qCardHTML(q){
       </div>
     </div>
     <span class="qc-orn">◆</span>
-    <div onclick="event.stopPropagation();openEditQ('${q.id}')" style="padding:4px 6px;cursor:pointer;opacity:.3;font-size:14px;color:var(--acc)">✎</div>
+    <div style="display:flex;flex-direction:column;gap:2px;flex-shrink:0;">
+      <div onclick="event.stopPropagation();openEditQ('${q.id}')" style="padding:3px 5px;cursor:pointer;opacity:.5;font-size:12px;color:var(--acc);text-align:center;" title="Edit">✎</div>
+      <div onclick="event.stopPropagation();quickDeleteQuest('${q.id}')" style="padding:2px 5px;cursor:pointer;opacity:.35;font-size:10px;color:var(--red);text-align:center;" title="Delete">✕</div>
+    </div>
   </div>`;
 }
 
@@ -3365,9 +3491,10 @@ function rShop(){
     return `<button class="scat${isAct?' act':''}${isShadow?' shadow-unlocked':''}" onclick="setShopCat('${c}')">${isShadow?'🌑 ':''}${c}</button>`;
   }).join('');
   if(!cats.includes(shopCat))shopCat='All';
-  const items=shopCat==='All'
+  const hiddenIds=new Set(G.hiddenShopItems||[]);
+  const items=(shopCat==='All'
     ? allShop.filter(i=>cats.includes(i.cat)||['Treats','System'].includes(i.cat))
-    : allShop.filter(i=>i.cat===shopCat);
+    : allShop.filter(i=>i.cat===shopCat)).filter(i=>!hiddenIds.has(i.id));
   document.getElementById('shop-grid').innerHTML=items.map(baseItem=>{
     // Merge any saved overrides (name, icon, desc, cost, coolDays)
     const item={...baseItem,...(G.shopOverrides?.[baseItem.id]||{})};
@@ -3382,8 +3509,10 @@ function rShop(){
     const rarClass='r-'+item.rar;
     const cdText=onCd?`${cdInfo}d left`:'';
     return `<div class="sitem${item.cons?'':' perm'} ${rarClass}${cant||reqLocked?' cant':''}${onCd?' on-cooldown':''}" style="--ic:${RAR_COL[item.rar]||'var(--b2)'};position:relative;">
-      <!-- hidden edit button — tucked in top-right corner, barely visible -->
-      <button onclick="event.stopPropagation();openShopEdit('${item.id}')" style="position:absolute;top:4px;right:4px;background:none;border:none;color:rgba(160,96,255,1);font-size:11px;cursor:pointer;padding:2px 4px;opacity:0.06;line-height:1;z-index:2;" title="Edit item">✎</button>
+      <div style="position:absolute;top:4px;right:4px;display:flex;gap:3px;z-index:2;">
+        <button onclick="event.stopPropagation();openShopEdit('${item.id}')" style="background:rgba(124,63,255,.1);border:1px solid rgba(124,63,255,.2);color:var(--acc);font-size:9px;cursor:pointer;padding:2px 5px;line-height:1;font-family:'Barlow Condensed',sans-serif;font-weight:700;">✎</button>
+        <button onclick="event.stopPropagation();deleteShopItem('${item.id}')" style="background:rgba(255,40,70,.06);border:1px solid rgba(255,40,70,.15);color:var(--red);font-size:9px;cursor:pointer;padding:2px 5px;line-height:1;font-family:'Barlow Condensed',sans-serif;font-weight:700;">✕</button>
+      </div>
       <div class="si-icon-box" style="background:${RAR_COL[item.rar]||'var(--b1)'}18;">${item.icon}</div>
       <div class="si-body">
         <div class="si-name">${item.n}${isCustom?'<span style="font-family:\'Share Tech Mono\',monospace;font-size:7px;color:rgba(160,96,255,.35);margin-left:5px;letter-spacing:1px;">CUSTOM</span>':''}</div>
@@ -3397,7 +3526,6 @@ function rShop(){
       </div>
       <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end;flex-shrink:0;">
         ${owned?'':`<button class="si-buy ${item.cons?'cons':'prm'}${onCd?' cd-btn':''}" onclick="event.stopPropagation();buyItem('${item.id}')" ${onCd||reqLocked?'disabled':''}>${reqLocked?'🔒':onCd?'⏱':cant?'◈'+item.cost:'BUY'}</button>`}
-        ${isCustom?`<button onclick="event.stopPropagation();removeShopItem('${item.id}')" style="padding:3px 7px;background:rgba(255,40,70,.1);border:1px solid rgba(255,40,70,.25);color:var(--red);font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;letter-spacing:1px;cursor:pointer;clip-path:polygon(0 0,calc(100% - 3px) 0,100% 3px,100% 100%,3px 100%,0 calc(100% - 3px));">✕ REMOVE</button>`:''}
       </div>
     </div>`;
   }).join('')||`<div style="text-align:center;padding:40px;color:rgba(160,96,255,.2);font-family:'Share Tech Mono',monospace;font-size:8px;letter-spacing:2px;">NO ITEMS</div>`;
@@ -4148,8 +4276,18 @@ function saveEditQuest(){sfx('save');
   sv();closeModal('edit-modal');renderAll();
 }
 function deleteEditQuest(){sfx('delete');
-  G.quests=G.quests.filter(x=>x.id!==editQId);
+  if(G.urgentQuest?.id===editQId){G.urgentQuest=null;}
+  else{G.quests=G.quests.filter(x=>x.id!==editQId);}
   sv();closeModal('edit-modal');renderAll();
+}
+function quickDeleteQuest(id){
+  const q=G.quests.find(x=>x.id===id)||(G.urgentQuest?.id===id?G.urgentQuest:null);
+  if(!q)return;
+  if(!confirm('Delete quest: "'+q.n+'"?'))return;
+  sfx('delete');
+  if(G.urgentQuest?.id===id){G.urgentQuest=null;}
+  else{G.quests=G.quests.filter(x=>x.id!==id);}
+  sv();renderAll();
 }
 function openAddQuest(){
   editQId=null;editQStat='STR';editQType='daily';
@@ -4267,6 +4405,25 @@ function removeShopItem(id){
   sv();rShop();
 }
 
+function deleteShopItem(id){
+  const isCustom=G.customShop.some(x=>x.id===id);
+  const allShop=[...BUILTIN_SHOP,...G.customShop];
+  const item=allShop.find(x=>x.id===id);
+  if(!item)return;
+  // Show confirmation
+  if(!confirm('Delete "'+item.n+'" from the shop?'))return;
+  sfx('delete');
+  if(isCustom){
+    G.customShop=G.customShop.filter(x=>x.id!==id);
+    G.inventory=G.inventory.filter(x=>x.id!==id);
+  } else {
+    // For built-in items, mark as hidden
+    if(!G.hiddenShopItems)G.hiddenShopItems=[];
+    if(!G.hiddenShopItems.includes(id))G.hiddenShopItems.push(id);
+  }
+  sv();rShop();
+}
+
 // ══════════════════════════════════════════════
 // CINEMATIC QUEUE
 // ══════════════════════════════════════════════
@@ -4325,7 +4482,9 @@ function showStatUpCine(boosts,reason){sfx('statUp');
   cineShow('csu');
 }
 function showStreakCine(days,qn){sfx('streak');document.getElementById('cstr-days').textContent=days;document.getElementById('cstr-qn').textContent=qn;cineShow('cstr');}
-function showUrgentCine(q){if(!q)return;sfx('urgent');document.getElementById('curg-name').textContent=q.n;document.getElementById('curg-desc').textContent=q.desc||'Complete this quest immediately.';cineShow('curg');}
+function showUrgentCine(q){if(!q)return;
+  showNotice('URGENT QUEST','⚡','<strong style="color:var(--red)">'+q.n+'</strong><br><br>'+( q.desc||'The System demands immediate action.'),'var(--red)');
+  sfx('urgent');document.getElementById('curg-name').textContent=q.n;document.getElementById('curg-desc').textContent=q.desc||'Complete this quest immediately.';cineShow('curg');}
 function showArise(){sfx('arise');
   const hasSa=SKILLS.find(s=>s.id==='sa').f(G);
   const hasSr=SKILLS.find(s=>s.id==='sr').f(G);
@@ -4374,12 +4533,18 @@ function closeChest(){
 // PENALTY ZONE
 // ══════════════════════════════════════════════
 function showPenaltyZone(){sfx('penalty');
+  // Show acceptance popup first — countdown starts only after user accepts
+  document.getElementById('pz-accept').classList.add('show');
+}
+function acceptPenalty(){
+  document.getElementById('pz-accept').classList.remove('show');
   const tasks=['50 push-ups right now','30 squats','10 minutes of running','Drink 1 litre of water','Plan tomorrow\'s quests'];
   document.getElementById('pz-tasks').innerHTML=tasks.map((t,i)=>`<div class="pz-task" id="pzt${i}" onclick="togPZTask(${i})"><div class="pz-tck" id="pztck${i}"></div><span class="pz-tn">${t}</span></div>`).join('');
   document.getElementById('pz').classList.add('show');
   let s=3600;if(penTimer)clearInterval(penTimer);
   const el=document.getElementById('pz-timer');
   penTimer=setInterval(()=>{s--;const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sc=s%60;el.textContent=h>0?h+':'+String(m).padStart(2,'0')+':'+String(sc).padStart(2,'0'):m+':'+String(sc).padStart(2,'0');el.style.color=s<=300?'#ff6680':'var(--red)';if(s<=0){clearInterval(penTimer);penTimer=null;completePenalty();}},1000);
+  sfx('penalty');
 }
 function togPZTask(i){const t=document.getElementById('pzt'+i),c=document.getElementById('pztck'+i);t.classList.toggle('done');c.textContent=t.classList.contains('done')?'✓':'';}
 function completePenalty(){if(penTimer){clearInterval(penTimer);penTimer=null;}document.getElementById('pz').classList.remove('show');showItemCine({icon:'🏜',n:'Penalty Zone Escaped',d:'You survived the Poison-fanged Desert'});}
@@ -4740,6 +4905,30 @@ function closeSysVoice(){
   const el=document.getElementById('sys-voice');
   el.style.opacity='0';el.style.transition='opacity .3s';
   setTimeout(()=>{el.classList.remove('show');el.style.opacity='';el.style.transition='';},300);
+}
+
+// ── SYSTEM NOTICE POPUP ──
+const noticeQ=[];let noticeActive=false;
+function showNotice(title,icon,body,color){
+  noticeQ.push({title,icon,body,color});
+  if(!noticeActive)showNextNotice();
+}
+function showNextNotice(){
+  if(!noticeQ.length){noticeActive=false;return;}
+  noticeActive=true;
+  const n=noticeQ.shift();
+  const el=document.getElementById('sys-notice');
+  document.getElementById('sn-title').textContent=n.title||'NOTICE';
+  document.getElementById('sn-title').style.color=n.color||'var(--white)';
+  document.getElementById('sn-icon').textContent=n.icon||'';
+  document.getElementById('sn-body').innerHTML=n.body||'';
+  el.classList.remove('show');void el.offsetWidth;el.classList.add('show');
+  sfx('sysVoice');
+}
+function closeSysNotice(){
+  const el=document.getElementById('sys-notice');
+  el.style.opacity='0';el.style.transition='opacity .25s';
+  setTimeout(()=>{el.classList.remove('show');el.style.opacity='';el.style.transition='';noticeActive=false;showNextNotice();},250);
 }
 
 // ── ITEM TOOLTIP ──
