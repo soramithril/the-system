@@ -1786,6 +1786,84 @@ body{font-family:'Barlow Condensed',sans-serif;color:var(--white);}
   width:50px;height:50px;opacity:.06;
   background:radial-gradient(circle,rgba(160,96,255,.8) 0%,transparent 70%);
 }
+
+/* ── MINIMUM VIABLE WEEK WIDGET ── */
+.mvw-card{
+  margin:10px 16px 0;
+  background:rgba(12,8,28,.85);
+  border:1px solid rgba(160,96,255,.2);
+  clip-path:polygon(0 0,calc(100% - 12px) 0,100% 12px,100% 100%,12px 100%,0 calc(100% - 12px));
+  padding:12px 14px;
+  position:relative;overflow:hidden;
+}
+.mvw-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(160,96,255,.5),transparent);}
+.mvw-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.mvw-title{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:800;letter-spacing:3px;color:rgba(160,96,255,.6);text-transform:uppercase;}
+.mvw-badge{font-family:'Share Tech Mono',monospace;font-size:8px;letter-spacing:2px;padding:2px 8px;border:1px solid;clip-path:polygon(0 0,calc(100% - 4px) 0,100% 4px,100% 100%,4px 100%,0 calc(100% - 4px));}
+.mvw-badge.pass{color:var(--green);border-color:rgba(0,232,150,.3);background:rgba(0,232,150,.07);}
+.mvw-badge.fail{color:var(--red);border-color:rgba(255,51,85,.3);background:rgba(255,51,85,.07);}
+.mvw-badge.prog{color:var(--gold);border-color:rgba(232,168,32,.3);background:rgba(232,168,32,.07);}
+.mvw-rows{display:flex;flex-direction:column;gap:6px;}
+.mvw-row{display:flex;align-items:center;gap:8px;}
+.mvw-label{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;color:rgba(200,180,255,.5);width:90px;flex-shrink:0;text-transform:uppercase;letter-spacing:1px;}
+.mvw-track{flex:1;height:5px;background:rgba(255,255,255,.05);border-radius:1px;overflow:hidden;}
+.mvw-fill{height:100%;border-radius:1px;transition:width .8s cubic-bezier(.22,1,.36,1);}
+.mvw-count{font-family:'Share Tech Mono',monospace;font-size:8px;color:rgba(160,96,255,.4);min-width:28px;text-align:right;}
+.mvw-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;transition:background .3s;}
+
+/* ── RECOVERY CARD ── */
+.recovery-card{
+  margin:10px 16px 0;
+  background:rgba(12,8,28,.85);
+  border:1px solid rgba(160,96,255,.2);
+  clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,10px 100%,0 calc(100% - 10px));
+  padding:10px 14px;
+  display:flex;align-items:center;gap:12px;
+  position:relative;overflow:hidden;
+}
+.recovery-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--rc-col,rgba(0,232,150,.5)),transparent);}
+.rec-score-wrap{flex-shrink:0;text-align:center;}
+.rec-score{font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:900;line-height:1;}
+.rec-label{font-family:'Share Tech Mono',monospace;font-size:7px;letter-spacing:2px;color:rgba(160,96,255,.4);}
+.rec-body{flex:1;}
+.rec-title{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;letter-spacing:2px;text-transform:uppercase;}
+.rec-meta{font-family:'Share Tech Mono',monospace;font-size:8px;color:rgba(160,96,255,.4);margin-top:2px;letter-spacing:1px;}
+.rec-bars{display:flex;flex-direction:column;gap:3px;margin-top:5px;}
+.rec-bar-row{display:flex;align-items:center;gap:5px;}
+.rec-bar-lbl{font-family:'Share Tech Mono',monospace;font-size:7px;color:rgba(160,96,255,.35);width:36px;}
+.rec-bar-track{flex:1;height:3px;background:rgba(255,255,255,.05);border-radius:1px;overflow:hidden;}
+.rec-bar-fill{height:100%;border-radius:1px;}
+.rec-sync-hint{font-family:'Share Tech Mono',monospace;font-size:7px;color:rgba(160,96,255,.2);letter-spacing:2px;text-align:center;margin-top:6px;}
+
+/* ── END-OF-WEEK RECAP MODAL ── */
+#week-recap{
+  position:fixed;inset:0;z-index:600;
+  display:none;align-items:center;justify-content:center;
+  background:rgba(4,2,14,.94);
+  flex-direction:column;
+  cursor:pointer;
+}
+#week-recap.show{display:flex;animation:ovFd .4s ease;}
+.wr-box{
+  width:min(90vw,360px);
+  background:linear-gradient(135deg,rgba(18,8,45,.98),rgba(10,5,30,.99));
+  border:1px solid var(--b2);
+  clip-path:polygon(0 0,calc(100% - 20px) 0,100% 20px,100% 100%,20px 100%,0 calc(100% - 20px));
+  padding:24px 22px;
+  position:relative;overflow:hidden;
+}
+.wr-box::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--acc),var(--blue3),var(--acc),transparent);}
+.wr-eyebrow{font-family:'Share Tech Mono',monospace;font-size:8px;letter-spacing:5px;color:rgba(160,96,255,.4);margin-bottom:4px;text-transform:uppercase;}
+.wr-heading{font-family:'Barlow Condensed',sans-serif;font-size:30px;font-weight:900;letter-spacing:3px;text-transform:uppercase;line-height:1;margin-bottom:4px;}
+.wr-heading.pass{color:var(--green);text-shadow:0 0 30px rgba(0,232,150,.4);}
+.wr-heading.fail{color:var(--red);text-shadow:0 0 30px rgba(255,51,85,.3);}
+.wr-sub{font-family:'Rajdhani',sans-serif;font-size:13px;color:rgba(200,180,255,.6);margin-bottom:18px;}
+.wr-items{display:flex;flex-direction:column;gap:8px;margin-bottom:18px;}
+.wr-item{display:flex;align-items:center;gap:10px;}
+.wr-dot{width:8px;height:8px;flex-shrink:0;clip-path:polygon(50% 0%,100% 50%,50% 100%,0% 50%);}
+.wr-iname{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;letter-spacing:1px;flex:1;}
+.wr-ival{font-family:'Share Tech Mono',monospace;font-size:9px;}
+.wr-dismiss{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:4px;color:rgba(160,96,255,.3);text-align:center;text-transform:uppercase;margin-top:4px;}
 </style>
 <!-- Firebase: pre-loaded as module to avoid dynamic import failures with file:// protocol -->
 <script type="importmap">
@@ -2116,6 +2194,17 @@ body{font-family:'Barlow Condensed',sans-serif;color:var(--white);}
   <div class="sn-tap">TAP TO CONTINUE</div>
 </div>
 
+<!-- END-OF-WEEK RECAP -->
+<div id="week-recap" onclick="closeWeekRecap()">
+  <div class="wr-box">
+    <div class="wr-eyebrow">◆ &nbsp; WEEKLY REPORT &nbsp; ◆</div>
+    <div class="wr-heading" id="wr-heading">WEEK COMPLETE</div>
+    <div class="wr-sub" id="wr-sub">Here's how you performed this week.</div>
+    <div class="wr-items" id="wr-items"></div>
+    <div class="wr-dismiss">TAP TO DISMISS</div>
+  </div>
+</div>
+
 <div id="app">
   <div id="screens">
     <!-- HOME -->
@@ -2269,6 +2358,28 @@ body{font-family:'Barlow Condensed',sans-serif;color:var(--white);}
       <div class="dung-section" id="h-dung-section">
         <div class="dung-sec-hdr"><img class="sl-icon sl-icon-sm" src="data:image/png;base64,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" alt=""> DUNGEON RUNS</div>
         <div id="h-dung-list"></div>
+      </div>
+
+      <!-- RECOVERY CARD (iOS Health) -->
+      <div class="recovery-card" id="h-recovery" style="display:none;">
+        <div class="rec-score-wrap">
+          <div class="rec-score" id="rec-score-val" style="color:var(--green);">—</div>
+          <div class="rec-label">RECOVERY</div>
+        </div>
+        <div class="rec-body">
+          <div class="rec-title" id="rec-title">LOADING...</div>
+          <div class="rec-meta" id="rec-meta"></div>
+          <div class="rec-bars" id="rec-bars"></div>
+        </div>
+      </div>
+
+      <!-- MINIMUM VIABLE WEEK WIDGET -->
+      <div class="mvw-card" id="h-mvw">
+        <div class="mvw-header">
+          <span class="mvw-title">◆ Minimum Viable Week</span>
+          <span class="mvw-badge prog" id="mvw-badge">IN PROGRESS</span>
+        </div>
+        <div class="mvw-rows" id="mvw-rows"></div>
       </div>
 
       <div class="sl-quest-banner"></div>
@@ -3148,6 +3259,11 @@ let G={
   debuff:{xp:false,expiry:null},   // xp debuff from missing quests yesterday
   streakUnlocksGiven:[],   // tracks which streak milestone unlocks have been given
   hiddenShopItems:[],      // IDs of built-in shop items that user has hidden
+  // ── MVW (Minimum Viable Week) tracking ──
+  mvwLog:{},               // {YYYY-WW: {dailyDays:0, gym:0, content:0, japanese:0}}
+  weekRecapShown:'',       // week string of last recap shown, to avoid repeat
+  // ── iOS Health sync (written by Apple Shortcuts via Firebase) ──
+  healthSync:{date:'',steps:0,workouts:[],sleep:{hours:0},hrv:0,updated:0},
 };
 let curTab='home',qFilter='all',shopCat='All';
 let editQId=null,editQStat='STR',editQType='daily';
@@ -3194,6 +3310,9 @@ function ld(){
       G.streakUnlocksGiven=p.streakUnlocksGiven||[];
       G.shopOverrides=p.shopOverrides||{};
       G.hiddenShopItems=p.hiddenShopItems||[];
+      G.mvwLog=p.mvwLog||{};
+      G.weekRecapShown=p.weekRecapShown||'';
+      G.healthSync=p.healthSync||{date:'',steps:0,workouts:[],sleep:{hours:0},hrv:0,updated:0};
       // Scrub any stale reqPct from candy (should only be gold-locked)
       if(G.shopOverrides.candy)delete G.shopOverrides.candy.reqPct;
       // Purge gear/removed items from inventory
@@ -3295,9 +3414,10 @@ function dayCheck(){
 
 function weekCheck(){
   const monday=getMondayStr();
-  if(G.weekDate===monday)return;
+  if(G.weekDate===monday){checkWeekRecap();return;}
   G.quests.filter(q=>q.t==='weekly').forEach(q=>{q.done=false;if('weekDone' in q)q.weekDone=0;});
   G.weekDate=monday;sv();
+  checkWeekRecap();
 }
 
 function getMondayStr(){
@@ -3421,6 +3541,9 @@ function rHome(){
   renderBossSection();
   renderDungeons();
   renderDebuff();
+  renderMVW();
+  renderRecovery();
+  checkHealthSync();
   const daily=G.quests.filter(q=>q.t==='daily');
   const done=daily.filter(q=>q.done).length,total=daily.length;
   const pct=total?Math.round(done/total*100):0;
@@ -3855,6 +3978,7 @@ function togQ(id,evt){
           const allDone=questIds.every(qid=>{const dq=G.quests.find(x=>x.id===qid);return dq&&dq.done;});
           if(allDone){
             G.dungeonToday[aid]=true;
+            updateMVWOnDungeon(aid);
             G.gold+=dungGold;
             // ── Shadow Army: XP gain for all soldiers ──
             const _dungType=aid==='hidden'?'hidden':(DUNGEONS.find(d=>d.id===aid)?.type||'standard');
@@ -3896,9 +4020,12 @@ function togQ(id,evt){
     }
     // ruler's authority
     if(SKILLS.find(s=>s.id==='sk').f(G)&&G.questsTotal%10===0){G.inventory.push({id:'expstone',n:'EXP Stone'});setTimeout(()=>showItemCine({icon:'⬡',n:"Ruler's Authority",d:'Free EXP Stone added'}),900);}
+    // MVW tracking
+    updateMVWOnQuestComplete(q);
     // all daily complete
     const dailies=G.quests.filter(q=>q.t==='daily');
     if(dailies.length&&dailies.every(x=>x.done)){
+      updateMVWDailyDay();
       const boosts=autoDistribute(3,q.s);applyBoosts(boosts);
       setTimeout(()=>showStatUpCine(boosts,'Daily quests complete — System rewarding your discipline'),600);
       if(SKILLS.find(s=>s.id==='sa').f(G)){gainXp(100,q.s);G.gold+=50;}
@@ -5163,6 +5290,235 @@ function maybeShowFirstLaunch(){
 }
 
 // ══════════════════════════════════════════════
+// MINIMUM VIABLE WEEK
+// ══════════════════════════════════════════════
+
+function getWeekKey(){
+  // Returns YYYY-WW string for current ISO week
+  const d=new Date();
+  const jan4=new Date(d.getFullYear(),0,4);
+  const week=Math.ceil(((d-jan4)/86400000+jan4.getDay()+1)/7);
+  return d.getFullYear()+'-W'+String(week).padStart(2,'0');
+}
+
+// MVW floor definitions
+const MVW_FLOOR={
+  dailyDays:{label:'Daily Discipline',target:5,unit:'days',col:'#c084ff'},
+  gym:       {label:'Gym Sessions',   target:3,unit:'sessions',col:'var(--str)'},
+  content:   {label:'Content Actions',target:2,unit:'actions',col:'var(--sen)'},
+  japanese:  {label:'Japanese',       target:3,unit:'sessions',col:'var(--int)'},
+};
+
+function getMVWEntry(){
+  const wk=getWeekKey();
+  if(!G.mvwLog[wk])G.mvwLog[wk]={dailyDays:0,gym:0,content:0,japanese:0};
+  return G.mvwLog[wk];
+}
+
+// Called after completing quests — increments the right MVW counters
+function updateMVWOnQuestComplete(q){
+  const e=getMVWEntry();
+  // Content: daily core content action or content dungeon
+  if(q.m==='youtube'||q.id==='y_core')e.content=Math.min(e.content+1,99);
+  // Japanese: daily core or japanese dungeon or weekly listening sessions
+  if(q.m==='japanese'||q.id==='j_core')e.japanese=Math.min(e.japanese+1,99);
+  sv();
+}
+
+// Called when all daily quests are done for the day (or midnight reset)
+function updateMVWDailyDay(){
+  const e=getMVWEntry();
+  const today=new Date().toDateString();
+  if(G._mvwLastDailyDay!==today){
+    const daily=G.quests.filter(q=>q.t==='daily');
+    const done=daily.filter(q=>q.done).length,total=daily.length;
+    // Count the day if at least 80% of dailies done (11/14)
+    if(total>0&&done/total>=0.8){
+      e.dailyDays=Math.min(e.dailyDays+1,7);
+      G._mvwLastDailyDay=today;
+      sv();
+    }
+  }
+}
+
+// Called when a dungeon is completed — gym dungeons count as gym sessions
+function updateMVWOnDungeon(dungId){
+  const gymIds=['push','pull','legs','fullbody','hiit'];
+  if(gymIds.some(id=>dungId&&dungId.includes(id))){
+    const e=getMVWEntry();
+    e.gym=Math.min(e.gym+1,7);
+    sv();
+  }
+}
+
+function renderMVW(){
+  const e=getMVWEntry();
+  const keys=Object.keys(MVW_FLOOR);
+  const passing=keys.every(k=>e[k]>=MVW_FLOOR[k].target);
+  const allDone=keys.every(k=>e[k]>=MVW_FLOOR[k].target);
+
+  const badge=document.getElementById('mvw-badge');
+  if(badge){
+    if(allDone){badge.textContent='✓ ON TRACK';badge.className='mvw-badge pass';}
+    else {
+      const remaining=keys.filter(k=>e[k]<MVW_FLOOR[k].target).length;
+      badge.textContent=remaining+' REMAINING';badge.className='mvw-badge prog';
+    }
+  }
+
+  const rows=document.getElementById('mvw-rows');
+  if(!rows)return;
+  rows.innerHTML=keys.map(k=>{
+    const f=MVW_FLOOR[k];
+    const val=Math.min(e[k]||0,f.target);
+    const pct=Math.round((val/f.target)*100);
+    const done=val>=f.target;
+    return `<div class="mvw-row">
+      <div class="mvw-dot" style="background:${done?f.col:'rgba(255,255,255,.1)'}"></div>
+      <span class="mvw-label">${f.label}</span>
+      <div class="mvw-track"><div class="mvw-fill" style="width:${pct}%;background:${f.col};opacity:${done?1:.7}"></div></div>
+      <span class="mvw-count" style="color:${done?f.col:'rgba(160,96,255,.4)'}">${val}/${f.target}</span>
+    </div>`;
+  }).join('');
+}
+
+// ── END-OF-WEEK RECAP ──
+function checkWeekRecap(){
+  // Only fire on Monday (day 1) and only once per week
+  const now=new Date();
+  if(now.getDay()!==1)return; // not Monday
+  const wk=getWeekKey();
+  const prevWk=getPrevWeekKey();
+  if(G.weekRecapShown===prevWk)return; // already shown
+  const prev=G.mvwLog[prevWk];
+  if(!prev)return;
+  G.weekRecapShown=prevWk;sv();
+  setTimeout(()=>showWeekRecap(prev),2000);
+}
+
+function getPrevWeekKey(){
+  const d=new Date();
+  d.setDate(d.getDate()-7);
+  const jan4=new Date(d.getFullYear(),0,4);
+  const week=Math.ceil(((d-jan4)/86400000+jan4.getDay()+1)/7);
+  return d.getFullYear()+'-W'+String(week).padStart(2,'0');
+}
+
+function showWeekRecap(data){
+  const keys=Object.keys(MVW_FLOOR);
+  const allPass=keys.every(k=>(data[k]||0)>=MVW_FLOOR[k].target);
+  const heading=document.getElementById('wr-heading');
+  const sub=document.getElementById('wr-sub');
+  heading.textContent=allPass?'WEEK CONQUERED':'WEEK COMPLETE';
+  heading.className='wr-heading '+(allPass?'pass':'fail');
+  sub.textContent=allPass?'Minimum Viable Week achieved. The System acknowledges your consistency.':'You fell short of your minimum this week. Adjust and rise next week.';
+  document.getElementById('wr-items').innerHTML=keys.map(k=>{
+    const f=MVW_FLOOR[k];
+    const val=data[k]||0;
+    const done=val>=f.target;
+    return `<div class="wr-item">
+      <div class="wr-dot" style="background:${done?f.col:'rgba(255,51,85,.5)'}"></div>
+      <span class="wr-iname" style="color:${done?'var(--white)':'rgba(200,180,255,.4)'}">${f.label}</span>
+      <span class="wr-ival" style="color:${done?f.col:'var(--red)'}">${val}/${f.target} ${f.unit}</span>
+    </div>`;
+  }).join('');
+  sfx('sysVoice');
+  document.getElementById('week-recap').classList.add('show');
+}
+
+function closeWeekRecap(){
+  const el=document.getElementById('week-recap');
+  el.style.opacity='0';el.style.transition='opacity .3s';
+  setTimeout(()=>{el.classList.remove('show');el.style.opacity='';el.style.transition='';},300);
+}
+
+// ══════════════════════════════════════════════
+// iOS HEALTH SYNC
+// ══════════════════════════════════════════════
+
+function checkHealthSync(){
+  const hs=G.healthSync;
+  if(!hs||!hs.date)return;
+  const today=new Date().toDateString();
+  const hsDate=hs.date?new Date(hs.date).toDateString():'';
+  if(hsDate!==today)return; // stale data — don't act on old health data
+
+  // ── Auto-complete steps quest ──
+  if((hs.steps||0)>=10000){
+    const stepsQ=G.quests.find(q=>q.id==='f13'&&!q.done);
+    if(stepsQ){
+      stepsQ.done=true;
+      G.stats[stepsQ.s]=(G.stats[stepsQ.s]||0)+stepsQ.xp;
+      G.qsd[stepsQ.s]=(G.qsd[stepsQ.s]||0)+stepsQ.xp;
+      G.gold=(G.gold||0)+(stepsQ.g||0);
+      stepsQ.streak=(stepsQ.streak||0)+1;
+      showNotice('AUTO-COMPLETED','🏃','<strong>10,000 steps</strong> detected from Apple Health. Quest auto-completed. +'+(stepsQ.xp)+' XP','var(--agi)');
+      sv();renderAll();
+    }
+  }
+
+  // ── Workout detection — suggest dungeon completion ──
+  if(hs.workouts&&hs.workouts.length){
+    const gymTypes=['Traditional Strength Training','Functional Strength Training','High Intensity Interval Training','Cross Training','Other'];
+    const gymSession=hs.workouts.find(w=>gymTypes.includes(w.type));
+    if(gymSession&&!sessionStorage.getItem('health_workout_notice_'+today)){
+      sessionStorage.setItem('health_workout_notice_'+today,'1');
+      const dur=gymSession.duration?Math.round(gymSession.duration)+' min':'';
+      const cal=gymSession.calories?gymSession.calories+' kcal':'';
+      setTimeout(()=>showNotice('WORKOUT DETECTED','💪',`<strong>${gymSession.type||'Workout'}</strong>${dur?' · '+dur:''}${cal?' · '+cal:''}<br><br>Open Dungeons to log this session and claim your XP.`,'var(--str)'),1500);
+    }
+  }
+}
+
+function renderRecovery(){
+  const hs=G.healthSync;
+  const card=document.getElementById('h-recovery');
+  if(!card)return;
+  if(!hs||!hs.date||(hs.sleep?.hours||0)===0){
+    card.style.display='none';return;
+  }
+  const today=new Date().toDateString();
+  const hsDate=hs.date?new Date(hs.date).toDateString():'';
+  if(hsDate!==today){card.style.display='none';return;}
+
+  card.style.display='flex';
+
+  // Recovery score: 0–100
+  const hrs=hs.sleep?.hours||0;
+  let score=0;
+  if(hrs>=7&&hrs<=9)score=100;
+  else if(hrs>=6)score=75;
+  else if(hrs>=5)score=50;
+  else score=25;
+  const hrv=hs.hrv||0;
+  if(hrv>40)score=Math.min(100,score+10);
+  else if(hrv>0&&hrv<30)score=Math.max(0,score-10);
+
+  const col=score>=80?'var(--green)':score>=60?'var(--gold)':'var(--red)';
+  const label=score>=80?'PEAK':score>=60?'MODERATE':'LOW';
+
+  document.getElementById('rec-score-val').textContent=score;
+  document.getElementById('rec-score-val').style.color=col;
+  document.getElementById('rec-title').textContent=label+' RECOVERY';
+  document.getElementById('rec-title').style.color=col;
+  card.style.setProperty('--rc-col',col.replace('var(','').replace(')',''));
+
+  const sleepBar=Math.min(100,Math.round((hrs/9)*100));
+  const hrvBar=hrv?Math.min(100,Math.round((hrv/60)*100)):0;
+  document.getElementById('rec-meta').textContent=hrs.toFixed(1)+'h sleep'+(hrv?' · HRV '+hrv:'');
+  document.getElementById('rec-bars').innerHTML=`
+    <div class="rec-bar-row">
+      <span class="rec-bar-lbl">SLEEP</span>
+      <div class="rec-bar-track"><div class="rec-bar-fill" style="width:${sleepBar}%;background:${col}"></div></div>
+    </div>
+    ${hrv?`<div class="rec-bar-row">
+      <span class="rec-bar-lbl">HRV</span>
+      <div class="rec-bar-track"><div class="rec-bar-fill" style="width:${hrvBar}%;background:${col}"></div></div>
+    </div>`:''}
+  `;
+}
+
+// ══════════════════════════════════════════════
 // FIREBASE SYNC
 // ══════════════════════════════════════════════
 // Paste your Firebase config here:
@@ -5256,6 +5612,16 @@ function mergeRemote(data){
     merged.debuff=data.debuff||G.debuff||{xp:false,expiry:null};
     merged.streakUnlocksGiven=data.streakUnlocksGiven||G.streakUnlocksGiven||[];
     merged.shopOverrides=data.shopOverrides||G.shopOverrides||{};
+    merged.mvwLog=data.mvwLog||G.mvwLog||{};
+    merged.weekRecapShown=data.weekRecapShown||G.weekRecapShown||'';
+    // ── iOS Health: always take the newer healthSync record ──
+    const remoteHs=data.healthSync||null;
+    const localHs=G.healthSync||null;
+    if(remoteHs&&(!localHs||(remoteHs.updated||0)>(localHs.updated||0))){
+      merged.healthSync=remoteHs;
+    } else {
+      merged.healthSync=localHs||{date:'',steps:0,workouts:[],sleep:{hours:0},hrv:0,updated:0};
+    }
     Object.assign(G,merged);
     // Run quest migration on Firebase data too
     if(!G._qmig2){
