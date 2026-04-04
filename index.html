@@ -2474,12 +2474,11 @@ body{font-family:'Barlow Condensed',sans-serif;color:var(--white);}
       </div>
 
       <div style="padding:8px 16px 4px;"><button onclick="resetD()" style="width:100%;padding:10px;background:rgba(255,255,255,.03);border:1px solid rgba(160,96,255,.12);color:rgba(160,96,255,.25);font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;letter-spacing:2.5px;cursor:pointer;text-transform:uppercase;">↺ RESET DAILY QUESTS</button></div>
+      <div id="edit-toggle-bar">
+        <button id="edit-toggle-btn" onclick="toggleEditMode()">✎ EDIT</button>
+      </div>
       <div class="sp"></div>
     </div>
-  </div>
-
-  <div id="edit-toggle-bar">
-    <button id="edit-toggle-btn" onclick="toggleEditMode()">✎ EDIT</button>
   </div>
 
   <div id="bnav">
@@ -3437,8 +3436,7 @@ function goTab(t){sfx('tab');
   document.getElementById('s-'+t).classList.add('act');
   document.getElementById('bn-'+t).classList.add('act');
   document.getElementById('fab').classList.toggle('show',t==='quests');
-  document.getElementById('edit-toggle-bar').style.display=t==='prof'?'none':'flex';
-  renderAll();
+renderAll();
 }
 
 function toggleEditMode(){
