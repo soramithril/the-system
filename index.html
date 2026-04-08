@@ -127,64 +127,63 @@ body{font-family:'Barlow Condensed',sans-serif;color:var(--white);}
 .scr.act{display:block;}
 
 /* ── YEAR CALENDAR HEATMAP — GitHub-style compact grid ── */
-.cal-container{padding:10px 8px 24px;}
+#s-cal{display:none;flex-direction:column;}
+#s-cal.act{display:flex!important;}
+.cal-container{
+  padding:8px 8px 0;flex:1;display:flex;flex-direction:column;min-height:0;
+}
 .cal-year-title{
-  font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;
+  font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:800;
   letter-spacing:3px;color:var(--acc);text-transform:uppercase;
 }
 .cal-year-nav{
-  display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:8px;
+  display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:4px;
 }
 .cal-year-nav button{
   background:rgba(140,155,180,.08);border:1px solid var(--b1);color:var(--acc2);
-  font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;
-  letter-spacing:2px;padding:3px 12px;cursor:pointer;text-transform:uppercase;
+  font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;
+  letter-spacing:2px;padding:2px 10px;cursor:pointer;text-transform:uppercase;
 }
 .cal-legend{
   display:flex;align-items:center;justify-content:center;gap:4px;
-  margin-bottom:8px;font-family:'Share Tech Mono',monospace;font-size:7px;
+  margin-bottom:4px;font-family:'Share Tech Mono',monospace;font-size:7px;
   color:rgba(140,155,180,.35);letter-spacing:1px;
 }
 .cal-legend-block{
   width:10px;height:10px;border-radius:2px;border:1px solid rgba(140,155,180,.06);
 }
 .cal-stats-row{
-  display:flex;gap:6px;justify-content:center;margin-bottom:8px;flex-wrap:wrap;
+  display:flex;gap:5px;justify-content:center;margin-bottom:4px;flex-wrap:nowrap;
 }
 .cal-stat-card{
-  background:rgba(140,155,180,.04);border:1px solid var(--b1);border-radius:5px;
-  padding:6px 12px;text-align:center;min-width:65px;
+  background:rgba(140,155,180,.04);border:1px solid var(--b1);border-radius:4px;
+  padding:4px 10px;text-align:center;flex:1;min-width:0;
 }
 .cal-stat-val{
-  font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:800;
+  font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:800;
   color:var(--acc);letter-spacing:1px;
 }
 .cal-stat-lbl{
   font-family:'Share Tech Mono',monospace;font-size:6px;color:rgba(140,155,180,.3);
-  letter-spacing:1.5px;text-transform:uppercase;
+  letter-spacing:1px;text-transform:uppercase;
 }
-/* Grid wrapper: 7 rows, many columns, scrollable if needed */
+/* Grid fills remaining space */
 .cal-grid-wrap{
-  overflow-x:auto;overflow-y:hidden;padding-bottom:4px;
-  -webkit-overflow-scrolling:touch;
+  flex:1;min-height:0;overflow:hidden;padding:0 2px;
 }
 .cal-grid{
   display:grid;grid-template-rows:repeat(7,1fr);grid-auto-flow:column;
-  grid-auto-columns:minmax(0,1fr);gap:2px;
+  grid-auto-columns:1fr;gap:2px;
+  width:100%;height:100%;
 }
 .cal-dow{
   font-family:'Share Tech Mono',monospace;font-size:7px;color:rgba(140,155,180,.22);
   display:flex;align-items:center;justify-content:center;letter-spacing:1px;
 }
-.cal-month-hdr{
-  grid-row:1/-1;display:flex;align-items:flex-start;padding-top:1px;
-  font-family:'Barlow Condensed',sans-serif;font-size:8px;font-weight:700;
-  letter-spacing:1.5px;color:rgba(140,155,180,.3);text-transform:uppercase;
-  writing-mode:vertical-lr;text-orientation:mixed;
-}
 .cal-cell{
-  width:100%;aspect-ratio:1;border-radius:2px;position:relative;
+  width:100%;height:100%;border-radius:2px;position:relative;
   border:1px solid rgba(140,155,180,.05);cursor:default;
+  min-width:0;min-height:0;
 }
 .cal-cell:hover{border-color:var(--b2);z-index:2;filter:brightness(1.3);}
 .cal-cell.today{box-shadow:0 0 0 1.5px var(--blue2);}
@@ -2595,14 +2594,7 @@ body{font-family:'Barlow Condensed',sans-serif;color:var(--white);}
 
     <!-- CALENDAR -->
     <div class="scr" id="s-cal">
-      <div class="scr-banner">
-        <img src="https://i.pinimg.com/originals/9d/d8/91/9dd89189142dd4bbfffa2e3414ed83a0.jpg" style="object-position:center 60%" alt="Calendar banner">
-        <div class="ban-vig"></div>
-        <div class="ban-title">Quest Log</div>
-        <div class="ban-sub">◆ ANNUAL PROGRESS HEATMAP ◆</div>
-      </div>
       <div class="cal-container" id="cal-container"></div>
-      <div class="sp"></div>
     </div>
   </div>
 
