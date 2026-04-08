@@ -167,27 +167,35 @@ body{font-family:'Barlow Condensed',sans-serif;color:var(--white);}
   font-family:'Share Tech Mono',monospace;font-size:6px;color:rgba(140,155,180,.3);
   letter-spacing:1px;text-transform:uppercase;
 }
-/* Grid fills remaining space */
+/* Grid: vertical — 7 columns (Mon-Sun), rows = weeks going down, month labels on left */
 .cal-grid-wrap{
-  flex:1;min-height:0;overflow:hidden;padding:0 2px;
+  flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;padding:0 2px;
+  -webkit-overflow-scrolling:touch;
 }
 .cal-grid{
-  display:grid;grid-template-rows:repeat(7,1fr);grid-auto-flow:column;
-  grid-auto-columns:1fr;gap:2px;
-  width:100%;height:100%;
+  display:grid;
+  grid-template-columns:24px repeat(7,1fr);
+  gap:2px;
+  width:100%;
 }
 .cal-dow{
-  font-family:'Share Tech Mono',monospace;font-size:7px;color:rgba(140,155,180,.22);
+  font-family:'Share Tech Mono',monospace;font-size:7px;color:rgba(140,155,180,.25);
   display:flex;align-items:center;justify-content:center;letter-spacing:1px;
+  padding-bottom:2px;
+}
+.cal-mlabel{
+  font-family:'Share Tech Mono',monospace;font-size:7px;color:rgba(140,155,180,.3);
+  letter-spacing:1px;display:flex;align-items:center;justify-content:center;
+  text-transform:uppercase;
 }
 .cal-cell{
-  width:100%;height:100%;border-radius:2px;position:relative;
+  aspect-ratio:1;border-radius:2px;position:relative;
   border:1px solid rgba(140,155,180,.05);cursor:default;
-  min-width:0;min-height:0;
 }
 .cal-cell:hover{border-color:var(--b2);z-index:2;filter:brightness(1.3);}
 .cal-cell.today{box-shadow:0 0 0 1.5px var(--blue2);}
 .cal-cell.future{opacity:.12;}
+.cal-cell.rest{background:rgba(255,180,60,.25)!important;border-color:rgba(255,180,60,.15);}
 .cal-cell .cal-tip{
   display:none;position:absolute;bottom:calc(100% + 4px);left:50%;transform:translateX(-50%);
   background:var(--glass2);border:1px solid var(--b2);padding:4px 8px;border-radius:3px;
@@ -195,6 +203,18 @@ body{font-family:'Barlow Condensed',sans-serif;color:var(--white);}
   font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--acc);letter-spacing:1px;
 }
 .cal-cell:hover .cal-tip{display:block;}
+/* sparkline trend */
+.cal-spark-section{
+  padding:8px 4px 4px;flex-shrink:0;
+}
+.cal-spark-title{
+  font-family:'Share Tech Mono',monospace;font-size:7px;color:rgba(140,155,180,.3);
+  letter-spacing:2px;text-transform:uppercase;text-align:center;margin-bottom:4px;
+}
+.cal-spark-svg{display:block;width:100%;height:40px;}
+/* stat sparklines on stats page */
+.stat-spark-svg{display:block;width:100%;height:28px;margin-top:4px;}
+
 .cal-heat-0{background:rgba(140,155,180,.04);}
 .cal-heat-1{background:rgba(60,130,200,.18);}
 .cal-heat-2{background:rgba(60,140,220,.35);}
@@ -3180,7 +3200,8 @@ const BUILTIN_SHOP=[
   // ── SYSTEM ──
   {id:'shield',  cat:'System',icon:'🛡',n:'Streak Shield',         d:'Protects all streaks if you miss a day. One-time use.',      cost:350,coolDays:0, cons:true,rar:'magic',    e:'shield'},
   {id:'randbox', cat:'System',icon:'🎲',n:'Random Reward Box',     d:'Opens a random treat from the shop. Luck is a stat.',        cost:250,coolDays:0, cons:true,rar:'magic',    e:'rand'},
-  {id:'restday', cat:'System',icon:'🛋',n:'Rest Day Pass',         d:'Skip ALL fitness quests today with zero penalty. This costs nearly three weeks of consistent grinding. Use it wisely.',cost:5000,coolDays:0,cons:true,rar:'legendary',e:'skipfit'},
+  {id:'restday', cat:'System',icon:'🛋',n:'Rest Day Pass',         d:'Skip ALL fitness quests today with zero penalty.',cost:2000,coolDays:0,cons:true,rar:'rare',e:'skipfit'},
+  {id:'restpermit',cat:'System',icon:'🏖',n:'Rest Permit',          d:'Declare today a full rest day. ALL daily quests are suspended — no penalties, no streak loss. Use sparingly.',cost:3000,coolDays:7,cons:true,rar:'epic',e:'restpermit'},
   // ── KNIGHT\'S ARMOURY (unlocked by extracting Igris) ──
   {id:'ka_shoes',  cat:"Knight's Armoury",icon:'👟',n:'New Training Shoes',   d:'Treat yourself to a proper pair of gym shoes.',              cost:1200,coolDays:90,cons:true,rar:'epic'},
   {id:'ka_gloves', cat:"Knight's Armoury",icon:'🥊',n:'Boxing / Gym Gloves',  d:'A quality pair of gloves. Igris would approve.',             cost:450,coolDays:30,cons:true,rar:'rare'},
@@ -3268,6 +3289,8 @@ const TITLES=[
   {id:'tm',        icon:'👑',n:'Shadow Monarch',    e:'+20% all XP and gold',           r:'S-Rank',              f:G=>G.totalXp>=15000},
   {id:'t7streak',  icon:'🔥',n:'Streak of Iron',   e:'+5% all XP',                     r:'7-day streak reward', f:G=>(G.streakUnlocksGiven||[]).includes('7')},
   {id:'t30streak', icon:'💎',n:'The Unbroken',      e:'+8% all XP',                     r:'30-day streak reward',f:G=>(G.streakUnlocksGiven||[]).includes('30')},
+  {id:'t60streak', icon:'⚡',n:'Relentless',        e:'+12% all XP',                    r:'60-day streak reward',f:G=>(G.streakUnlocksGiven||[]).includes('60')},
+  {id:'t100streak',icon:'🌟',n:"Monarch's Will",    e:'+15% all XP & +10% gold',        r:'100-day streak reward',f:G=>(G.streakUnlocksGiven||[]).includes('100')},
 ];
 
 // SKILLS
@@ -3486,29 +3509,37 @@ function dayCheck(){
   const today=new Date().toDateString();
   if(G.lastDate===today)return;
   if(G.lastDate){
-    const inc=G.quests.filter(q=>q.t==='daily'&&!q.done&&!q.penaltyTask).length;
-    if(inc>0){
-      if(G.fx.shield){
-        G.fx.shield=false;
-        showItemCine({icon:'🛡',n:'Streak Shield Activated',d:'All streaks protected — no penalty applied'});
-      } else {
-        // ── ENHANCED PENALTY SYSTEM ──
-        // Lose HP proportional to missed quests (8 HP each, max 40)
-        const hpLoss=Math.min(40, inc*8);
-        G.hp=Math.max(1, G.hp-hpLoss);
-        // Lose gold (5 gold per missed quest, max 60)
-        const goldLoss=Math.min(60, inc*5);
-        G.gold=Math.max(0, G.gold-goldLoss);
-        // Apply XP debuff for today (−20% XP)
-        G.debuff={xp:true, expiry:today};
-        // Reset streaks on all incomplete dailies
-        G.quests.filter(q=>q.t==='daily').forEach(q=>q.streak=0);
-        // Set penalty pending — banner persists until user accepts
-        G.penaltyPending=true;
-      }
-    } else {
-      // Clear debuff if all quests were done
+    // Check if yesterday was a declared rest day
+    const wasRestDay=G.fx.restDay&&G.fx.restDay===G.lastDate;
+    if(wasRestDay){
+      // Rest day — no penalties, no streak loss, clear the flag
+      G.fx.restDay=null;
       G.debuff={xp:false,expiry:null};
+    } else {
+      const inc=G.quests.filter(q=>q.t==='daily'&&!q.done&&!q.penaltyTask).length;
+      if(inc>0){
+        if(G.fx.shield){
+          G.fx.shield=false;
+          showItemCine({icon:'🛡',n:'Streak Shield Activated',d:'All streaks protected — no penalty applied'});
+        } else {
+          // ── ENHANCED PENALTY SYSTEM ──
+          // Lose HP proportional to missed quests (8 HP each, max 40)
+          const hpLoss=Math.min(40, inc*8);
+          G.hp=Math.max(1, G.hp-hpLoss);
+          // Lose gold (5 gold per missed quest, max 60)
+          const goldLoss=Math.min(60, inc*5);
+          G.gold=Math.max(0, G.gold-goldLoss);
+          // Apply XP debuff for today (−20% XP)
+          G.debuff={xp:true, expiry:today};
+          // Reset streaks on all incomplete dailies
+          G.quests.filter(q=>q.t==='daily').forEach(q=>q.streak=0);
+          // Set penalty pending — banner persists until user accepts
+          G.penaltyPending=true;
+        }
+      } else {
+        // Clear debuff if all quests were done
+        G.debuff={xp:false,expiry:null};
+      }
     }
     if(new Date().getDay()===0&&SKILLS.find(s=>s.id==='sl').f(G)){G.stats.INT+=3;showStatUpCine({INT:3},'Sunday Language Absorption bonus');}
   }
@@ -3519,10 +3550,14 @@ function dayCheck(){
     const dTotal=dl.length;
     if(dTotal>0){
       if(!G.dailyLog)G.dailyLog=[];
-      G.dailyLog.push({date:G.lastDate,done:dDone,total:dTotal});
+      G.dailyLog.push({date:G.lastDate,done:dDone,total:dTotal,rest:wasRestDay||false});
       // Keep last 366 days for annual calendar
       while(G.dailyLog.length>366)G.dailyLog.shift();
     }
+    // Snapshot stats for sparkline history
+    if(!G.statLog)G.statLog=[];
+    G.statLog.push({date:G.lastDate,s:{...G.stats}});
+    while(G.statLog.length>366)G.statLog.shift();
   }
   G.quests.filter(q=>!q.penaltyTask).forEach(q=>{if(q.t==='daily')q.done=false;});
   G.quests=G.quests.filter(q=>!q.penaltyTask);
@@ -3870,9 +3905,28 @@ function rStats(){
   const MAX=Math.max(100,...Object.values(G.stats));
   document.getElementById('stat-bars').innerHTML=Object.entries(STAT_INFO).map(([k,v])=>{
     const val=G.stats[k]||0;
+    // Build sparkline from statLog
+    let sparkHtml='';
+    const log=G.statLog||[];
+    if(log.length>=2){
+      const vals=log.map(e=>(e.s&&e.s[k])||0);
+      vals.push(val); // add current
+      const mn=Math.min(...vals),mx=Math.max(...vals,1);
+      const svgW=200,svgH=24,pad=2;
+      const pts=vals.map((v2,i)=>{
+        const x=pad+(i/(vals.length-1))*(svgW-pad*2);
+        const y=svgH-pad-((v2-mn)/(mx-mn||1))*(svgH-pad*2);
+        return `${x},${y}`;
+      });
+      sparkHtml=`<svg class="stat-spark-svg" viewBox="0 0 ${svgW} ${svgH}" preserveAspectRatio="none">
+        <polyline points="${pts.join(' ')}" fill="none" stroke="${v.col}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity=".6"/>
+        <circle cx="${pts[pts.length-1].split(',')[0]}" cy="${pts[pts.length-1].split(',')[1]}" r="2" fill="${v.col}" opacity=".8"/>
+      </svg>`;
+    }
     return `<div class="sbar" style="--sc:${v.col}">
       <div class="sbar-top"><div class="sbar-left"><div class="sbar-dot" style="background:${v.col};box-shadow:0 0 6px ${v.col};"></div><span class="sbar-name" style="color:${v.col};">${v.name}</span></div><span class="sbar-val" id="sbv-${k}" style="color:${v.col};">${val}</span></div>
       <div class="sbar-track"><div class="sbar-fill" style="width:${Math.max(2,(val/MAX)*100)}%;background:${v.fill};box-shadow:2px 0 8px ${v.col};"></div></div>
+      ${sparkHtml}
       <div class="sbar-desc">${v.desc}</div>
     </div>`;
   }).join('');
@@ -4147,41 +4201,116 @@ function rCal(){
     <span>MORE</span>
   </div>`;
 
-  // GitHub-style grid: 7 rows (Mon-Sun), columns = weeks
-  // Pad start so first column starts on Monday
+  // Vertical grid: 7 columns (Mon-Sun), rows = weeks, month labels on left
+  // Align start to Monday
   const startDow=(startDate.getDay()+6)%7; // 0=Mon
-  html+=`<div class="cal-grid-wrap"><div class="cal-grid">`;
+  // Pad to start on a Monday
+  const gridStart=new Date(startDate);
+  gridStart.setDate(gridStart.getDate()-startDow);
 
-  // Day-of-week labels as first column
+  html+=`<div class="cal-grid-wrap"><div class="cal-grid">`;
+  // Header row: empty corner + Mon-Sun
+  html+=`<div></div>`;
   dowLabels.forEach(l=>{html+=`<div class="cal-dow">${l}</div>`;});
 
-  // Pad leading empty cells if startDate isn't Monday
-  for(let i=0;i<startDow;i++)html+=`<div></div>`;
-
-  let lastMonth=-1;
-  allDays.forEach((dt,idx)=>{
-    const k=dt.toISOString().slice(0,10);
-    const entry=logMap[k];
-    const isFuture=dt>now;
-    const isToday=k===todayKey;
-    let heat=0;
-    const mStr=months[dt.getMonth()]+' '+dt.getDate();
-    let tipText=mStr;
-    if(entry&&entry.total>0){
-      const pct=entry.done/entry.total;
-      if(pct>0)heat=1;
-      if(pct>=0.25)heat=2;
-      if(pct>=0.5)heat=3;
-      if(pct>=0.75)heat=4;
-      if(pct>=1)heat=5;
-      tipText+=` · ${entry.done}/${entry.total} (${Math.round(pct*100)}%)`;
-    } else if(!isFuture){
-      tipText+=' · No data';
+  // Render week rows
+  let d=new Date(gridStart);
+  let lastMonthShown=-1;
+  while(d<=endDate||d<=now){
+    // Month label for this week (show if the week contains 1st of a new month or first row)
+    let mLabel='';
+    for(let i=0;i<7;i++){
+      const check=new Date(d);check.setDate(check.getDate()+i);
+      if(check.getDate()<=7&&check.getMonth()!==lastMonthShown){
+        mLabel=months[check.getMonth()];
+        lastMonthShown=check.getMonth();
+        break;
+      }
     }
-    html+=`<div class="cal-cell cal-heat-${isFuture?0:heat}${isToday?' today':''}${isFuture?' future':''}"><div class="cal-tip">${tipText}</div></div>`;
-  });
+    // First row always shows month
+    if(d.getTime()===gridStart.getTime()&&!mLabel){
+      mLabel=months[d.getMonth()];
+      lastMonthShown=d.getMonth();
+    }
+    html+=`<div class="cal-mlabel">${mLabel}</div>`;
+
+    // 7 day cells for this week
+    for(let i=0;i<7;i++){
+      const dt=new Date(d);
+      dt.setDate(dt.getDate()+i);
+      const k=dt.toISOString().slice(0,10);
+      const entry=logMap[k];
+      const isFuture=dt>now;
+      const isToday=k===todayKey;
+      const isBeforeStart=dt<startDate;
+      const isAfterEnd=dt>endDate;
+
+      if(isBeforeStart||isAfterEnd){
+        html+=`<div></div>`;
+        continue;
+      }
+
+      let heat=0;
+      const mStr=months[dt.getMonth()]+' '+dt.getDate();
+      let tipText=mStr;
+      const isRest=entry&&entry.rest;
+      if(isRest){
+        tipText+=' · Rest Day';heat=0;
+      } else if(entry&&entry.total>0){
+        const pct=entry.done/entry.total;
+        if(pct>0)heat=1;
+        if(pct>=0.25)heat=2;
+        if(pct>=0.5)heat=3;
+        if(pct>=0.75)heat=4;
+        if(pct>=1)heat=5;
+        tipText+=` · ${entry.done}/${entry.total} (${Math.round(pct*100)}%)`;
+      } else if(!isFuture){
+        tipText+=' · No data';
+      }
+      html+=`<div class="cal-cell cal-heat-${isFuture?0:heat}${isToday?' today':''}${isFuture?' future':''}${isRest?' rest':''}"><div class="cal-tip">${tipText}</div></div>`;
+    }
+    d.setDate(d.getDate()+7);
+    if(d>endDate&&d>now)break;
+  }
 
   html+=`</div></div>`;
+
+  // ── 12-WEEK SPARKLINE ──
+  const weekData=[];
+  for(let w=11;w>=0;w--){
+    const wEnd=new Date(now);wEnd.setDate(wEnd.getDate()-w*7);
+    const wStart=new Date(wEnd);wStart.setDate(wStart.getDate()-6);
+    let wDone=0,wTotal=0;
+    for(let d=new Date(wStart);d<=wEnd;d.setDate(d.getDate()+1)){
+      const k=d.toISOString().slice(0,10);
+      if(logMap[k]){wDone+=logMap[k].done;wTotal+=logMap[k].total;}
+    }
+    weekData.push(wTotal>0?Math.round((wDone/wTotal)*100):null);
+  }
+  const sparkVals=weekData.filter(v=>v!==null);
+  if(sparkVals.length>=2){
+    const svgW=300,svgH=36,pad=2;
+    const mn=Math.min(...sparkVals),mx=Math.max(...sparkVals,1);
+    const pts=[];let pi=0;
+    weekData.forEach((v,i)=>{
+      if(v===null)return;
+      const x=pad+(i/(weekData.length-1))*(svgW-pad*2);
+      const y=svgH-pad-((v-mn)/(mx-mn||1))*(svgH-pad*2);
+      pts.push(`${x},${y}`);pi++;
+    });
+    const line=pts.join(' ');
+    const lastPt=pts[pts.length-1];
+    const trend=sparkVals[sparkVals.length-1]-sparkVals[0];
+    const tCol=trend>=0?'rgba(100,190,255,.8)':'rgba(212,32,64,.7)';
+    html+=`<div class="cal-spark-section">
+      <div class="cal-spark-title">◆ 12-WEEK COMPLETION TREND ◆</div>
+      <svg class="cal-spark-svg" viewBox="0 0 ${svgW} ${svgH}" preserveAspectRatio="none">
+        <polyline points="${line}" fill="none" stroke="${tCol}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="${lastPt.split(',')[0]}" cy="${lastPt.split(',')[1]}" r="3" fill="${tCol}"/>
+      </svg>
+    </div>`;
+  }
+
   c.innerHTML=html;
 }
 
@@ -4280,6 +4409,18 @@ function togQ(id,evt){
       G.streakUnlocksGiven.push('30');
       if(!G.unlockedTitles.includes('t30streak'))G.unlockedTitles.push('t30streak');
       setTimeout(()=>showTitleCine({icon:'💎',n:'The Unbroken',e:'+8% all XP'}),1100);
+    }
+    if(q.streak===60&&!G.streakUnlocksGiven.includes('60')){
+      G.streakUnlocksGiven.push('60');
+      if(!G.unlockedTitles.includes('t60streak'))G.unlockedTitles.push('t60streak');
+      G.gold+=500;
+      setTimeout(()=>showTitleCine({icon:'⚡',n:'Relentless',e:'+12% all XP · +500 Gold bonus'}),1100);
+    }
+    if(q.streak===100&&!G.streakUnlocksGiven.includes('100')){
+      G.streakUnlocksGiven.push('100');
+      if(!G.unlockedTitles.includes('t100streak'))G.unlockedTitles.push('t100streak');
+      G.gold+=1000;
+      setTimeout(()=>showTitleCine({icon:'🌟',n:"Monarch's Will",e:'+15% all XP & +10% gold · +1000 Gold bonus'}),1100);
     }
     // ruler's authority
     if(SKILLS.find(s=>s.id==='sk').f(G)&&G.questsTotal%10===0){gainXp(50,q.s);G.gold+=25;setTimeout(()=>showItemCine({icon:'⬡',n:"Ruler's Authority",d:'+50 XP & +25 Gold (every 10 quests)'}),900);}
@@ -4497,6 +4638,7 @@ function useItem(idx){
   if(!item||!item.cons)return;
   const e=item.e;
   if(e==='shield'){G.fx.shield=true;showItemCine({icon:'🛡',n:'Streak Shield Active',d:'All streaks protected until next miss'});}
+  else if(e==='restpermit'){G.fx.restDay=new Date().toDateString();showItemCine({icon:'🏖',n:'Rest Day Declared',d:'All daily quests suspended today. No penalties. No streak loss. Recovery is part of the mission.'});}
   else if(e==='skipfit'){G.fx.skipfit=true;showItemCine({icon:'🛋',n:'Rest Day Pass',d:'One fitness quest can be skipped today'});}
   else if(e==='read7'){G.fx.read7=(G.fx.read7||0)+7;showItemCine(item);}
   else if(e==='read10'){G.fx.read10=(G.fx.read10||0)+10;showItemCine(item);}
@@ -5570,6 +5712,45 @@ document.addEventListener('visibilitychange', ()=>{
   if(document.visibilityState === 'visible') autoMidnightReset();
 });
 
+// ── PUSH NOTIFICATION REMINDERS ──
+function initNotifications(){
+  if(!('Notification' in window))return;
+  if(Notification.permission==='default'){
+    // Ask on first quest completion so it's not intrusive on load
+    return;
+  }
+}
+function requestNotifPermission(){
+  if(!('Notification' in window))return;
+  if(Notification.permission==='default')Notification.requestPermission();
+}
+// Schedule a check every minute; fire reminder at 9pm if incomplete dailies
+let _lastNotifDate='';
+function checkNotifReminder(){
+  if(Notification.permission!=='granted')return;
+  const now=new Date();
+  const h=now.getHours();
+  const todayStr=now.toDateString();
+  // Only fire once per day, at 9pm (21:00)
+  if(h>=21&&_lastNotifDate!==todayStr){
+    // Check if rest day
+    if(G.fx.restDay===todayStr)return;
+    const inc=G.quests.filter(q=>q.t==='daily'&&!q.done&&!q.penaltyTask).length;
+    if(inc>0){
+      _lastNotifDate=todayStr;
+      new Notification('⚔ THE SYSTEM',{
+        body:`${inc} daily quest${inc>1?'s':''} remain. Complete them before midnight or face the Penalty Zone.`,
+        icon:'/solo_leveling_icon.png',
+        tag:'quest-reminder',
+        silent:false,
+      });
+    }
+  }
+}
+setInterval(checkNotifReminder, 60000); // check every minute
+// Request permission subtly after app has been used a few seconds
+setTimeout(()=>{if('Notification' in window&&Notification.permission==='default')Notification.requestPermission();},5000);
+
 // ── FIRST-LAUNCH SYSTEM VOICE ──
 function maybeShowFirstLaunch(){
   if(!localStorage.getItem('sl_v9_welcomed')){
@@ -5907,6 +6088,7 @@ function mergeRemote(data){
     merged.shopOverrides=data.shopOverrides||G.shopOverrides||{};
     merged.mvwLog=data.mvwLog||G.mvwLog||{};
     merged.weekRecapShown=data.weekRecapShown||G.weekRecapShown||'';
+    merged.statLog=data.statLog||G.statLog||[];
     // ── iOS Health: always take the newer healthSync record ──
     const remoteHs=data.healthSync||null;
     const localHs=G.healthSync||null;
