@@ -308,7 +308,7 @@ function acceptPenalty(){
   document.getElementById('pz-accept').classList.remove('show');
   // Clear the persistent banner
   G.penaltyPending=false;sv();renderPenaltyBanner();
-  const tasks=['50 push-ups right now','30 squats','10 minutes of running','Drink 1 litre of water','Plan tomorrow\'s quests'];
+  const tasks=['50 push-ups right now','30 squats','10 minutes of running'];
   document.getElementById('pz-tasks').innerHTML=tasks.map((t,i)=>`<div class="pz-task" id="pzt${i}" onclick="togPZTask(${i})"><div class="pz-tck" id="pztck${i}"></div><span class="pz-tn">${t}</span></div>`).join('');
   document.getElementById('pz').classList.add('show');
   let s=3600;if(penTimer)clearInterval(penTimer);
