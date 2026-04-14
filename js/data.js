@@ -87,7 +87,7 @@ const MISSIONS=[
   {id:'health',  icon:'🌿', name:'Healthy Life',goal:'Mind & Body Optimised',         col:'var(--sta)', mc:'var(--sta)'},
   {id:'cooking', icon:'🍳', name:'Cooking',    goal:'Clean Eating Protocol',          col:'var(--sen)', mc:'var(--sen)'},
   {id:'supps',   icon:'💊', name:'Supplements',goal:'Daily Stack Protocol',           col:'var(--sta)', mc:'var(--sta)'},
-  {id:'savings', icon:'💰', name:'Savings',    goal:'Financial Freedom',              col:'var(--gold2)',mc:'rgba(255,208,96,.7)'},
+  {id:'savings', icon:'💰', name:'$',          goal:'Financial Freedom',              col:'var(--gold2)',mc:'rgba(255,208,96,.7)'},
   {id:'grind',   icon:'🏠', name:'The Grind',  goal:'Discipline · Grooming · Order',  col:'var(--purple)', mc:'var(--purple)'},
 ];
 
