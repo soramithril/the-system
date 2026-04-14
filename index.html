@@ -199,6 +199,25 @@
   <div class="arise-bonus" id="arise-bonus"></div>
 </div>
 
+<!-- GATE CINEMATIC — Boss Reveal -->
+<div id="gate-cine" onclick="closeGateCine()">
+  <div class="gate-bg"></div>
+  <div class="gate-rings">
+    <div class="gate-ring"></div><div class="gate-ring"></div>
+    <div class="gate-ring"></div><div class="gate-ring"></div>
+  </div>
+  <div class="cine-corner tl"></div><div class="cine-corner tr"></div>
+  <div class="cine-corner bl"></div><div class="cine-corner br"></div>
+  <div class="gate-content">
+    <div class="gate-type" id="gate-type">◆ DAILY DUNGEON BOSS ◆</div>
+    <img class="gate-boss-img" id="gate-img" src="" alt="">
+    <div class="gate-rank" id="gate-rank">D-RANK</div>
+    <div class="gate-name" id="gate-name">Boss Name</div>
+    <div class="gate-title" id="gate-title">Title</div>
+  </div>
+  <div class="gate-tap">TAP TO CONTINUE</div>
+</div>
+
 <!-- PERSISTENT PENALTY ZONE BANNER -->
 <div class="pz-persistent-banner" id="pz-persistent-banner" onclick="openPenaltyFromBanner()">
   <div class="pzb-icon">⚠</div>
@@ -473,32 +492,44 @@
       <div class="boss-section" id="h-boss-section">
         <div class="boss-sec-hdr">◆ DUNGEON ASSAULT</div>
         <!-- Daily Dungeon Boss -->
-        <div class="boss-card" id="boss-daily-card">
-          <div class="boss-top">
-            <span class="boss-icon">👹</span>
-            <span class="boss-name" id="boss-daily-name">Daily Dungeon Boss</span>
-            <span class="boss-type">DAILY</span>
+        <div class="boss-card-v2" id="boss-daily-card">
+          <img class="boss-card-img" id="boss-daily-img" src="" alt="">
+          <div class="boss-card-overlay">
+            <div class="boss-card-top">
+              <span class="boss-rank-badge" id="boss-daily-rank">D</span>
+              <span class="boss-label">DAILY</span>
+            </div>
+            <div class="boss-card-bottom">
+              <div class="boss-card-name" id="boss-daily-name">Boss</div>
+              <div class="boss-hp-bar-wrap">
+                <div class="boss-hp-bar"><div class="boss-hp-fill-v2" id="boss-daily-fill" style="width:100%"></div></div>
+                <span class="boss-hp-val-v2" id="boss-daily-val">0/0</span>
+              </div>
+            </div>
+            <div class="boss-dead-overlay" id="boss-daily-dead" style="display:none">
+              <div class="boss-dead-text">◆ CLEARED ◆</div>
+            </div>
           </div>
-          <div class="boss-hp-row">
-            <span class="boss-hp-lbl">HP</span>
-            <div class="boss-hp-track"><div class="boss-hp-fill" id="boss-daily-fill" style="width:100%"></div></div>
-            <span class="boss-hp-val" id="boss-daily-val">1000/1000</span>
-          </div>
-          <div class="boss-dead-lbl" id="boss-daily-dead" style="display:none">◆ DUNGEON CLEARED ◆</div>
         </div>
-        <!-- Weekly Boss -->
-        <div class="boss-card weekly-boss" id="boss-weekly-card">
-          <div class="boss-top">
-            <span class="boss-icon">💀</span>
-            <span class="boss-name" id="boss-weekly-name">Weekly Boss</span>
-            <span class="boss-type weekly">WEEKLY</span>
+        <!-- Weekly Raid Boss -->
+        <div class="boss-card-v2 weekly" id="boss-weekly-card">
+          <img class="boss-card-img" id="boss-weekly-img" src="" alt="">
+          <div class="boss-card-overlay">
+            <div class="boss-card-top">
+              <span class="boss-rank-badge" id="boss-weekly-rank">S</span>
+              <span class="boss-label weekly">WEEKLY</span>
+            </div>
+            <div class="boss-card-bottom">
+              <div class="boss-card-name" id="boss-weekly-name">Boss</div>
+              <div class="boss-hp-bar-wrap">
+                <div class="boss-hp-bar weekly"><div class="boss-hp-fill-v2 weekly" id="boss-weekly-fill" style="width:100%"></div></div>
+                <span class="boss-hp-val-v2 weekly" id="boss-weekly-val">0/0</span>
+              </div>
+            </div>
+            <div class="boss-dead-overlay" id="boss-weekly-dead" style="display:none">
+              <div class="boss-dead-text">◆ DEFEATED ◆</div>
+            </div>
           </div>
-          <div class="boss-hp-row">
-            <span class="boss-hp-lbl weekly">HP</span>
-            <div class="boss-hp-track"><div class="boss-hp-fill weekly" id="boss-weekly-fill" style="width:100%"></div></div>
-            <span class="boss-hp-val weekly" id="boss-weekly-val">1000/1000</span>
-          </div>
-          <div class="boss-dead-lbl" id="boss-weekly-dead" style="display:none">◆ BOSS DEFEATED ◆</div>
         </div>
       </div>
 
@@ -725,6 +756,7 @@
 <script src="js/quests.js"></script>
 <script src="js/shop.js"></script>
 <script src="js/combat.js"></script>
+<script src="js/boss.js"></script>
 <script src="js/ui.js"></script>
 <script src="js/features.js"></script>
 <script src="js/firebase.js"></script>

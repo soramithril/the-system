@@ -1737,31 +1737,119 @@ body{font-family:'Barlow Condensed',sans-serif;color:var(--white);}
 .scat.shadow-unlocked{border-color:rgba(160,80,255,.45);color:var(--purple);}
 .scat.shadow-unlocked.act{background:rgba(80,20,160,.2);border-color:var(--purple);color:var(--purple);}
 
-/* ── BOSS COMBAT ── */
+/* ── BOSS COMBAT v2 — Image Cards ── */
 .boss-section{padding:0 14px 6px;}
 .boss-sec-hdr{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:800;letter-spacing:3px;color:rgba(255,60,90,.45);margin-bottom:7px;display:flex;align-items:center;gap:6px;}
 .boss-sec-hdr::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,rgba(255,40,70,.2),transparent);}
-.boss-card{background:rgba(20,5,12,.7);border:1px solid rgba(255,40,70,.2);padding:9px 12px;margin-bottom:8px;clip-path:polygon(0 0,calc(100% - 6px) 0,100% 6px,100% 100%,6px 100%,0 calc(100% - 6px));transition:border-color .3s;}
-.boss-card.dead{opacity:.35;border-color:rgba(0,232,150,.2);}
-.boss-card.weekly-boss{border-color:rgba(160,80,255,.25);background:rgba(10,4,22,.7);}
-.boss-card.weekly-boss.dead{border-color:rgba(0,232,150,.2);}
-.boss-top{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
-.boss-icon{font-size:20px;line-height:1;}
-.boss-name{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:900;letter-spacing:1px;flex:1;}
-.boss-type{font-family:'Share Tech Mono',monospace;font-size:7px;letter-spacing:2px;padding:2px 5px;border:1px solid rgba(255,40,70,.25);color:rgba(255,60,90,.5);}
-.boss-type.weekly{border-color:rgba(160,80,255,.3);color:rgba(180,100,255,.5);}
-.boss-hp-row{display:flex;align-items:center;gap:8px;}
-.boss-hp-lbl{font-family:'Share Tech Mono',monospace;font-size:8px;color:rgba(255,60,90,.45);width:18px;}
-.boss-hp-lbl.weekly{color:rgba(160,80,255,.5);}
-.boss-hp-track{flex:1;height:7px;background:rgba(255,40,70,.08);overflow:hidden;position:relative;}
-.boss-hp-fill{height:100%;background:linear-gradient(90deg,#660015,#ff3355);transition:width .7s cubic-bezier(.22,1,.36,1);}
-.boss-hp-fill.weekly{background:linear-gradient(90deg,#440080,#b040ff);}
-.boss-hp-val{font-family:'Share Tech Mono',monospace;font-size:8px;color:rgba(255,60,90,.4);min-width:64px;text-align:right;white-space:nowrap;}
-.boss-hp-val.weekly{color:rgba(160,80,255,.4);}
-.boss-dead-lbl{font-family:'Share Tech Mono',monospace;font-size:7px;letter-spacing:3px;color:rgba(0,232,150,.5);margin-top:4px;}
+
+/* Boss Card v2 */
+.boss-card-v2{position:relative;overflow:hidden;border-radius:4px;margin-bottom:10px;height:120px;border:1px solid rgba(255,40,70,.25);background:#0a0510;transition:border-color .3s,opacity .5s;}
+.boss-card-v2.weekly{border-color:rgba(160,80,255,.3);}
+.boss-card-v2.dead{opacity:.3;border-color:rgba(0,232,150,.25);}
+.boss-card-img{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;object-position:center 20%;opacity:.45;transition:opacity .3s;}
+.boss-card-v2.dead .boss-card-img{filter:grayscale(1);opacity:.15;}
+.boss-card-overlay{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:space-between;padding:8px 12px;background:linear-gradient(180deg,rgba(0,0,0,.3) 0%,rgba(0,0,0,.05) 40%,rgba(0,0,0,.7) 100%);}
+.boss-card-top{display:flex;align-items:center;gap:8px;}
+.boss-rank-badge{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:16px;line-height:1;text-shadow:0 0 10px currentColor;}
+.boss-label{font-family:'Share Tech Mono',monospace;font-size:7px;letter-spacing:2.5px;padding:2px 6px;border:1px solid rgba(255,60,90,.3);color:rgba(255,60,90,.6);margin-left:auto;}
+.boss-label.weekly{border-color:rgba(160,80,255,.35);color:rgba(180,100,255,.6);}
+.boss-card-bottom{display:flex;flex-direction:column;gap:4px;}
+.boss-card-name{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:900;letter-spacing:1px;text-shadow:0 1px 6px rgba(0,0,0,.8);}
+.boss-hp-bar-wrap{display:flex;align-items:center;gap:8px;}
+.boss-hp-bar{flex:1;height:6px;background:rgba(255,255,255,.06);overflow:hidden;border-radius:1px;}
+.boss-hp-fill-v2{height:100%;transition:width .7s cubic-bezier(.22,1,.36,1);border-radius:1px;}
+.boss-hp-val-v2{font-family:'Share Tech Mono',monospace;font-size:8px;color:rgba(255,60,90,.5);min-width:55px;text-align:right;white-space:nowrap;}
+.boss-hp-val-v2.weekly{color:rgba(160,80,255,.5);}
+.boss-dead-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,20,10,.5);}
+.boss-dead-text{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:4px;color:rgba(0,232,150,.6);text-shadow:0 0 12px rgba(0,232,150,.3);}
+.boss-notice-img{width:60px;height:60px;border-radius:4px;object-fit:cover;border:1px solid rgba(255,255,255,.15);}
+
+/* Floating damage numbers */
 .boss-dmg-num{position:fixed;pointer-events:none;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:24px;color:#ff3355;text-shadow:0 0 12px rgba(255,40,70,.8);animation:bossHit .75s ease forwards;z-index:9999;}
 .boss-dmg-num.weekly{color:#c040ff;text-shadow:0 0 12px rgba(160,80,255,.8);}
 @keyframes bossHit{0%{transform:translateY(0) scale(1.3);opacity:1;}100%{transform:translateY(-52px) scale(.6);opacity:0;}}
+
+/* ── BOSS THRESHOLD ANIMATIONS ── */
+/* Screen shake */
+.screen-shake{animation:screenShake .5s ease;}
+.screen-shake-heavy{animation:screenShakeHeavy .7s ease;}
+@keyframes screenShake{
+  0%,100%{transform:translate(0);}
+  10%{transform:translate(-4px,2px);}
+  20%{transform:translate(4px,-2px);}
+  30%{transform:translate(-3px,3px);}
+  40%{transform:translate(3px,-1px);}
+  50%{transform:translate(-2px,2px);}
+  60%{transform:translate(2px,-2px);}
+  70%{transform:translate(-1px,1px);}
+}
+@keyframes screenShakeHeavy{
+  0%,100%{transform:translate(0);}
+  5%{transform:translate(-8px,4px);}
+  10%{transform:translate(8px,-4px);}
+  15%{transform:translate(-6px,6px);}
+  20%{transform:translate(6px,-3px);}
+  30%{transform:translate(-5px,3px);}
+  40%{transform:translate(4px,-4px);}
+  50%{transform:translate(-3px,2px);}
+  60%{transform:translate(3px,-2px);}
+  70%{transform:translate(-2px,1px);}
+}
+
+/* Boss stagger */
+.boss-stagger{animation:bossStagger .6s ease;}
+@keyframes bossStagger{
+  0%{transform:translateX(0);}
+  15%{transform:translateX(-6px) rotate(-1deg);}
+  30%{transform:translateX(5px) rotate(.5deg);}
+  45%{transform:translateX(-3px);}
+  60%{transform:translateX(2px);}
+  75%{transform:translateX(-1px);}
+  100%{transform:translateX(0);}
+}
+
+/* Boss shatter (death) */
+.boss-shatter{animation:bossShatter 1.5s ease forwards;}
+@keyframes bossShatter{
+  0%{transform:scale(1);filter:brightness(1);}
+  15%{transform:scale(1.04);filter:brightness(2.5);}
+  30%{transform:scale(1.02);filter:brightness(1.5);}
+  60%{transform:scale(.97);filter:brightness(.6) saturate(.3);}
+  100%{transform:scale(.95);filter:brightness(.4) saturate(0);opacity:.3;}
+}
+
+/* Crack flash overlay inside boss card */
+.boss-crack-flash{position:absolute;inset:0;background:radial-gradient(circle at center,rgba(255,255,255,.5),transparent 70%);animation:crackFlash .8s ease forwards;pointer-events:none;z-index:5;}
+@keyframes crackFlash{0%{opacity:1;}100%{opacity:0;}}
+
+/* Threshold burst text */
+.boss-threshold-burst{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:22px;letter-spacing:2px;text-shadow:0 0 20px rgba(0,0,0,.8);animation:threshBurst 1.2s ease forwards;pointer-events:none;z-index:6;white-space:nowrap;}
+@keyframes threshBurst{0%{opacity:0;transform:translate(-50%,-50%) scale(.5);}20%{opacity:1;transform:translate(-50%,-50%) scale(1.2);}50%{transform:translate(-50%,-50%) scale(1);}100%{opacity:0;transform:translate(-50%,-70%) scale(.8);}}
+
+/* Death flash fullscreen */
+.boss-death-flash{position:fixed;inset:0;background:rgba(255,255,255,.35);animation:deathFlash .6s ease forwards;pointer-events:none;z-index:9998;}
+@keyframes deathFlash{0%{opacity:1;}100%{opacity:0;}}
+
+/* ── GATE CINEMATIC ── */
+#gate-cine{position:fixed;inset:0;z-index:10001;display:flex;align-items:center;justify-content:center;background:rgba(2,0,8,.95);opacity:0;pointer-events:none;transition:opacity .4s ease;}
+#gate-cine.show{opacity:1;pointer-events:auto;}
+.gate-bg{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 40%,rgba(100,40,180,.12),transparent 70%);}
+.gate-rings{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;}
+.gate-ring{position:absolute;border:1px solid rgba(255,60,90,.2);border-radius:50%;animation:gateRingSpin 8s linear infinite;}
+.gate-ring:nth-child(1){width:240px;height:240px;animation-duration:6s;}
+.gate-ring:nth-child(2){width:300px;height:300px;animation-duration:10s;animation-direction:reverse;}
+.gate-ring:nth-child(3){width:360px;height:360px;animation-duration:14s;}
+.gate-ring:nth-child(4){width:420px;height:420px;animation-duration:18s;animation-direction:reverse;}
+@keyframes gateRingSpin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
+.gate-content{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;z-index:2;animation:gateReveal .8s cubic-bezier(.16,1,.3,1) forwards;}
+@keyframes gateReveal{0%{opacity:0;transform:scale(.85) translateY(20px);}100%{opacity:1;transform:scale(1) translateY(0);}}
+.gate-type{font-family:'Share Tech Mono',monospace;font-size:8px;letter-spacing:3px;color:rgba(255,60,90,.6);}
+.gate-boss-img{width:160px;height:160px;border-radius:6px;object-fit:cover;border:2px solid rgba(255,255,255,.08);box-shadow:0 0 40px rgba(0,0,0,.6);animation:gateImgGlow 2s ease infinite alternate;}
+@keyframes gateImgGlow{0%{box-shadow:0 0 20px rgba(0,0,0,.5);}100%{box-shadow:0 0 40px rgba(255,60,90,.2);}}
+.gate-rank{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:28px;letter-spacing:3px;margin-top:4px;text-shadow:0 0 16px currentColor;}
+.gate-name{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:20px;letter-spacing:2px;text-align:center;text-shadow:0 0 12px currentColor;}
+.gate-title{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;color:rgba(200,200,220,.4);}
+.gate-tap{position:absolute;bottom:40px;font-family:'Share Tech Mono',monospace;font-size:8px;letter-spacing:4px;color:rgba(200,200,220,.25);animation:pulse 2s ease infinite;}
 
 /* ── DUNGEON RUNS ── */
 .dung-section{padding:0 14px 6px;}

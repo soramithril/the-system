@@ -27,6 +27,12 @@ let G={
   debuff:{xp:false,expiry:null},   // xp debuff from missing quests yesterday
   penaltyPending:false,            // persistent penalty zone banner until accepted
   streakUnlocksGiven:[],   // tracks which streak milestone unlocks have been given
+  // ── BOSS SYSTEM ──
+  dailyBossId:null,dailyBossDate:'',   // current daily boss id & date assigned
+  weeklyBossId:null,weeklyBossWeek:'', // current weekly boss id & week assigned
+  dailyGateShown:'',  // date string — gate cinematic shown for daily
+  weeklyGateShown:'', // week string — gate cinematic shown for weekly
+  bossThresholds:{daily:[],weekly:[]}, // which 20% thresholds have fired
   hiddenShopItems:[],      // IDs of built-in shop items that user has hidden
   // ── MVW (Minimum Viable Week) tracking ──
   mvwLog:{},               // {YYYY-WW: {dailyDays:0, gym:0, content:0, japanese:0}}
@@ -221,6 +227,9 @@ function dayCheck(){
   G.activeDungeonId=null;
   G.activeDungeonDate='';
   G.hiddenDungeon=null;
+  // Reset daily boss for new day
+  G.dailyBossId=null;G.dailyBossDate='';G.dailyGateShown='';
+  if(G.bossThresholds)G.bossThresholds.daily=[];
   // Clear urgent quest if it's from a previous day — apply penalty if failed
   if(G.urgentExpiry&&G.urgentExpiry!==today){
     if(G.urgentQuest&&!G.urgentQuest.done){
@@ -237,6 +246,9 @@ function weekCheck(){
   const monday=getMondayStr();
   if(G.weekDate===monday){checkWeekRecap();return;}
   G.quests.filter(q=>q.t==='weekly').forEach(q=>{q.done=false;if('weekDone' in q)q.weekDone=0;});
+  // Reset weekly boss for new week
+  G.weeklyBossId=null;G.weeklyBossWeek='';G.weeklyGateShown='';
+  if(G.bossThresholds)G.bossThresholds.weekly=[];
   G.weekDate=monday;sv();
   checkWeekRecap();
 }

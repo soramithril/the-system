@@ -336,33 +336,7 @@ function getBossState(){
     weekly:{hp:Math.max(0,weeklyMax-weeklyDmg),maxHp:weeklyMax,dead:weeklyDmg>=weeklyMax},
   };
 }
-
-// Render boss HP bars in home screen
-function renderBossSection(){
-  const bs=getBossState();
-  // Daily boss
-  const dc=document.getElementById('boss-daily-card');
-  const df=document.getElementById('boss-daily-fill');
-  const dv=document.getElementById('boss-daily-val');
-  const dd=document.getElementById('boss-daily-dead');
-  if(dc){
-    dc.classList.toggle('dead',bs.daily.dead);
-    df.style.width=bs.daily.maxHp>0?Math.max(0,(bs.daily.hp/bs.daily.maxHp)*100)+'%':'0%';
-    dv.textContent=bs.daily.hp+'/'+bs.daily.maxHp;
-    dd.style.display=bs.daily.dead?'block':'none';
-  }
-  // Weekly boss
-  const wc=document.getElementById('boss-weekly-card');
-  const wf=document.getElementById('boss-weekly-fill');
-  const wv=document.getElementById('boss-weekly-val');
-  const wd=document.getElementById('boss-weekly-dead');
-  if(wc){
-    wc.classList.toggle('dead',bs.weekly.dead);
-    wf.style.width=bs.weekly.maxHp>0?Math.max(0,(bs.weekly.hp/bs.weekly.maxHp)*100)+'%':'0%';
-    wv.textContent=bs.weekly.hp+'/'+bs.weekly.maxHp;
-    wd.style.display=bs.weekly.dead?'block':'none';
-  }
-}
+// renderBossSection is now in boss.js
 
 // Floating damage number on boss hit
 function showBossDmg(dmg,cx,cy,isWeekly){

@@ -209,6 +209,11 @@ const SFX=(()=>{
 
     // Extras
     streakCine:()=>{const c=ctx(),t=c.currentTime;shimmer(.08,.5,t,2500,600);tone(165,.12,.08,.6,t+.05);bellArp([330,415,523,659,784],.22,1.0,.14,t+.1);bell(1047,.15,1.2,t+.85);},
+
+    // Boss sounds
+    bossReveal:()=>{const c=ctx(),t=c.currentTime;bowl(35,.5,4.0,t);shimmer(.15,1.5,t,.300,30);tone(55,.2,.6,2.0,t+.2);bowl(55,.4,3.5,t+.5);shimmer(.1,1.0,t+.8,1500,200);bellArp([110,138,165,207],.2,1.5,.18,t+1.0);},
+    bossHit:()=>{const c=ctx(),t=c.currentTime;thud(60,.4,.15,t);shimmer(.12,.3,t+.05,1200,200);tone(110,.15,.08,.4,t+.1);bell(220,.15,.5,t+.15);},
+    bossDeath:()=>{const c=ctx(),t=c.currentTime;thud(40,.5,.3,t);bowl(55,.45,4.0,t+.1);shimmer(.2,2.0,t+.2,2000,300);bellArp([220,277,330,415,523],.25,2.0,.15,t+.5);bell(659,.2,2.5,t+1.2);shimmer(.12,2.5,t+1.5,5000,1000);},
   };
 
   // Resume AudioContext when returning from background (iOS suspends it)

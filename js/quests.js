@@ -32,9 +32,11 @@ function togQ(id,evt){
     if(q.t==='daily'||q.t==='urgent'){
       const dmg=q.xp;
       if(evt)showBossDmg(dmg,evt.clientX,evt.clientY,false);
+      setTimeout(()=>checkBossThreshold('daily'),400);
     } else if(q.t==='weekly'){
       const dmg=q.xp;
       if(evt)showBossDmg(dmg,evt.clientX,evt.clientY,true);
+      setTimeout(()=>checkBossThreshold('weekly'),400);
     }
     // ── DUNGEON CHECK — did completing this quest clear today's dungeon run? ──
     if(!G.dungeonToday)G.dungeonToday={};
