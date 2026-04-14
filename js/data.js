@@ -282,7 +282,7 @@ const BUILTIN_SHOP=[
   {id:'shield',  cat:'System',icon:'🛡',n:'Streak Shield',         d:'Protects all streaks if you miss a day. One-time use.',      cost:350,coolDays:0, cons:true,rar:'magic',    e:'shield'},
   {id:'randbox', cat:'System',icon:'🎲',n:'Random Reward Box',     d:'Opens a random treat from the shop. Luck is a stat.',        cost:250,coolDays:0, cons:true,rar:'magic',    e:'rand'},
   {id:'restday', cat:'System',icon:'🛋',n:'Rest Day Pass',         d:'Skip ALL fitness quests today with zero penalty.',cost:2000,coolDays:0,cons:true,rar:'rare',e:'skipfit'},
-  {id:'restpermit',cat:'System',icon:'🏖',n:'Rest Permit',          d:'Declare today a full rest day. ALL daily quests are suspended — no penalties, no streak loss. Use sparingly.',cost:3000,coolDays:7,cons:true,rar:'epic',e:'restpermit'},
+  {id:'restpermit',cat:'System',icon:'🏖',n:'Rest Permit',          d:'Declare today a full rest day. ALL daily quests are suspended — no penalties, no streak loss. Use sparingly.',cost:400,coolDays:7,cons:true,rar:'epic',e:'restpermit'},
   // ── KNIGHT\'S ARMOURY (unlocked by extracting Igris) ──
   {id:'ka_shoes',  cat:"Knight's Armoury",icon:'👟',n:'New Training Shoes',   d:'Treat yourself to a proper pair of gym shoes.',              cost:1200,coolDays:90,cons:true,rar:'epic'},
   {id:'ka_gloves', cat:"Knight's Armoury",icon:'🥊',n:'Boxing / Gym Gloves',  d:'A quality pair of gloves. Igris would approve.',             cost:450,coolDays:30,cons:true,rar:'rare'},
