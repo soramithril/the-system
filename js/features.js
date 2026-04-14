@@ -146,6 +146,11 @@ setInterval(autoMidnightReset, 15000); // check every 15s
 document.addEventListener('visibilitychange', ()=>{
   if(document.visibilityState === 'visible') autoMidnightReset();
 });
+// iOS Safari may restore pages from cache without firing visibilitychange
+window.addEventListener('pageshow', (e)=>{
+  if(e.persisted) autoMidnightReset();
+});
+window.addEventListener('focus', autoMidnightReset);
 
 // ── PUSH NOTIFICATION REMINDERS ──
 function initNotifications(){

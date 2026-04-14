@@ -162,9 +162,10 @@ function ld(){
 function dayCheck(){
   const today=new Date().toDateString();
   if(G.lastDate===today)return;
+  let wasRestDay=false;
   if(G.lastDate){
     // Check if yesterday was a declared rest day
-    const wasRestDay=G.fx.restDay&&G.fx.restDay===G.lastDate;
+    wasRestDay=G.fx.restDay&&G.fx.restDay===G.lastDate;
     if(wasRestDay){
       // Rest day — no penalties, no streak loss, clear the flag
       G.fx.restDay=null;
