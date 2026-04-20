@@ -165,6 +165,61 @@ function ld(){
         G._qmig4=true;
         sv();
       }
+      // ── FRESH START RESET (runs once, 2026-04-20) ──
+      // Full progress wipe requested by player. Heatmap begins Mon Apr 20 2026.
+      // Preserves: player name, gate cinematic flag, firstLaunch flag (cosmetic only).
+      if(!G._reset20260420){
+        const FRESH_START='Mon Apr 20 2026';
+        // Core progress
+        G.level=1;G.xp=0;G.totalXp=0;G.gold=100;
+        G.hp=100;G.maxHp=100;G.mp=100;G.maxMp=100;
+        G.stats={STR:0,AGI:0,STA:0,INT:0,SEN:0};
+        G.qsd={STR:0,AGI:0,STA:0,INT:0,SEN:0,savings:0};
+        G.questsTotal=0;
+        // Buffs / debuffs / penalty state
+        G.fx={shield:false,skipfit:false,fitb:false,intb:false,str3:0,slp2x:false,
+              read7:0,read10:0,sta5:false,str6:false,str12:false,agi8:false,
+              mind7:false,anki10:false,water5:false,gld20:false,all5:false};
+        G.debuff={xp:false,expiry:null};
+        G.penaltyPending=false;
+        // Inventory / shadows / titles / skills / job
+        G.inventory=[];G.shadows=[];G.shadowArmy=[];
+        G.shadowCrystal=false;G.shadowSigil=false;G.shadowSeal=false;
+        G.shadowScrollPending=false;G.shadowPendant='';
+        G.unlockedTitles=['tw'];G.equippedTitle=null;G.unlockedSkills=[];
+        G.jobClass=null;
+        // Shop state
+        G.shopCooldowns={};G.shopOverrides={};G.hiddenShopItems=[];
+        G.customShop=[];G.customCategories=[];
+        // Dungeon + boss state
+        G.dungeonToday={};G.activeDungeonId=null;G.activeDungeonDate='';G.hiddenDungeon=null;
+        G.dailyBossId=null;G.dailyBossDate='';G.dailyGateShown='';
+        G.weeklyBossId=null;G.weeklyBossWeek='';G.weeklyGateShown='';
+        G.bossThresholds={daily:[],weekly:[]};
+        // Urgent + streak unlocks + recap + weekly MVW
+        // urgentNextDate set to morning of startDate so nothing spawns during the
+        // pre-start day and can't be auto-penalized at midnight rollover.
+        G.urgentQuest=null;G.urgentExpiry=null;G.lastUrgentId=-1;G.lastUrgentQuestId='';
+        G.urgentNextDate=new Date(FRESH_START+' 08:00:00').toISOString();
+        G.streakUnlocksGiven=[];
+        G.mvwLog={};G.weekRecapShown='';
+        // Heatmap + stat history — both empty so heatmap begins on FRESH_START
+        G.dailyLog=[];G.statLog=[];
+        // Quests: rebuild from DEFAULT_QUESTS so all done/streak/weekDone flags are clean
+        G.quests=DEFAULT_QUESTS.map(q=>({...q,done:false,streak:0,weekDone:0}));
+        // Health sync
+        G.healthSync={date:'',steps:0,workouts:[],sleep:{hours:0},hrv:0,updated:0};
+        // Date fields:
+        //   lastDate = today → dayCheck short-circuits on today's load (no false penalty)
+        //   startDate = Mon Apr 20 → dayCheck uses this to skip penalty+logging
+        //                            for any "yesterday" date before the fresh start
+        //   weekDate = '' → weekCheck resets weekly quests cleanly on next load
+        G.lastDate=new Date().toDateString();
+        G.weekDate='';
+        G.startDate=FRESH_START;
+        G._reset20260420=true;
+        sv();
+      }
     }catch(e){
       console.error('Save data corrupted, starting fresh:',e);
       setTimeout(()=>showError('⚠ SAVE DATA CORRUPTED','Starting fresh. Firebase recovery will be attempted.'),500);
@@ -189,7 +244,11 @@ function dayCheck(){
   const today=new Date().toDateString();
   if(G.lastDate===today)return;
   let wasRestDay=false;
-  if(G.lastDate){
+  // Fresh-start guard: when G.startDate is set, any "yesterday" that predates it
+  // should NOT trigger penalty logic or heatmap logging. Keeps the dailyLog clean
+  // so the calendar heatmap begins exactly on G.startDate.
+  const beforeStart=G.startDate&&G.lastDate&&new Date(G.lastDate)<new Date(G.startDate);
+  if(G.lastDate&&!beforeStart){
     // Check if yesterday was a declared rest day
     wasRestDay=G.fx.restDay&&G.fx.restDay===G.lastDate;
     if(wasRestDay){
@@ -228,7 +287,8 @@ function dayCheck(){
     if(new Date().getDay()===0&&SKILLS.find(s=>s.id==='sl').f(G)){G.stats.INT+=3;showStatUpCine({INT:3},'Sunday Language Absorption bonus');}
   }
   // Log yesterday's daily completion rate — only count quests scheduled yesterday
-  if(G.lastDate){
+  // Skipped when yesterday predates the fresh-start date (heatmap starts clean).
+  if(G.lastDate&&!beforeStart){
     const dl=G.quests.filter(q=>q.t==='daily'&&!q.penaltyTask&&wasScheduledOn(q,G.lastDate));
     const dDone=dl.filter(q=>q.done).length;
     const dTotal=dl.length;
@@ -254,8 +314,9 @@ function dayCheck(){
   G.dailyBossId=null;G.dailyBossDate='';G.dailyGateShown='';
   if(G.bossThresholds)G.bossThresholds.daily=[];
   // Clear urgent quest if it's from a previous day — apply penalty if failed
+  // (Skipped on fresh-start day so a reset doesn't auto-penalize an unfired urgent.)
   if(G.urgentExpiry&&G.urgentExpiry!==today){
-    if(G.urgentQuest&&!G.urgentQuest.done){
+    if(G.urgentQuest&&!G.urgentQuest.done&&!beforeStart){
       // Penalty for ignoring urgent quest: lose gold and small XP penalty
       G.gold=Math.max(0,G.gold-25);
       G.xp=Math.max(0,G.xp-20);G.totalXp=Math.max(0,G.totalXp-20);
