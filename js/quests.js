@@ -112,8 +112,8 @@ function togQ(id,evt){
     if(SKILLS.find(s=>s.id==='sk').f(G)&&G.questsTotal%10===0){gainXp(50,q.s);G.gold+=25;setTimeout(()=>showItemCine({icon:'⬡',n:"Ruler's Authority",d:'+50 XP & +25 Gold (every 10 quests)'}),900);}
     // MVW tracking
     updateMVWOnQuestComplete(q);
-    // all daily complete
-    const dailies=G.quests.filter(q=>q.t==='daily');
+    // all daily complete — only consider quests scheduled for today
+    const dailies=G.quests.filter(q=>q.t==='daily'&&isScheduledToday(q));
     if(dailies.length&&dailies.every(x=>x.done)){
       updateMVWDailyDay();
       const boosts=autoDistribute(3,q.s);applyBoosts(boosts);

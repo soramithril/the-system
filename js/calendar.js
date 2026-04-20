@@ -19,7 +19,7 @@ function rCal(){
   const now=new Date();
   const todayKey=now.toISOString().slice(0,10);
   if(now.getFullYear()===calYear){
-    const dl=G.quests.filter(q=>q.t==='daily'&&!q.penaltyTask);
+    const dl=G.quests.filter(q=>q.t==='daily'&&!q.penaltyTask&&isScheduledToday(q));
     const dDone=dl.filter(q=>q.done).length;
     const dTotal=dl.length;
     if(dTotal>0)logMap[todayKey]={done:dDone,total:dTotal};

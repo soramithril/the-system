@@ -175,7 +175,7 @@ function checkNotifReminder(){
   if(h>=21&&_lastNotifDate!==todayStr){
     // Check if rest day
     if(G.fx.restDay===todayStr)return;
-    const inc=G.quests.filter(q=>q.t==='daily'&&!q.done&&!q.penaltyTask).length;
+    const inc=G.quests.filter(q=>q.t==='daily'&&!q.done&&!q.penaltyTask&&isScheduledToday(q)).length;
     if(inc>0){
       _lastNotifDate=todayStr;
       new Notification('⚔ THE SYSTEM',{
@@ -240,9 +240,9 @@ function updateMVWDailyDay(){
   const e=getMVWEntry();
   const today=new Date().toDateString();
   if(G._mvwLastDailyDay!==today){
-    const daily=G.quests.filter(q=>q.t==='daily');
+    const daily=G.quests.filter(q=>q.t==='daily'&&isScheduledToday(q));
     const done=daily.filter(q=>q.done).length,total=daily.length;
-    // Count the day if at least 80% of dailies done (11/14)
+    // Count the day if at least 80% of dailies done
     if(total>0&&done/total>=0.8){
       e.dailyDays=Math.min(e.dailyDays+1,7);
       G._mvwLastDailyDay=today;

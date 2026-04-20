@@ -145,6 +145,26 @@ function ld(){
         G._qmig3=true;
         sv();
       }
+      // ── QUEST MIGRATION v4 (2026-04-19) ──
+      // Meal protocol + day-scheduled training schedule.
+      // Adds: m_shake1/m_lunch/m_shake2/m_dinner/m_shake3, w_upper/w_lower/w_pel40/w_pel45/w_recover.
+      // Retires: s7 "2 protein shakes" (now covered by 3 shake meals).
+      // Also syncs `days` onto any existing quest whose default now has one.
+      if(!G._qmig4){
+        const REMOVED_V4=new Set(['s7']);
+        G.quests=G.quests.filter(q=>!REMOVED_V4.has(q.id)||q.m==='custom');
+        const defMap4=new Map(DEFAULT_QUESTS.map(q=>[q.id,q]));
+        G.quests.forEach(q=>{
+          const def=defMap4.get(q.id);
+          if(def&&def.days)q.days=def.days;
+        });
+        const savedIds4=new Set(G.quests.map(q=>q.id));
+        DEFAULT_QUESTS.forEach(dq=>{
+          if(!savedIds4.has(dq.id))G.quests.push({...dq});
+        });
+        G._qmig4=true;
+        sv();
+      }
     }catch(e){
       console.error('Save data corrupted, starting fresh:',e);
       setTimeout(()=>showError('⚠ SAVE DATA CORRUPTED','Starting fresh. Firebase recovery will be attempted.'),500);
@@ -177,7 +197,9 @@ function dayCheck(){
       G.fx.restDay=null;
       G.debuff={xp:false,expiry:null};
     } else {
-      const inc=G.quests.filter(q=>q.t==='daily'&&!q.done&&!q.penaltyTask).length;
+      // Only count quests that were actually scheduled for yesterday (day-scheduled
+      // workouts like Tue-only Upper shouldn't count as "missed" on Mon).
+      const inc=G.quests.filter(q=>q.t==='daily'&&!q.done&&!q.penaltyTask&&wasScheduledOn(q,G.lastDate)).length;
       if(inc>0){
         if(G.fx.shield){
           G.fx.shield=false;
@@ -192,8 +214,9 @@ function dayCheck(){
           G.gold=Math.max(0, G.gold-goldLoss);
           // Apply XP debuff for today (−20% XP)
           G.debuff={xp:true, expiry:today};
-          // Reset streaks on all incomplete dailies
-          G.quests.filter(q=>q.t==='daily').forEach(q=>q.streak=0);
+          // Reset streaks — but only for quests that were actually due yesterday.
+          // A Tuesday-only workout should keep its streak when Mon→Tue rolls over.
+          G.quests.filter(q=>q.t==='daily'&&wasScheduledOn(q,G.lastDate)).forEach(q=>q.streak=0);
           // Set penalty pending — banner persists until user accepts
           G.penaltyPending=true;
         }
@@ -204,9 +227,9 @@ function dayCheck(){
     }
     if(new Date().getDay()===0&&SKILLS.find(s=>s.id==='sl').f(G)){G.stats.INT+=3;showStatUpCine({INT:3},'Sunday Language Absorption bonus');}
   }
-  // Log yesterday's daily completion rate
+  // Log yesterday's daily completion rate — only count quests scheduled yesterday
   if(G.lastDate){
-    const dl=G.quests.filter(q=>q.t==='daily'&&!q.penaltyTask);
+    const dl=G.quests.filter(q=>q.t==='daily'&&!q.penaltyTask&&wasScheduledOn(q,G.lastDate));
     const dDone=dl.filter(q=>q.done).length;
     const dTotal=dl.length;
     if(dTotal>0){
@@ -271,8 +294,8 @@ function maybeSpawnUrgent(){
   if(G.urgentQuest&&!G.urgentQuest.done&&G.urgentExpiry===today)return;
   if(G.urgentNextDate&&new Date()<new Date(G.urgentNextDate))return;
 
-  // ── PERSONALISED URGENT: pull from weak or missed daily quests ──
-  const dailies=G.quests.filter(q=>q.t==='daily'&&!q.penaltyTask);
+  // ── PERSONALISED URGENT: pull from weak or missed daily quests (today's schedule only) ──
+  const dailies=G.quests.filter(q=>q.t==='daily'&&!q.penaltyTask&&isScheduledToday(q));
 
   // Tier 1: incomplete today AND no streak at all (chronically skipped)
   const t1=dailies.filter(q=>!q.done&&(q.streak||0)===0);

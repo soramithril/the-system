@@ -325,7 +325,8 @@ function completePenalty(){if(penTimer){clearInterval(penTimer);penTimer=null;}d
 
 // Returns {daily:{hp,maxHp,dead}, weekly:{hp,maxHp,dead}}
 function getBossState(){
-  const dailyQs=G.quests.filter(q=>q.t==='daily'&&!q.penaltyTask);
+  // Scale daily boss HP to the quests actually due today (day-scheduled only)
+  const dailyQs=G.quests.filter(q=>q.t==='daily'&&!q.penaltyTask&&isScheduledToday(q));
   const weeklyQs=G.quests.filter(q=>q.t==='weekly');
   const dailyMax=Math.max(100,dailyQs.reduce((s,q)=>s+q.xp,0));
   const weeklyMax=Math.max(200,weeklyQs.reduce((s,q)=>s+(q.xp*(q.weekDone!==undefined?2:1)),0));
