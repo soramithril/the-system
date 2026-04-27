@@ -28,9 +28,9 @@ function rCal(){
   const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   const dowLabels=['M','T','W','T','F','S','S'];
 
-  // Build list of all days in the year starting from Apr 7
-  const startDate=new Date(calYear,3,7); // April 7
-  const endDate=new Date(calYear+1,3,6); // April 6 next year
+  // Build list of all days in the year starting from Apr 26 (matches fresh-start date)
+  const startDate=new Date(calYear,3,26); // April 26
+  const endDate=new Date(calYear+1,3,25); // April 25 next year
   const allDays=[];
   for(let d=new Date(startDate);d<=endDate;d.setDate(d.getDate()+1)){
     allDays.push(new Date(d));
