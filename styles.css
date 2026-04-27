@@ -9,6 +9,30 @@
   --str:#d44060;--agi:#4098b8;--sta:#40c070;--int:#7088aa;--sen:#c8a040;
   --acc:#d0d6e2;--acc2:#a0a8b8;--vio:#2a4060;
   --sit:env(safe-area-inset-top,0px);--sib:env(safe-area-inset-bottom,0px);
+
+  /* ── WAVE 1 — Solo-Leveling-ARISE-aligned palette ── additive, doesn't break existing ── */
+  --void:#04030a; --void-deep:#020107;
+  --surface-1:#0a0815; --surface-2:#110d20; --surface-3:#18142e; --surface-4:#221a3d;
+  --violet-900:#1a0c3d; --violet-800:#2c156b; --violet-700:#4020a0;
+  --violet-600:#6030d0; --violet-500:#8048ff; --violet-400:#a878ff; --violet-300:#c4a8ff;
+  --cyan-700:#0a8090; --cyan-500:#18d8e8; --cyan-400:#6cf0ff;
+  --cyan-glow:rgba(24,216,232,0.55);
+  --gold-400:#ffd060; --gold-glow:rgba(255,208,96,0.55);
+  --red-700:#80101c; --red-500:#e02040; --red-400:#ff5070; --red-glow:rgba(224,32,64,0.55);
+  /* Rarity ramp (rk-* names reserved by existing classes; using rar-* to avoid collisions) */
+  --rar-E:#707888; --rar-D:#b8c0d0; --rar-C:#30c878; --rar-B:#2090e8;
+  --rar-A:#a040ff; --rar-S:#ffd060; --rar-N:#ff60c0;
+  --line-frame:rgba(168,120,255,0.85); --line-scan:rgba(108,240,255,0.55);
+  /* Motion */
+  --ease-quick:cubic-bezier(.4,0,.2,1);
+  --ease-elegant:cubic-bezier(.22,1,.36,1);
+  --ease-dramatic:cubic-bezier(.16,1,.3,1);
+  --ease-cinematic:cubic-bezier(.7,0,.3,1);
+  --d-micro:80ms; --d-quick:180ms; --d-standard:280ms;
+  --d-elegant:480ms; --d-dramatic:720ms; --d-cinematic:1400ms;
+
+  /* Numeric face — Orbitron for system display numbers */
+  --font-num:'Orbitron','Saira',Eurostile,'Barlow Condensed',sans-serif;
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 /* Accessibility: visible focus indicators */
@@ -2027,3 +2051,429 @@ body{font-family:'Barlow Condensed',sans-serif;color:var(--white);}
 .wr-iname{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;letter-spacing:1px;flex:1;}
 .wr-ival{font-family:'Share Tech Mono',monospace;font-size:9px;}
 .wr-dismiss{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:4px;color:rgba(140,155,180,.3);text-align:center;text-transform:uppercase;margin-top:4px;}
+
+
+/* ════════════════════════════════════════════════════════════════════
+   WAVE 1 — Visual upgrade pass.  Loaded LAST so its rules win.
+   Touches: banners, status window, resource bars, stat hexes, numeric
+   typography, persistent Penalty Zone banner (Tier 5+ Penance), tap
+   feedback primitive, reduced-motion path.
+   No JS classes were renamed.  All edits are visual-only.
+   ════════════════════════════════════════════════════════════════════ */
+
+/* ── BANNERS — per-screen tonal grade + scan sweep + Ken Burns drift ── */
+.scr-banner{height:170px;}
+#s-home .scr-banner{height:200px;}
+.scr-banner img{
+  filter:brightness(.55) saturate(1.35) contrast(1.08);
+  transform:scale(1.03);
+  animation:w1-banner-drift 26s ease-in-out infinite alternate;
+}
+@keyframes w1-banner-drift{
+  0%  {transform:scale(1.03) translate(0,0);}
+  100%{transform:scale(1.06) translate(-2%,1%);}
+}
+/* Per-screen tint pumped through ::after */
+.scr-banner::after{
+  background:
+    linear-gradient(180deg,
+      var(--w1-banner-tint, rgba(64,16,144,0.32)) 0%,
+      transparent 28%, transparent 60%,
+      rgba(6,8,14,0.92) 88%, var(--bg) 100%);
+  mix-blend-mode:normal;
+}
+#s-home   {--w1-banner-tint: rgba(64,16,144,0.32);}
+#s-quests {--w1-banner-tint: rgba(120,16,40,0.28);}
+#s-stats  {--w1-banner-tint: rgba(40,16,80,0.30);}
+#s-shop   {--w1-banner-tint: rgba(140,96,16,0.24);}
+#s-prof   {--w1-banner-tint: rgba(80,32,140,0.30);}
+#s-cal    {--w1-banner-tint: rgba(16,48,96,0.30);}
+
+/* Periodic cyan scan sweep across the banner — appears every 14s */
+.scr-banner .ban-vig{
+  background:radial-gradient(ellipse 65% 80% at 50% 35%,transparent 35%,rgba(4,2,14,.55) 100%);
+}
+.scr-banner::before{
+  /* hairline cyan stroke at the bottom edge of the banner */
+  background:linear-gradient(90deg,transparent,var(--cyan-500),var(--violet-400),var(--cyan-500),transparent);
+  opacity:.78;
+  height:1px;
+  box-shadow:0 0 12px var(--cyan-glow);
+}
+/* Add a dedicated scan-sweep layer via a stacked pseudo on the img wrapper */
+.scr-banner{position:relative;}
+.scr-banner > .w1-banner-scan{
+  position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:2;
+}
+.scr-banner > .w1-banner-scan::before{
+  content:'';position:absolute;top:0;bottom:0;left:-30%;width:30%;
+  background:linear-gradient(90deg,transparent,rgba(108,240,255,.18),transparent);
+  filter:blur(.5px);
+  animation:w1-banner-scan 14s linear infinite;
+}
+@keyframes w1-banner-scan{
+  0%, 72% { left:-30%; }
+  100%    { left:130%; }
+}
+
+/* Banner title — tighten tracking, drop a numeric eyebrow */
+.ban-title{
+  font-size:30px;letter-spacing:4px;
+  text-shadow:0 2px 24px rgba(0,0,0,.85),0 0 32px rgba(168,120,255,.35);
+}
+.ban-title::before{color:var(--cyan-500);text-shadow:0 0 8px var(--cyan-glow);}
+.ban-sub{
+  color:rgba(168,200,255,.55);letter-spacing:3.5px;
+}
+
+/* ── STATUS WINDOW — glass refresh + drawn corner brackets ── */
+.status-window{
+  background:
+    linear-gradient(180deg, rgba(34,26,61,.86) 0%, rgba(17,13,32,.96) 100%),
+    linear-gradient(135deg, rgba(18,8,45,0.94), rgba(10,5,30,0.98));
+  border:1px solid rgba(168,120,255,.28);
+  box-shadow:
+    inset 0 1px 0 rgba(168,120,255,.10),
+    0 8px 32px -8px rgba(80,20,200,.35);
+  backdrop-filter:blur(14px) saturate(140%);
+  -webkit-backdrop-filter:blur(14px) saturate(140%);
+}
+.status-window::before{
+  /* upgrade the existing top hairline to cyan→violet */
+  background:linear-gradient(90deg,transparent,var(--cyan-500) 25%,var(--violet-400) 50%,var(--cyan-500) 75%,transparent);
+  opacity:.8;height:1px;
+  box-shadow:0 0 14px var(--cyan-glow);
+}
+/* Replace the ◆ corner glyphs with drawn L-brackets via background-image masks */
+.status-window .sw-corner{
+  font-size:0 !important; /* hide the ◆ character */
+  width:18px;height:18px;
+  background:
+    linear-gradient(var(--line-frame),var(--line-frame)) no-repeat,
+    linear-gradient(var(--line-frame),var(--line-frame)) no-repeat,
+    radial-gradient(circle at 50% 50%, var(--cyan-500) 0 1.6px, transparent 2px) no-repeat;
+}
+.status-window .sw-corner.tl{
+  top:8px;left:8px;
+  background-size:1.5px 12px, 12px 1.5px, 4px 4px;
+  background-position:0 0, 0 0, 0 0;
+}
+.status-window .sw-corner.tr{
+  top:8px;right:8px;
+  background-size:1.5px 12px, 12px 1.5px, 4px 4px;
+  background-position:100% 0, 100% 0, 100% 0;
+}
+.status-window .sw-corner.bl{
+  bottom:8px;left:8px;
+  background-size:1.5px 12px, 12px 1.5px, 4px 4px;
+  background-position:0 100%, 0 100%, 0 100%;
+}
+.status-window .sw-corner.br{
+  bottom:8px;right:8px;
+  background-size:1.5px 12px, 12px 1.5px, 4px 4px;
+  background-position:100% 100%, 100% 100%, 100% 100%;
+}
+.status-window .sw-watermark{
+  color:rgba(168,120,255,.18);font-family:'Share Tech Mono',monospace;
+  letter-spacing:5px;
+}
+
+/* ── RESOURCE BARS — unified HP / MP / XP chrome ── */
+.bars-wrap{gap:6px;}
+.bar-row{gap:9px;}
+.bar-key{
+  font-family:var(--font-num);font-weight:700;font-size:10px;letter-spacing:1.5px;
+  width:22px;text-shadow:0 0 6px currentColor;
+}
+.bar-k-hp{color:var(--red-500);}
+.bar-k-mp{color:var(--cyan-500);}
+.bar-track{
+  height:11px;
+  background:linear-gradient(180deg, rgba(0,0,0,.55), rgba(0,0,0,.35));
+  border:1px solid rgba(168,120,255,.18);
+  border-radius:0;
+  clip-path:polygon(2px 0,100% 0,calc(100% - 2px) 100%,0 100%); /* slight skew */
+  box-shadow:inset 0 1px 2px rgba(0,0,0,.6);
+}
+.bar-track::before{
+  /* segment ticks every 25% */
+  background:repeating-linear-gradient(90deg,
+    transparent 0, transparent calc(25% - 1px),
+    rgba(0,0,0,.45) calc(25% - 1px), rgba(0,0,0,.45) 25%);
+}
+.bar-fill{border-radius:0;}
+.hp-fill{background:linear-gradient(90deg, var(--red-700), var(--red-500), var(--red-400));}
+.mp-fill{background:linear-gradient(90deg, var(--cyan-700), var(--cyan-500), var(--cyan-400));}
+.bar-fill::after{
+  width:8px;background:rgba(255,255,255,.7);filter:blur(2px);
+}
+.bar-val{
+  font-family:var(--font-num);font-weight:500;font-size:9px;
+  color:rgba(232,228,255,.55);letter-spacing:.5px;
+  font-feature-settings:"tnum" 1;
+}
+
+/* XP gets the same chrome */
+.xp-track{
+  height:11px;
+  background:linear-gradient(180deg, rgba(0,0,0,.55), rgba(0,0,0,.35)) !important;
+  border:1px solid rgba(255,208,96,.22);
+  clip-path:polygon(2px 0,100% 0,calc(100% - 2px) 100%,0 100%);
+  box-shadow:inset 0 1px 2px rgba(0,0,0,.6);
+}
+.xp-fill{
+  background:linear-gradient(90deg, #604000, var(--gold-400), #fff0c0) !important;
+  height:100% !important;
+  position:relative;
+}
+.xp-fill::after{
+  content:'';position:absolute;right:0;top:0;bottom:0;width:8px;
+  background:rgba(255,255,255,.7);filter:blur(2px);
+}
+
+/* ── STAT HEX — real frame chrome via doubled SVG stroke ── */
+.stat-hex{
+  background:
+    linear-gradient(180deg, rgba(34,26,61,.45), rgba(10,5,25,.65));
+  border:1px solid var(--sc, rgba(168,120,255,.22));
+  box-shadow:
+    inset 0 1px 0 rgba(168,120,255,.10),
+    0 0 12px -6px var(--sc, rgba(168,120,255,.4));
+  padding:8px 2px;
+  transition:transform var(--d-quick) var(--ease-quick),
+             box-shadow var(--d-standard) var(--ease-elegant);
+}
+.stat-hex::before{
+  height:1px;
+  background:var(--sc, rgba(168,120,255,.4));
+  opacity:.75;
+  box-shadow:0 0 8px var(--sc, transparent);
+}
+.stat-hex:active{transform:scale(.96);}
+.sh-k{
+  font-family:'Rajdhani',sans-serif;font-weight:700;
+  font-size:9px;letter-spacing:1.5px;
+}
+.sh-v{
+  font-family:var(--font-num);font-weight:700;font-size:18px;
+  font-feature-settings:"tnum" 1;
+  text-shadow:0 0 10px currentColor;
+}
+
+/* ── INFO CHIPS — number face split from label face ── */
+.ic{
+  background:linear-gradient(180deg, rgba(34,26,61,.55), rgba(10,5,25,.85));
+  border:1px solid rgba(168,120,255,.18);
+}
+.ic::before{background:linear-gradient(90deg,transparent,rgba(168,120,255,.5),transparent);}
+.ic-l{
+  font-family:'Share Tech Mono',monospace;font-weight:500;
+  font-size:8px;letter-spacing:2.5px;color:rgba(168,200,255,.42);
+}
+.ic-v{
+  font-family:var(--font-num);font-weight:700;font-size:21px;
+  font-feature-settings:"tnum" 1;
+  letter-spacing:.5px;
+}
+.ic-lv .ic-v{color:var(--cyan-500);text-shadow:0 0 14px var(--cyan-glow);}
+.ic-gd .ic-v{color:var(--gold-400);text-shadow:0 0 14px var(--gold-glow);}
+.ic-tx .ic-v{color:var(--violet-400);font-size:14px;}
+
+/* ── DAILY QUESTS RING — promote to hero, numeric face ── */
+.daily-card{
+  background:
+    linear-gradient(180deg, rgba(34,26,61,.65), rgba(10,5,25,.92));
+  border:1px solid rgba(168,120,255,.25);
+  box-shadow:
+    inset 0 1px 0 rgba(168,120,255,.12),
+    0 8px 24px -8px rgba(80,20,200,.35);
+  padding:14px 16px;
+}
+.ring-n{
+  font-family:var(--font-num);font-weight:900;font-size:24px;
+  font-feature-settings:"tnum" 1;
+  text-shadow:0 0 14px var(--cyan-glow);
+  color:#fff;
+}
+.ring-of{font-family:var(--font-num);font-weight:500;font-size:8px;letter-spacing:1px;color:rgba(168,200,255,.4);}
+.ring-pct{
+  font-family:var(--font-num);font-weight:700;font-size:10px;
+  letter-spacing:2px;color:var(--cyan-500);
+  text-shadow:0 0 8px var(--cyan-glow);
+}
+
+/* ── SHOP — gold balance gets the numeric face & glow ── */
+.shop-gold-bar{
+  background:linear-gradient(180deg, rgba(140,96,16,.10), rgba(80,40,8,.18));
+  border:1px solid rgba(255,208,96,.32);
+  box-shadow:0 0 24px -8px var(--gold-glow);
+}
+.sgb-lbl{font-family:'Share Tech Mono',monospace;letter-spacing:3px;color:rgba(255,208,96,.55);}
+.sgb-val{
+  font-family:var(--font-num);font-weight:900;font-size:28px;
+  font-feature-settings:"tnum" 1;
+  color:var(--gold-400);
+  text-shadow:0 0 18px var(--gold-glow);
+}
+
+/* ── HEADER NUMERIC FACES — level, stat values, totals, timers ── */
+#h-rl, .rk-card-letter, .rk-badge-sm, .boss-rank-badge,
+.rt-val, .dp-cnt, .qcr-v, .lu-number, .ru-badge, .str-days,
+.sbar-val, .stat-hex .sh-v, .pz-timer{
+  font-family:var(--font-num) !important;
+  font-feature-settings:"tnum" 1;
+  letter-spacing:.5px;
+}
+
+/* ── BOSS RANK BADGE — pop more ── */
+.boss-rank-badge{
+  font-size:18px;font-weight:900;
+  text-shadow:0 0 12px currentColor, 0 1px 2px rgba(0,0,0,.8);
+  filter:drop-shadow(0 2px 4px rgba(0,0,0,.6));
+}
+.boss-card-v2{height:140px;border-width:1px;}
+.boss-card-img{opacity:.55;}
+.boss-card-name{font-size:17px;letter-spacing:1.5px;}
+
+/* ── GLOBAL TAP FEEDBACK PRIMITIVE ── */
+.qcard, .ic, .stat-hex, .sitem, .tl-card, .tl-card-eq,
+.bn, .iv-card, .iv-card-use, .si-buy, .mbtn, .sh-card,
+.fp, .scat, .rk-card, .pz-task, .boss-card-v2{
+  transition:transform var(--d-micro) var(--ease-quick),
+             filter   var(--d-quick) var(--ease-quick),
+             box-shadow var(--d-standard) var(--ease-elegant) !important;
+}
+.qcard:active, .ic:active, .stat-hex:active, .sitem:active,
+.tl-card:active, .iv-card:active, .sh-card:active,
+.fp:active, .scat:active, .rk-card:active, .boss-card-v2:active{
+  transform:scale(.97);
+  filter:brightness(1.12);
+}
+
+/* ── BOTTOM NAV — refined active state ── */
+#bnav{
+  background:linear-gradient(180deg,rgba(6,8,14,0) 0%,rgba(10,5,25,.95) 22%);
+  border-top:1px solid rgba(168,120,255,.32);
+}
+#bnav::before{
+  background:linear-gradient(90deg,transparent,var(--cyan-500),var(--violet-400),var(--cyan-500),transparent);
+  opacity:.85;
+  box-shadow:0 0 10px var(--cyan-glow);
+}
+.bn-ic{transition:transform var(--d-standard) var(--ease-elegant), opacity var(--d-standard) var(--ease-elegant), filter var(--d-standard) var(--ease-elegant);}
+.bn.act .bn-ic{
+  transform:scale(1.14);
+  filter:drop-shadow(0 0 10px var(--cyan-glow));
+  color:var(--cyan-400);
+}
+.bn.act .bn-lb{color:var(--cyan-400);text-shadow:0 0 8px var(--cyan-glow);}
+.bn.act::after{
+  background:var(--cyan-400);
+  box-shadow:0 0 14px var(--cyan-glow);
+}
+
+/* Bottom nav — Stats tab folds into Profile in Wave 1 (visually hidden, click still works) */
+#bn-stats{display:none !important;}
+/* Re-flow remaining tabs */
+#bnav .bn{flex:1;}
+
+/* ── TIER 5+ PENANCE — the persistent Penalty Zone banner, cranked ── */
+.pz-persistent-banner{
+  background:
+    linear-gradient(180deg, rgba(80,8,16,.94) 0%, rgba(40,4,12,.98) 100%) !important;
+  border:1px solid var(--red-500) !important;
+  border-bottom:1px solid var(--red-700) !important;
+  box-shadow:
+    0 0 0 1px var(--red-700),
+    0 4px 32px -4px var(--red-glow),
+    inset 0 0 80px -20px var(--red-700) !important;
+  animation:w1-penance-tremor 4s ease-in-out infinite !important;
+  padding:14px 20px 16px;
+  overflow:visible;
+}
+.pz-persistent-banner::before{
+  /* red mist breathing layer */
+  content:'';position:absolute;inset:-30px;
+  background:radial-gradient(ellipse 60% 80% at 50% 50%,rgba(224,32,64,.22) 0%,transparent 65%);
+  filter:blur(28px);
+  animation:w1-penance-mist 7s ease-in-out infinite alternate;
+  pointer-events:none;z-index:-1;
+}
+.pz-persistent-banner::after{
+  /* chain ornament hanging from the top edge */
+  content:'';position:absolute;top:-3px;left:14px;right:14px;height:14px;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='28' height='14' viewBox='0 0 28 14'><g fill='none' stroke='%23e02040' stroke-width='1.2' opacity='0.85'><ellipse cx='7' cy='5' rx='5' ry='3'/><ellipse cx='21' cy='5' rx='5' ry='3'/><line x1='12' y1='5' x2='16' y2='5'/></g></svg>");
+  background-repeat:repeat-x;
+  filter:drop-shadow(0 1px 2px rgba(224,32,64,.6));
+  pointer-events:none;
+}
+@keyframes w1-penance-tremor{
+  0%, 100% { transform:translate(0,0); }
+  20% { transform:translate(.4px,-.3px); }
+  40% { transform:translate(-.4px,.3px); }
+  60% { transform:translate(.3px,.4px); }
+  80% { transform:translate(-.3px,-.4px); }
+}
+@keyframes w1-penance-mist{
+  0%   { transform:scale(1)    translate(0,0);  opacity:.5; }
+  100% { transform:scale(1.18) translate(8px,-4px); opacity:.95; }
+}
+.pz-persistent-banner .pzb-icon{
+  font-size:0; /* hide ⚠ emoji */
+  width:24px;height:24px;margin:0 auto 4px;
+  background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ff5070' stroke-width='1.6' stroke-linejoin='round'><path d='M12 3 L22 21 L2 21 Z'/><line x1='12' y1='10' x2='12' y2='15' stroke-width='2'/><circle cx='12' cy='18' r='1' fill='%23ff5070'/></svg>") center/contain no-repeat;
+  filter:drop-shadow(0 0 8px var(--red-glow));
+}
+.pzb-title{
+  font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:18px;
+  letter-spacing:5px;color:#fff;
+  text-shadow:0 0 16px var(--red-glow), 0 1px 2px rgba(0,0,0,.8);
+}
+.pzb-sub{
+  font-family:'Share Tech Mono',monospace;font-size:9px;
+  letter-spacing:2.5px;color:rgba(255,200,200,.78);margin-top:4px;
+}
+
+/* When Penance is active, vignette the screen edges */
+body:has(.pz-persistent-banner.show)::after{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:849;
+  box-shadow:inset 0 0 90px -10px rgba(224,32,64,.25);
+}
+
+/* ── BOTTOM-SLIDE BEAT CHIP — for quest completion (ready for JS to use) ── */
+.w1-beat-chip{
+  position:fixed;left:50%;bottom:calc(76px + var(--sib));
+  transform:translateX(-50%) translateY(20px);
+  background:linear-gradient(180deg, rgba(34,26,61,.92), rgba(10,5,25,.96));
+  border:1px solid rgba(24,216,232,.45);
+  clip-path:polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,8px 100%,0 calc(100% - 8px));
+  padding:10px 16px;display:flex;align-items:center;gap:12px;
+  z-index:740;opacity:0;pointer-events:none;
+  box-shadow:0 8px 32px -8px rgba(24,216,232,.45);
+  font-family:'Rajdhani',sans-serif;
+}
+.w1-beat-chip.show{
+  opacity:1;transform:translateX(-50%) translateY(0);
+  transition:transform var(--d-standard) var(--ease-elegant),
+             opacity   var(--d-standard) var(--ease-elegant);
+}
+.w1-beat-chip::before{
+  content:'';position:absolute;top:0;left:8%;right:8%;height:1px;
+  background:linear-gradient(90deg,transparent,var(--cyan-500),transparent);
+  box-shadow:0 0 8px var(--cyan-glow);
+}
+.w1-beat-name{font-size:14px;font-weight:600;color:#fff;letter-spacing:.5px;}
+.w1-beat-rew{
+  font-family:var(--font-num);font-weight:700;font-size:13px;
+  color:var(--cyan-400);text-shadow:0 0 8px var(--cyan-glow);
+  font-feature-settings:"tnum" 1;
+}
+
+/* ── REDUCED MOTION ── */
+@media (prefers-reduced-motion: reduce) {
+  .scr-banner img{animation:none;}
+  .scr-banner > .w1-banner-scan::before{animation:none;}
+  .pz-persistent-banner{animation:none !important;}
+  .pz-persistent-banner::before{animation:none;}
+  .qcard:active, .ic:active, .stat-hex:active{transform:none;}
+}
