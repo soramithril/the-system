@@ -1638,231 +1638,306 @@ button.qbtn.done,button.qbtn[disabled]{
   text-shadow:0 0 8px rgba(255,200,98,.45);
 }
 
-/* ── Each .qsec is a horizontally scrolling shelf of mission cards ─────── */
+/* ── .qsec is a vertical stack of mission cards (NOT a carousel) ───────── */
 .qsec{
   display:flex !important;
-  gap:10px;
-  overflow-x:auto;
-  overflow-y:visible;
-  scroll-snap-type:x mandatory;
-  -webkit-overflow-scrolling:touch;
-  padding:6px 0 14px;
-  margin-bottom:6px;
+  flex-direction:column !important;
+  gap:8px !important;
+  margin-bottom:14px;
+  overflow:visible !important;
 }
-.qsec::-webkit-scrollbar{ display:none; }
+#h-qprev{
+  display:flex !important;
+  flex-direction:column !important;
+  gap:8px !important;
+  padding:0 !important;
+  overflow:visible !important;
+}
 
-/* The QUEST CARD itself becomes a fat vertical card with art */
+/* ════════════════════════════════════════════════════════════════════════
+   MISSION CARD  v6.1  — wide horizontal banner, NOT a checkbox row
+   Synthesis: HSR Daily Training row + NIKKE quest banner + ZZZ Inter-Knot
+   commission. Tall (76-104px), edge-cut frame, stat-coloured emblem,
+   reward chips, glowing tap zone.
+   ════════════════════════════════════════════════════════════════════════ */
 .qcard{
   position:relative;
-  flex:0 0 240px;
-  scroll-snap-align:start;
-  padding:0;
-  background:linear-gradient(180deg,
-    rgba(20,18,55,.92) 0%,
-    rgba(8,8,22,.96) 100%);
-  border:1px solid var(--hud-line);
-  box-shadow:var(--hud-shadow-2), inset 0 1px 0 rgba(255,255,255,.04);
+  display:grid !important;
+  grid-template-columns:64px 1fr auto;
+  align-items:stretch;
+  gap:0;
+  padding:0 !important;
+  margin:0 !important;
+  min-height:84px;
+  background:linear-gradient(180deg,rgba(18,16,42,.90) 0%,rgba(8,8,22,.96) 100%);
+  border:1px solid var(--hud-line) !important;
+  box-shadow:var(--hud-shadow-1), inset 0 1px 0 rgba(255,255,255,.035);
   clip-path:polygon(
-    14px 0, calc(100% - 14px) 0, 100% 14px,
-    100% calc(100% - 14px), calc(100% - 14px) 100%,
-    14px 100%, 0 calc(100% - 14px), 0 14px);
+    12px 0, calc(100% - 12px) 0, 100% 12px,
+    100% calc(100% - 12px), calc(100% - 12px) 100%,
+    12px 100%, 0 calc(100% - 12px), 0 12px);
   cursor:pointer;
   overflow:hidden;
-  display:flex; flex-direction:column;
-  min-height:200px;
   isolation:isolate;
-  transition:transform .18s var(--hud-ease-quick),
-             border-color .18s var(--hud-ease-quick),
+  transition:transform .15s var(--hud-ease-quick),
+             border-color .2s var(--hud-ease-quick),
              box-shadow .25s var(--hud-ease);
 }
-.qcard:active{ transform:scale(.98); }
+.qcard:active{ transform:scale(.985); }
+.qcard:hover{ border-color:rgba(168,120,255,.42) !important; }
 
-/* ART panel: stat-coloured wash + emblem glyph */
-.qcard::before{
-  content:''; position:absolute; inset:0; z-index:-1;
-  background:
-    radial-gradient(120% 80% at 50% 0%, var(--qc), transparent 60%),
-    linear-gradient(180deg, transparent 0%, rgba(0,0,0,.4) 100%);
-  opacity:.18;
-  transition:opacity .25s var(--hud-ease);
-}
-.qcard:hover::before{ opacity:.28; }
-
-/* Top stripe in the stat colour */
-.qcard > .qchk{
-  position:absolute; top:0; left:0; right:0;
-  height:3px;
-  background:var(--qc, var(--hud-violet-300));
-  box-shadow:0 0 12px var(--qc, var(--hud-violet-300));
-  border:0; border-radius:0;
-  z-index:2;
-}
-
-/* Card body */
-.qcard > .qbody{
-  position:relative; z-index:1;
-  flex:1; padding:24px 16px 16px;
-  display:flex; flex-direction:column; gap:10px;
-}
-
-/* Big quest name */
-.qcard .qn{
-  font-family:'Barlow Condensed',sans-serif;
-  font-size:17px; font-weight:800;
-  letter-spacing:.5px;
-  color:var(--hud-ink-hi);
-  line-height:1.2;
-  text-shadow:0 2px 10px rgba(0,0,0,.6);
-  margin:0 0 4px;
-  display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical;
-  overflow:hidden;
-}
-
-/* Reward chips */
-.qcard .qmeta{
-  display:flex; flex-wrap:wrap; gap:5px;
-  margin-top:auto;
-  padding-top:8px;
-}
-.qcard .qmeta > span{
-  font-family:'Share Tech Mono',monospace;
-  font-size:9px; font-weight:600; letter-spacing:1.2px;
-  padding:3px 7px;
-  background:rgba(7,9,20,.7);
-  border:1px solid var(--hud-line-soft);
-  color:var(--hud-ink-lo);
-  border-radius:0;
-  clip-path:polygon(0 0,calc(100% - 4px) 0,100% 50%,calc(100% - 4px) 100%,0 100%,4px 50%);
-  display:inline-flex; align-items:center; gap:3px;
-  white-space:nowrap;
-}
-.qcard .qmeta .qtag{
-  background:transparent;
-  border:1px solid var(--qc);
-  color:var(--qc);
-  font-weight:800;
-}
-.qcard .qmeta .qtype-tag{
-  background:rgba(168,120,255,.14);
-  border:1px solid rgba(168,120,255,.45);
-  color:var(--hud-violet-100);
-}
-.qcard .qmeta .qtype-tag.qt-urgent{
-  background:rgba(255,70,112,.16);
-  border-color:rgba(255,70,112,.55);
-  color:var(--hud-red-300);
-  animation:hud-pulse-red 1.4s ease-in-out infinite;
-}
-.qcard .qmeta .qtype-tag.qt-main{
-  background:rgba(255,200,98,.14);
-  border-color:rgba(255,200,98,.5);
-  color:var(--hud-gold-300);
-}
-.qcard .qmeta .qxp{
-  background:linear-gradient(180deg,rgba(122,60,255,.18),rgba(60,28,140,.30));
-  border-color:rgba(168,120,255,.5);
-  color:var(--hud-violet-100);
-}
-.qcard .qmeta .qxp::before{ content:'◆'; opacity:.7; }
-.qcard .qmeta .qgd{
-  background:linear-gradient(180deg,rgba(255,200,98,.15),rgba(184,128,24,.25));
-  border-color:rgba(255,200,98,.5);
-  color:var(--hud-gold-300);
-}
-.qcard .qmeta .qgd::before{ content:'◈'; opacity:.85; }
-.qcard .qmeta .qmp{
-  background:rgba(52,200,255,.10);
-  border-color:rgba(52,200,255,.4);
-  color:#9ee3ff;
-}
-.qcard .qmeta .qstr{
-  background:linear-gradient(180deg,rgba(255,70,112,.16),rgba(255,200,98,.16));
-  border-color:rgba(255,200,98,.5);
-  color:var(--hud-gold-300);
-  font-weight:800;
-}
-.qcard .qmeta .qstr::before{ content:'🔥'; font-size:9px; margin-right:2px; }
-
-/* Decorative ◆ orn — repurposed as a corner glyph */
-.qcard .qc-orn{
-  position:absolute !important;
-  top:8px; right:10px; z-index:2;
-  font-size:18px !important;
-  color:var(--qc) !important;
-  filter:drop-shadow(0 0 8px var(--qc));
-  opacity:.7;
-  pointer-events:none;
-}
-
-/* Edit/delete column → tucked into top-right, low-prominence */
-.qcard > div:last-child:not(.qbody):not(.qchk){
-  position:absolute !important;
-  top:8px; right:30px; z-index:3;
-  display:flex !important; flex-direction:row !important;
-  gap:6px !important;
-  opacity:0;
-  transition:opacity .2s var(--hud-ease-quick);
-}
-.qcard:hover > div:last-child:not(.qbody):not(.qchk),
-.qcard.edit-show > div:last-child:not(.qbody):not(.qchk){
-  opacity:.85;
-}
-
-/* DONE state — quest cleared */
-.qcard.done{
-  border-color:rgba(43,227,149,.4) !important;
-  filter:saturate(.85);
-  opacity:.7;
-}
-.qcard.done::before{
-  background:radial-gradient(120% 80% at 50% 50%,rgba(43,227,149,.25),transparent 60%) !important;
-  opacity:.7 !important;
-}
-.qcard.done > .qchk{
-  background:var(--hud-grn-500) !important;
-  box-shadow:0 0 14px var(--hud-grn-500) !important;
-}
-.qcard.done .qn{ text-decoration:line-through; text-decoration-color:rgba(43,227,149,.5); text-decoration-thickness:1.5px; }
-.qcard.done::after{
-  content:'CLEARED'; position:absolute; bottom:14px; right:14px;
-  font-family:'Barlow Condensed',sans-serif; font-size:11px; font-weight:800;
-  letter-spacing:3px; color:var(--hud-grn-500);
-  text-shadow:0 0 10px rgba(43,227,149,.6);
-  z-index:2;
-}
-
-/* Stat tints for the ART wash and accent rail */
+/* Stat tints */
 .qcard[data-stat="STR"]{ --qc:#ff5570; }
 .qcard[data-stat="AGI"]{ --qc:#34c8ff; }
 .qcard[data-stat="STA"]{ --qc:#2be395; }
 .qcard[data-stat="INT"]{ --qc:#b070ff; }
 .qcard[data-stat="SEN"]{ --qc:#ffc85e; }
+.qcard{ --qc:var(--qc, #a878ff); }
 
-/* Type-aware borders */
+/* Wash gradient drawn from left rail outward */
+.qcard::before{
+  content:''; position:absolute; inset:0; z-index:-1;
+  background:linear-gradient(90deg, var(--qc), transparent 45%);
+  opacity:.13;
+  transition:opacity .2s var(--hud-ease);
+}
+.qcard:hover::before{ opacity:.22; }
+
+/* Stat-coloured EMBLEM column (left) — hex plate with stat letter */
+.qcard > .qchk{
+  position:relative !important;
+  width:auto !important; height:auto !important;
+  background:transparent !important;
+  border:0 !important;
+  display:flex; align-items:center; justify-content:center;
+  margin:0 !important;
+}
+.qcard > .qchk::before{
+  content:''; position:absolute; left:8px; top:50%; transform:translateY(-50%);
+  width:46px; height:46px;
+  background:linear-gradient(180deg,
+    color-mix(in srgb,var(--qc) 32%,#06080e) 0%,
+    color-mix(in srgb,var(--qc) 8%,#06080e) 100%);
+  border:1.5px solid var(--qc);
+  clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);
+  box-shadow:0 0 16px -2px var(--qc), inset 0 1px 0 rgba(255,255,255,.1);
+  z-index:1;
+}
+.qcard > .qchk::after{
+  content:attr(data-stat-letter); position:absolute;
+  left:8px; top:50%; transform:translate(0,-50%);
+  width:46px; height:46px;
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Orbitron',sans-serif; font-size:14px; font-weight:800;
+  color:var(--qc);
+  text-shadow:0 0 10px var(--qc), 0 0 1px rgba(0,0,0,.6);
+  letter-spacing:1px;
+  z-index:2;
+}
+/* Left edge accent rail (full height) */
+.qcard{
+  border-left:3px solid var(--qc) !important;
+  box-shadow:inset 4px 0 12px -4px var(--qc), var(--hud-shadow-1);
+}
+
+/* CONTENT column */
+.qcard > .qbody{
+  position:relative; z-index:1;
+  padding:11px 6px 11px 0 !important;
+  display:flex !important; flex-direction:column !important; gap:5px !important;
+  align-self:center;
+  min-width:0;
+}
+.qcard .qn{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:15.5px; font-weight:800;
+  letter-spacing:.5px;
+  color:var(--hud-ink-hi);
+  line-height:1.18;
+  text-shadow:0 1px 6px rgba(0,0,0,.55);
+  margin:0;
+  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;
+  overflow:hidden;
+}
+.qcard .qmeta{
+  display:flex !important; flex-wrap:wrap !important; gap:4px !important;
+  margin:0 !important; padding:0 !important;
+}
+.qcard .qmeta > span{
+  font-family:'Share Tech Mono',monospace;
+  font-size:8.5px; font-weight:600; letter-spacing:1.1px;
+  padding:2px 6px;
+  background:rgba(7,9,20,.65);
+  border:1px solid var(--hud-line-soft);
+  color:var(--hud-ink-lo);
+  border-radius:0 !important;
+  clip-path:polygon(0 0,calc(100% - 3px) 0,100% 50%,calc(100% - 3px) 100%,0 100%,3px 50%);
+  display:inline-flex; align-items:center; gap:3px;
+  white-space:nowrap; line-height:1.3;
+}
+.qcard .qmeta .qtag{
+  background:transparent !important;
+  border-color:var(--qc) !important;
+  color:var(--qc) !important;
+  font-weight:800;
+}
+.qcard .qmeta .qtype-tag{
+  background:rgba(168,120,255,.14) !important;
+  border-color:rgba(168,120,255,.42) !important;
+  color:var(--hud-violet-100) !important;
+  font-weight:800;
+}
+.qcard .qmeta .qtype-tag.qt-daily{
+  background:rgba(168,120,255,.10) !important;
+  border-color:rgba(168,120,255,.36) !important;
+}
+.qcard .qmeta .qtype-tag.qt-weekly{
+  background:rgba(43,217,255,.10) !important;
+  border-color:rgba(43,217,255,.42) !important;
+  color:#9ee3ff !important;
+}
+.qcard .qmeta .qtype-tag.qt-urgent{
+  background:rgba(255,70,112,.16) !important;
+  border-color:rgba(255,70,112,.55) !important;
+  color:var(--hud-red-300) !important;
+}
+.qcard .qmeta .qtype-tag.qt-main{
+  background:rgba(255,200,98,.14) !important;
+  border-color:rgba(255,200,98,.50) !important;
+  color:var(--hud-gold-300) !important;
+}
+.qcard .qmeta .qxp{
+  background:linear-gradient(180deg,rgba(122,60,255,.18),rgba(60,28,140,.28)) !important;
+  border-color:rgba(168,120,255,.48) !important;
+  color:var(--hud-violet-100) !important;
+}
+.qcard .qmeta .qxp::before{ content:'◆'; opacity:.75; }
+.qcard .qmeta .qgd{
+  background:linear-gradient(180deg,rgba(255,200,98,.16),rgba(184,128,24,.26)) !important;
+  border-color:rgba(255,200,98,.50) !important;
+  color:var(--hud-gold-300) !important;
+}
+.qcard .qmeta .qgd::before{ content:'◈'; opacity:.9; }
+.qcard .qmeta .qmp{
+  background:rgba(52,200,255,.10) !important;
+  border-color:rgba(52,200,255,.40) !important;
+  color:#9ee3ff !important;
+}
+.qcard .qmeta .qstr{
+  background:linear-gradient(180deg,rgba(255,70,112,.16),rgba(255,200,98,.16)) !important;
+  border-color:rgba(255,200,98,.55) !important;
+  color:var(--hud-gold-300) !important;
+  font-weight:800;
+  animation:hud-pulse-streak 1.6s ease-in-out infinite alternate;
+}
+.qcard .qmeta .qstr::before{ content:''; }   /* ditch the emoji, use the ◆Nd as-is */
+
+/* RIGHT column — tap-to-complete glow zone + edit/delete */
+.qcard > .qc-orn{
+  display:none !important;     /* the entire right edge IS the tap zone now */
+}
+.qcard > div:last-child{
+  position:relative !important;
+  align-self:stretch !important;
+  display:flex !important; flex-direction:column !important;
+  align-items:center !important; justify-content:center !important;
+  gap:4px !important;
+  padding:0 14px !important;
+  background:linear-gradient(90deg, transparent, color-mix(in srgb,var(--qc) 12%,transparent));
+  border-left:1px solid var(--hud-line-soft);
+  flex-shrink:0; min-width:54px;
+}
+.qcard > div:last-child::before{
+  content:'TAP'; position:absolute; left:50%; top:50%;
+  transform:translate(-50%,-50%);
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:9px; font-weight:800; letter-spacing:3px;
+  color:var(--qc);
+  text-shadow:0 0 10px var(--qc);
+  pointer-events:none;
+  opacity:.55;
+  transition:opacity .2s var(--hud-ease-quick);
+}
+.qcard:hover > div:last-child::before{ opacity:.95; }
+/* the actual edit/delete buttons live as children — float them to top-right */
+.qcard > div:last-child .edit-btn,
+.qcard > div:last-child .delete-btn{
+  position:relative !important; z-index:2;
+  font-size:11px !important;
+  opacity:0 !important;
+  transition:opacity .2s var(--hud-ease-quick);
+}
+.qcard:hover > div:last-child .edit-btn,
+.qcard:hover > div:last-child .delete-btn,
+.qcard.edit-show > div:last-child .edit-btn,
+.qcard.edit-show > div:last-child .delete-btn{
+  opacity:.7 !important;
+}
+.qcard:hover > div:last-child::before,
+.qcard.edit-show > div:last-child::before{
+  /* hide TAP label when edit affordances surface */
+}
+
+/* DONE state */
+.qcard.done{
+  border-color:rgba(43,227,149,.40) !important;
+  border-left-color:var(--hud-grn-500) !important;
+  background:linear-gradient(180deg,rgba(8,30,22,.85),rgba(4,12,12,.95)) !important;
+  filter:saturate(.85);
+  opacity:.78;
+  box-shadow:inset 4px 0 12px -4px var(--hud-grn-500), var(--hud-shadow-1);
+}
+.qcard.done::before{
+  background:linear-gradient(90deg, rgba(43,227,149,.25), transparent 45%) !important;
+  opacity:.85 !important;
+}
+.qcard.done > .qchk::before{
+  background:linear-gradient(180deg,rgba(43,227,149,.32),rgba(8,30,22,.85)) !important;
+  border-color:var(--hud-grn-500) !important;
+  box-shadow:0 0 16px rgba(43,227,149,.6) !important;
+}
+.qcard.done > .qchk::after{
+  content:'\2713' !important;     /* checkmark */
+  color:var(--hud-grn-500) !important;
+  text-shadow:0 0 12px rgba(43,227,149,.7) !important;
+  font-size:24px !important;
+}
+.qcard.done .qn{
+  text-decoration:line-through;
+  text-decoration-color:rgba(43,227,149,.5);
+  text-decoration-thickness:1.5px;
+  color:rgba(196,212,255,.5);
+}
+.qcard.done > div:last-child{
+  background:linear-gradient(90deg, transparent, rgba(43,227,149,.10));
+  border-left-color:rgba(43,227,149,.25);
+}
+.qcard.done > div:last-child::before{
+  content:'CLEARED' !important;
+  font-size:9px !important;
+  color:var(--hud-grn-500) !important;
+  text-shadow:0 0 10px rgba(43,227,149,.6) !important;
+  opacity:.95 !important;
+}
+
+/* Type-aware shadows */
 .qcard[data-type="urgent"]{
   border-color:rgba(255,70,112,.55) !important;
-  box-shadow:0 0 0 1px rgba(255,70,112,.15), 0 12px 30px -10px rgba(255,70,112,.4);
+  box-shadow:inset 4px 0 12px -4px #ff4670,
+             0 0 0 1px rgba(255,70,112,.15),
+             0 8px 24px -10px rgba(255,70,112,.4);
   animation:hud-pulse-soft-red 2s ease-in-out infinite alternate;
 }
 .qcard[data-type="main"]{
   border-color:rgba(255,200,98,.5) !important;
-  box-shadow:0 0 0 1px rgba(255,200,98,.15), 0 12px 30px -10px rgba(255,200,98,.35);
+  box-shadow:inset 4px 0 12px -4px #ffc85e,
+             0 0 0 1px rgba(255,200,98,.15),
+             0 8px 24px -10px rgba(255,200,98,.35);
 }
 
-/* HOME quest preview shelf — same shelf treatment */
-#h-qprev{
-  display:flex !important;
-  gap:10px;
-  overflow-x:auto;
-  overflow-y:visible;
-  scroll-snap-type:x mandatory;
-  -webkit-overflow-scrolling:touch;
-  padding:6px 14px 14px;
-}
-#h-qprev::-webkit-scrollbar{ display:none; }
-#h-qprev .qcard{
-  flex:0 0 240px;
-  min-height:180px;
+@keyframes hud-pulse-streak{
+  0%   { filter:drop-shadow(0 0 4px rgba(255,200,98,.4)); }
+  100% { filter:drop-shadow(0 0 10px rgba(255,200,98,.85)); }
 }
 
 /* NEW MISSION tile — premium dashed slot */

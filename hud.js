@@ -242,7 +242,13 @@
       $$('.qcard', root || document).forEach(c => {
         const css = c.getAttribute('style') || '';
         const m = css.match(/--qc:var\(--(str|agi|sta|int|sen)\)/i);
-        if (m) c.setAttribute('data-stat', m[1].toUpperCase());
+        if (m) {
+          const stat = m[1].toUpperCase();
+          c.setAttribute('data-stat', stat);
+          // Mirror to the .qchk so the emblem ::after can render the stat letter
+          const chk = c.querySelector('.qchk');
+          if (chk) chk.setAttribute('data-stat-letter', stat);
+        }
         const meta = c.querySelector('.qmeta .qtype-tag');
         if (meta) {
           const cls = (meta.className.match(/qt-(\w+)/) || [])[1];

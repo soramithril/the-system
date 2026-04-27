@@ -28,9 +28,12 @@ function rCal(){
   const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   const dowLabels=['M','T','W','T','F','S','S'];
 
-  // Build list of all days in the year starting from Apr 26 (matches fresh-start date)
-  const startDate=new Date(calYear,3,26); // April 26
-  const endDate=new Date(calYear+1,3,25); // April 25 next year
+  // Build list of all days in the year starting from G.startDate (current fresh-start).
+  // Falls back to Apr 27 of calYear if G.startDate isn't set, so the heatmap never
+  // shows a day before the player's reset.
+  const startDate=(G&&G.startDate)?new Date(G.startDate):new Date(calYear,3,27);
+  // End one year minus one day after start so the grid spans exactly a year.
+  const endDate=new Date(startDate); endDate.setFullYear(endDate.getFullYear()+1); endDate.setDate(endDate.getDate()-1);
   const allDays=[];
   for(let d=new Date(startDate);d<=endDate;d.setDate(d.getDate()+1)){
     allDays.push(new Date(d));
