@@ -220,6 +220,44 @@ function ld(){
         G._reset20260420=true;
         sv();
       }
+      // -- FRESH START RESET (runs once, 2026-04-26) --
+      // Second full progress wipe requested by player. Heatmap begins today.
+      if(!G._reset20260426){
+        const FRESH_START='Sun Apr 26 2026';
+        G.level=1;G.xp=0;G.totalXp=0;G.gold=100;
+        G.hp=100;G.maxHp=100;G.mp=100;G.maxMp=100;
+        G.stats={STR:0,AGI:0,STA:0,INT:0,SEN:0};
+        G.qsd={STR:0,AGI:0,STA:0,INT:0,SEN:0,savings:0};
+        G.questsTotal=0;
+        G.fx={shield:false,skipfit:false,fitb:false,intb:false,str3:0,slp2x:false,
+              read7:0,read10:0,sta5:false,str6:false,str12:false,agi8:false,
+              mind7:false,anki10:false,water5:false,gld20:false,all5:false};
+        G.debuff={xp:false,expiry:null};
+        G.penaltyPending=false;
+        G.inventory=[];G.shadows=[];G.shadowArmy=[];
+        G.shadowCrystal=false;G.shadowSigil=false;G.shadowSeal=false;
+        G.shadowScrollPending=false;G.shadowPendant='';
+        G.unlockedTitles=['tw'];G.equippedTitle=null;G.unlockedSkills=[];
+        G.jobClass=null;
+        G.shopCooldowns={};G.shopOverrides={};G.hiddenShopItems=[];
+        G.customShop=[];G.customCategories=[];
+        G.dungeonToday={};G.activeDungeonId=null;G.activeDungeonDate='';G.hiddenDungeon=null;
+        G.dailyBossId=null;G.dailyBossDate='';G.dailyGateShown='';
+        G.weeklyBossId=null;G.weeklyBossWeek='';G.weeklyGateShown='';
+        G.bossThresholds={daily:[],weekly:[]};
+        G.urgentQuest=null;G.urgentExpiry=null;G.lastUrgentId=-1;G.lastUrgentQuestId='';
+        G.urgentNextDate=new Date(FRESH_START+' 08:00:00').toISOString();
+        G.streakUnlocksGiven=[];
+        G.mvwLog={};G.weekRecapShown='';
+        G.dailyLog=[];G.statLog=[];
+        G.quests=DEFAULT_QUESTS.map(q=>({...q,done:false,streak:0,weekDone:0}));
+        G.healthSync={date:'',steps:0,workouts:[],sleep:{hours:0},hrv:0,updated:0};
+        G.lastDate=new Date().toDateString();
+        G.weekDate='';
+        G.startDate=FRESH_START;
+        G._reset20260426=true;
+        sv();
+      }
     }catch(e){
       console.error('Save data corrupted, starting fresh:',e);
       setTimeout(()=>showError('⚠ SAVE DATA CORRUPTED','Starting fresh. Firebase recovery will be attempted.'),500);
