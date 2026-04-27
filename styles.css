@@ -2645,3 +2645,389 @@ body:has(.pz-persistent-banner.show)::after{
   from{opacity:1;}
   to  {opacity:0; transform:scale(.985);}
 }
+
+
+/* ════════════════════════════════════════════════════════════════════
+   WAVE 5 — finish the visual layer
+   - Runtime emoji-to-SVG swapper styling (.w5-svg-icon)
+   - Boss card heights — show the artwork instead of letterbox
+   - Calendar heatmap visibility
+   - Active Skills / Shadow Army widget empty-state polish
+   - Profile title + skill card upgrades
+   - System Notice / Tribes-Today chip strip refresh
+   ════════════════════════════════════════════════════════════════════ */
+
+/* ── Runtime swapper styling — every <svg> inside a swapped element ── */
+.w5-svg-icon{
+  /* Parent kept its font-size so SVG can size against em.
+     The injected SVG gets explicit width/height attrs from JS, so it's safe. */
+  display:inline-flex;align-items:center;justify-content:center;
+  line-height:0;
+}
+.w5-svg-icon svg{
+  display:inline-block;vertical-align:middle;
+  filter:drop-shadow(0 0 6px currentColor);
+}
+/* Bigger glow on cinematic-tier swaps */
+.it-ic.w5-svg-icon svg, .tl-ic-big.w5-svg-icon svg, .sk-ic-big.w5-svg-icon svg{
+  filter:drop-shadow(0 0 14px currentColor) drop-shadow(0 0 28px currentColor);
+}
+
+/* ── Boss cards: increase height so the cinematic art reads ── */
+.boss-card-v2{height:170px !important;}
+#s-home .boss-card-v2{height:180px !important;}
+.boss-card-v2.weekly{height:170px !important;}
+.boss-card-img{
+  opacity:.62 !important;
+  object-position:center 25% !important;
+}
+.boss-card-overlay{
+  background:linear-gradient(180deg,
+    rgba(0,0,0,.25) 0%,
+    rgba(0,0,0,0)   30%,
+    rgba(0,0,0,.30) 60%,
+    rgba(0,0,0,.85) 100%) !important;
+  padding:10px 14px !important;
+}
+.boss-card-name{
+  font-size:18px !important;
+  letter-spacing:1.5px !important;
+  text-shadow:0 2px 8px rgba(0,0,0,.95), 0 0 14px currentColor;
+}
+.boss-card-v2 .boss-rank-badge{
+  font-size:22px;font-weight:900;
+  width:36px;height:36px;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(0,0,0,.55);
+  border:1px solid currentColor;
+  clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);
+  box-shadow:0 0 14px currentColor;
+}
+.boss-label{
+  font-family:'Share Tech Mono',monospace;font-size:8px !important;letter-spacing:3px !important;
+  padding:3px 8px !important;
+  background:rgba(0,0,0,.65);
+  border:1px solid currentColor;
+}
+.boss-hp-bar{height:8px !important;border:1px solid currentColor;background:rgba(0,0,0,.5) !important;}
+.boss-hp-fill-v2{filter:drop-shadow(0 0 6px currentColor);}
+.boss-hp-val-v2{font-family:var(--font-num) !important;font-feature-settings:"tnum" 1;}
+
+/* ── Calendar heatmap: empty cells more visible, today highlighted ── */
+.cal-cell{
+  border:1px solid rgba(168,120,255,.10) !important;
+  border-radius:1px !important;
+}
+.cal-heat-0{background:rgba(168,120,255,.05) !important;}
+.cal-heat-1{background:rgba(24,216,232,.20) !important;}
+.cal-heat-2{background:rgba(24,216,232,.40) !important;}
+.cal-heat-3{background:rgba(108,240,255,.60) !important;}
+.cal-heat-4{background:rgba(168,120,255,.75) !important;}
+.cal-heat-5{
+  background:linear-gradient(135deg,var(--violet-400),var(--cyan-400)) !important;
+  box-shadow:0 0 6px var(--cyan-glow);
+}
+.cal-cell.today{
+  box-shadow:0 0 0 2px var(--cyan-400), 0 0 12px var(--cyan-glow) !important;
+  z-index:3 !important;
+}
+.cal-stat-card{
+  background:linear-gradient(180deg, rgba(24,20,46,.8), rgba(10,5,25,.92)) !important;
+  border:1px solid rgba(168,120,255,.22) !important;
+  border-radius:0 !important;
+  clip-path:polygon(0 0,calc(100% - 5px) 0,100% 5px,100% 100%,5px 100%,0 calc(100% - 5px));
+}
+.cal-stat-val{
+  font-family:var(--font-num) !important;font-weight:700 !important;
+  font-feature-settings:"tnum" 1;color:var(--cyan-400) !important;
+  text-shadow:0 0 8px var(--cyan-glow);
+}
+
+/* ── Home widgets — Active Skills empty state: visible silhouette slots ── */
+.home-skills, .home-shadows{
+  background:linear-gradient(180deg, rgba(34,26,61,.45), rgba(10,5,25,.85)) !important;
+  border:1px solid rgba(168,120,255,.22) !important;
+  padding:10px 12px !important;
+}
+.hs-hdr, .hsw-hdr{margin-bottom:8px !important;}
+.hs-title, .hsw-title{
+  font-family:'Barlow Condensed',sans-serif;font-size:11px !important;
+  font-weight:800 !important;letter-spacing:3px !important;
+  color:var(--cyan-400) !important;
+  text-shadow:0 0 6px var(--cyan-glow);
+  display:inline-flex;align-items:center;
+}
+.hs-count, .hsw-count{
+  font-family:var(--font-num) !important;font-feature-settings:"tnum" 1;
+  font-weight:500;font-size:9px !important;
+  color:rgba(168,200,255,.45) !important;
+}
+.home-skills .hs-list:empty::before, .home-skills .hs-locked{
+  content:'';display:block;
+  height:34px;
+  background:
+    repeating-linear-gradient(90deg,
+      rgba(168,120,255,.06) 0,
+      rgba(168,120,255,.06) calc(20% - 4px),
+      transparent calc(20% - 4px),
+      transparent 20%);
+  border:1px dashed rgba(168,120,255,.18);
+  font-family:'Share Tech Mono',monospace;font-size:8px;
+  letter-spacing:3px;color:rgba(168,200,255,.35);
+  text-align:center;line-height:34px;
+  text-transform:uppercase;
+  clip-path:polygon(0 0,calc(100% - 6px) 0,100% 6px,100% 100%,6px 100%,0 calc(100% - 6px));
+}
+/* When .hs-locked has actual text, show it */
+.hs-locked:not(:empty){
+  background:rgba(168,120,255,.06) !important;
+  border:1px dashed rgba(168,120,255,.22);
+  padding:8px 4px !important;
+  font-family:'Share Tech Mono',monospace;
+  letter-spacing:2px;color:rgba(168,200,255,.42) !important;
+}
+
+.hsw-empty{
+  font-family:'Share Tech Mono',monospace !important;
+  font-size:8px !important;letter-spacing:2px !important;
+  color:rgba(168,200,255,.4) !important;
+  padding:10px 0 !important;
+  border:1px dashed rgba(168,120,255,.20);
+  border-radius:0;
+  background:rgba(168,120,255,.04);
+  clip-path:polygon(0 0,calc(100% - 6px) 0,100% 6px,100% 100%,6px 100%,0 calc(100% - 6px));
+}
+
+/* Shadow soldiers + cards in widget */
+.hsw-card{
+  background:linear-gradient(180deg, rgba(60,20,120,.32), rgba(20,8,50,.6)) !important;
+  border:1px solid rgba(168,120,255,.30) !important;
+}
+.hsw-name{
+  font-family:'Barlow Condensed',sans-serif !important;
+  color:var(--violet-300) !important;
+  text-shadow:0 0 6px rgba(168,120,255,.6);
+}
+
+/* ── Profile title cards — clear locked vs unlocked vs equipped ── */
+.tl-card{
+  background:linear-gradient(180deg, rgba(18,14,32,.7), rgba(10,5,25,.92)) !important;
+  border:1px solid rgba(168,120,255,.12) !important;
+  padding:10px 11px !important;
+  position:relative;
+}
+.tl-card:not(.unl):not(.eqd){
+  /* Locked — silhouette treatment */
+  background:repeating-linear-gradient(45deg,
+    rgba(20,15,38,.5) 0px, rgba(20,15,38,.5) 6px,
+    rgba(10,5,25,.7) 6px, rgba(10,5,25,.7) 12px) !important;
+  border-color:rgba(168,120,255,.10) !important;
+}
+.tl-card:not(.unl):not(.eqd) .tl-card-icon{
+  filter:grayscale(1) brightness(0.5);
+  opacity:0.5;
+}
+.tl-card.unl{
+  background:linear-gradient(180deg, rgba(80,52,8,.18), rgba(20,12,2,.85)) !important;
+  border-color:rgba(255,208,96,.35) !important;
+  box-shadow:inset 0 0 18px -4px rgba(255,208,96,.20);
+}
+.tl-card.unl::before{
+  background:linear-gradient(90deg,transparent,var(--gold-400),transparent) !important;
+  height:1px !important;box-shadow:0 0 6px var(--gold-glow);
+}
+.tl-card.eqd{
+  background:linear-gradient(180deg, rgba(48,200,120,.10), rgba(8,18,12,.92)) !important;
+  border-color:rgba(48,200,120,.45) !important;
+  box-shadow:
+    inset 0 0 22px -4px rgba(48,200,120,.30),
+    0 0 18px -8px rgba(48,200,120,.55);
+}
+.tl-card.eqd::before{
+  background:linear-gradient(90deg,transparent,var(--rar-C),transparent) !important;
+  height:1px !important;box-shadow:0 0 8px rgba(48,200,120,.6);
+}
+.tl-card.eqd .tl-card-icon{filter:drop-shadow(0 0 8px var(--rar-C));}
+.tl-card-icon{
+  font-size:20px !important;
+  display:block !important;margin-bottom:4px !important;
+  color:var(--gold-400);
+}
+.tl-card:not(.unl):not(.eqd) .tl-card-icon{color:rgba(168,200,255,.25) !important;}
+.tl-card.eqd .tl-card-icon{color:var(--rar-C) !important;}
+.tl-card-eq{
+  font-family:'Barlow Condensed',sans-serif !important;
+  font-size:9px !important;
+  letter-spacing:2px !important;
+  color:var(--gold-400) !important;
+  border-color:rgba(255,208,96,.35) !important;
+  background:rgba(255,208,96,.06) !important;
+}
+.tl-card-eq.on{
+  color:var(--rar-C) !important;
+  border-color:rgba(48,200,120,.45) !important;
+  background:rgba(48,200,120,.10) !important;
+}
+
+/* Profile skill cards */
+.sk-full{
+  background:linear-gradient(180deg, rgba(18,14,32,.7), rgba(10,5,25,.92)) !important;
+  border:1px solid rgba(168,120,255,.12) !important;
+}
+.sk-full.unl{
+  background:linear-gradient(180deg, rgba(80,30,160,.16), rgba(16,8,32,.92)) !important;
+  border-color:rgba(168,120,255,.40) !important;
+  box-shadow:inset 0 0 22px -4px rgba(168,120,255,.22);
+}
+.sk-full.unl::before{
+  background:linear-gradient(90deg,transparent,var(--violet-400),transparent) !important;
+  height:1px !important;box-shadow:0 0 6px rgba(168,120,255,.5);
+}
+.sk-full.unl .sk-full-name{color:var(--violet-300) !important;text-shadow:0 0 6px rgba(168,120,255,.5);}
+.sk-full.unl .sk-full-icon{filter:drop-shadow(0 0 8px rgba(168,120,255,.7));color:var(--violet-300);}
+.sk-full.locked{
+  background:repeating-linear-gradient(45deg,
+    rgba(20,15,38,.4) 0px, rgba(20,15,38,.4) 6px,
+    rgba(10,5,25,.7) 6px, rgba(10,5,25,.7) 12px) !important;
+  opacity:.45 !important;
+}
+.sk-full.locked .sk-full-icon{filter:grayscale(1);}
+.sk-full-badge{
+  font-family:var(--font-num) !important;
+  font-feature-settings:"tnum" 1;font-weight:700 !important;
+}
+
+/* Shadow Army cards in profile */
+.sha-card{
+  background:linear-gradient(180deg, rgba(40,15,90,.32), rgba(12,4,28,.92)) !important;
+  border:1px solid rgba(168,120,255,.32) !important;
+  box-shadow:inset 0 0 24px -6px rgba(168,120,255,.22);
+}
+.sha-card::before{
+  background:linear-gradient(90deg,transparent,var(--violet-400),transparent) !important;
+  height:1px !important;box-shadow:0 0 8px rgba(168,120,255,.6);
+}
+.sha-name{color:var(--violet-300) !important;text-shadow:0 0 6px rgba(168,120,255,.6) !important;}
+.sha-locked{
+  background:repeating-linear-gradient(45deg,
+    rgba(20,15,38,.4) 0px, rgba(20,15,38,.4) 6px,
+    rgba(10,5,25,.6) 6px, rgba(10,5,25,.6) 12px) !important;
+  border:1px dashed rgba(168,120,255,.20) !important;
+}
+
+/* Inventory cards */
+.iv-card{
+  background:linear-gradient(180deg, rgba(18,14,32,.7), rgba(10,5,25,.92)) !important;
+  border:1px solid rgba(168,120,255,.18) !important;
+}
+.iv-card-ic{font-size:24px !important;color:var(--cyan-400);}
+
+/* ── System Notice — make it feel like an event, not a paragraph ── */
+.notice-panel{
+  background:linear-gradient(180deg, rgba(18,12,40,.9), rgba(8,4,20,.96)) !important;
+  border:1px solid rgba(168,120,255,.42) !important;
+  border-left:3px solid var(--cyan-400) !important;
+}
+.notice-panel::before{
+  background:linear-gradient(90deg,transparent,var(--cyan-400),var(--violet-400),var(--cyan-400),transparent) !important;
+  opacity:1 !important;
+  box-shadow:0 0 12px var(--cyan-glow);
+}
+.np-title{color:var(--cyan-400) !important;text-shadow:0 0 6px var(--cyan-glow);}
+.np-icon{
+  background:rgba(24,216,232,.15) !important;
+  border:1px solid var(--cyan-400) !important;
+  box-shadow:0 0 8px var(--cyan-glow);
+}
+.np-icon svg polygon{fill:var(--cyan-400) !important;}
+
+/* ── "TRIBES TODAY" chip strip — visible now ── */
+[id*="-tribes"], .tr-chip-row{padding:4px 16px 0;}
+.tr-chip-row{display:flex;gap:5px;flex-wrap:wrap;justify-content:center;}
+
+/* ── Quest screen daily-progress bar — pump intensity ── */
+.dp-wrap{
+  background:linear-gradient(180deg, rgba(34,26,61,.55), rgba(10,5,25,.92)) !important;
+  border:1px solid rgba(168,120,255,.32) !important;
+}
+.dp-fill{
+  background:linear-gradient(90deg,var(--violet-700),var(--violet-500),var(--cyan-500)) !important;
+  box-shadow:0 0 12px var(--cyan-glow);
+}
+.dp-cnt{color:var(--cyan-400) !important;text-shadow:0 0 8px var(--cyan-glow);}
+.dp-lbl{color:rgba(168,200,255,.5) !important;}
+
+/* ── Boss section header ── */
+.boss-sec-hdr, .dung-sec-hdr{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:10px !important;font-weight:900 !important;
+  letter-spacing:4px !important;
+  color:var(--cyan-400) !important;
+  text-shadow:0 0 6px var(--cyan-glow);
+  margin:14px 16px 8px !important;
+  display:flex;align-items:center;gap:8px;
+}
+.boss-sec-hdr::after, .dung-sec-hdr::after{
+  content:'';flex:1;height:1px;
+  background:linear-gradient(90deg,var(--cyan-400),transparent);
+  opacity:.5;
+}
+
+/* Dungeon list "BOSS" label — push harder */
+[class*="dr-boss"], .dung-row{
+  border:1px solid rgba(224,32,64,.32) !important;
+  background:linear-gradient(180deg, rgba(80,8,16,.32), rgba(12,4,8,.92)) !important;
+}
+
+/* Stat hex active state — when stat just bumped */
+.stat-hex{cursor:default;}
+
+/* Filter pills (quests + shop) — readable */
+.fp, .scat{
+  font-family:'Barlow Condensed',sans-serif;
+  letter-spacing:2px !important;
+  padding:6px 14px !important;
+  background:rgba(168,120,255,.04) !important;
+  border:1px solid rgba(168,120,255,.18) !important;
+  color:rgba(168,200,255,.55) !important;
+}
+.fp.act, .scat.act{
+  background:rgba(24,216,232,.10) !important;
+  border-color:var(--cyan-400) !important;
+  color:var(--cyan-400) !important;
+  box-shadow:0 0 12px -4px var(--cyan-glow);
+}
+
+/* ── Reset timer — bigger, monospace numerics ── */
+.reset-timer{
+  background:linear-gradient(180deg, rgba(24,20,46,.7), rgba(10,5,25,.9)) !important;
+  border:1px solid rgba(168,120,255,.22) !important;
+}
+.rt-val{
+  font-family:var(--font-num) !important;font-feature-settings:"tnum" 1;
+  font-weight:700 !important;color:var(--cyan-400) !important;
+  text-shadow:0 0 6px var(--cyan-glow);
+}
+
+/* ── Shop item rows — rarity frame intensity ── */
+.sitem.r-rare{box-shadow:inset 0 0 18px -4px rgba(32,144,232,.25) !important;}
+.sitem.r-epic{box-shadow:inset 0 0 22px -4px rgba(160,64,255,.30) !important;}
+.sitem.r-legendary{
+  box-shadow:
+    inset 0 0 26px -4px rgba(255,208,96,.32),
+    0 0 18px -8px rgba(255,208,96,.55) !important;
+}
+.si-icon-box{
+  background:rgba(24,20,46,.6) !important;
+  border:1px solid rgba(168,120,255,.22);
+}
+.sitem.r-rare .si-icon-box{border-color:var(--rar-B);}
+.sitem.r-epic .si-icon-box{border-color:var(--rar-A);}
+.sitem.r-legendary .si-icon-box{border-color:var(--rar-S);}
+
+/* Reduced motion path — turn off the new ambient animations */
+@media (prefers-reduced-motion: reduce) {
+  .qcard:has(.qt-main) .qbody::after{animation:none !important;}
+  .qcard:has(.qt-urgent){animation:none !important;}
+}
+
