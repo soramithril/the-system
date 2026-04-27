@@ -165,6 +165,20 @@ function ld(){
         G._qmig4=true;
         sv();
       }
+      // -- QUEST MIGRATION v5 (2026-04-26) --
+      // Remove dinner/morning shake/lunch/evening shake/omega-3/magnesium/collagen.
+      // Add Vitamins (s8). Clear stale full_fuel active dungeon ref.
+      if(!G._qmig5){
+        const REMOVED_V5=new Set(['s3','s4','s6','m_shake1','m_lunch','m_dinner','m_shake3']);
+        G.quests=G.quests.filter(q=>!REMOVED_V5.has(q.id)||q.m==='custom');
+        const savedIds5=new Set(G.quests.map(q=>q.id));
+        DEFAULT_QUESTS.forEach(dq=>{
+          if(!savedIds5.has(dq.id))G.quests.push({...dq});
+        });
+        if(G.activeDungeonId==='full_fuel'){G.activeDungeonId=null;G.activeDungeonDate='';}
+        G._qmig5=true;
+        sv();
+      }
       // ── FRESH START RESET (runs once, 2026-04-20) ──
       // Full progress wipe requested by player. Heatmap begins Mon Apr 20 2026.
       // Preserves: player name, gate cinematic flag, firstLaunch flag (cosmetic only).
