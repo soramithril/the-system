@@ -122,13 +122,11 @@ const DEFAULT_QUESTS=[
   // ══════════════════════════════════════════════════════
   {id:'f5',    m:'fitness',  t:'daily', layer:'core', n:'Hit daily protein target',                                 s:'STA',xp:12,g:5, mp:0, streak:0,done:false},
   {id:'s5',    m:'supps',    t:'daily', layer:'core', n:'Drink 3 litres of water',                                  s:'STA',xp:10,g:4, mp:0, streak:0,done:false},
+  {id:'s8',    m:'supps',    t:'daily', layer:'core', n:'Vitamins',                                                  s:'STA',xp:7, g:3, mp:0, streak:0,done:false},
   {id:'j_core',m:'japanese', t:'daily', layer:'core', n:'Japanese practice — minimum 15 min',                      s:'INT',xp:38,g:15,mp:15,streak:0,done:false},
   {id:'y_core',m:'youtube',  t:'daily', layer:'core', n:'One content action — film, edit or upload',               s:'SEN',xp:40,g:16,mp:15,streak:0,done:false},
   {id:'gr_core',m:'grind',   t:'daily', layer:'core', n:'Morning grooming + make bed',                             s:'SEN',xp:18,g:7, mp:0, streak:0,done:false},
   // Daily Stack Protocol
-  {id:'s3',  m:'supps',    t:'daily', layer:'core', n:'Omega-3 fish oil',                                          s:'STA',xp:7, g:3, mp:0, streak:0,done:false},
-  {id:'s4',  m:'supps',    t:'daily', layer:'core', n:'Magnesium + Zinc + B6',                                     s:'STA',xp:7, g:3, mp:0, streak:0,done:false},
-  {id:'s6',  m:'supps',    t:'daily', layer:'core', n:'Collagen',                                                  s:'STA',xp:7, g:3, mp:0, streak:0,done:false},
   // s7 "2 protein shakes" retired — now covered by 3 individual shake meals below.
 
   // ══════════════════════════════════════════════════════
@@ -136,11 +134,7 @@ const DEFAULT_QUESTS=[
   // Five checkable meals per day. Each one eaten = dopamine hit + streak.
   // Full run (all 5) triggers the Full Fuel Protocol dungeon clear.
   // ══════════════════════════════════════════════════════
-  {id:'m_shake1', m:'meals', t:'daily', layer:'core', n:'Morning shake — 1 scoop whey in water',                     s:'STA',xp:7, g:3, mp:0, streak:0,done:false},
-  {id:'m_lunch',  m:'meals', t:'daily', layer:'core', n:'Lunch — 100g dry oats + 40g peanut butter + 1 banana',      s:'STA',xp:14,g:6, mp:0, streak:0,done:false},
   {id:'m_shake2', m:'meals', t:'daily', layer:'core', n:'Afternoon shake — 1 scoop whey in water',                   s:'STA',xp:7, g:3, mp:0, streak:0,done:false},
-  {id:'m_dinner', m:'meals', t:'daily', layer:'core', n:'Dinner — 300g cooked white rice + protein (chicken or beef)',s:'STA',xp:16,g:6, mp:0, streak:0,done:false},
-  {id:'m_shake3', m:'meals', t:'daily', layer:'core', n:'Evening shake — 1 scoop whey in water',                     s:'STA',xp:7, g:3, mp:0, streak:0,done:false},
 
   // ══════════════════════════════════════════════════════
   // TRAINING SCHEDULE — v1 (Apr 2026)
@@ -264,7 +258,7 @@ const URGENT_POOL=[
 // Limit to 1 dungeon per day (2 max occasionally). 45–120 min focus sessions.
 const DUNGEONS=[
   {id:'morning',        name:'Morning Protocol',        icon:'🌅', type:'mini',
-   questIds:['gr_core','s5','s3','s4'],
+   questIds:['gr_core','s5','s8'],
    reward:{gold:55,icon:'🌅',name:"Dawn's Spoils",desc:'Morning protocol cleared. The day belongs to you.'},
    lore:'Control the morning — control the day.',
    unlockStreak:0},
@@ -284,14 +278,9 @@ const DUNGEONS=[
    lore:'One hour of deep focus is worth ten hours of distraction.',
    unlockStreak:0},
   {id:'stack',          name:'Supplement Stack',         icon:'💊', type:'mini',
-   questIds:['s3','s4','s5','s6'],
+   questIds:['s5','s8'],
    reward:{gold:45,icon:'💊',name:'Stack Protocol Done',desc:'Full supplement stack complete. Recovery optimised.'},
    lore:'The full stack. Every single one. No excuses.',
-   unlockStreak:0},
-  {id:'full_fuel',      name:'Full Fuel Protocol',       icon:'🍱', type:'mini',
-   questIds:['m_shake1','m_lunch','m_shake2','m_dinner','m_shake3'],
-   reward:{gold:65,icon:'🍱',name:'Full Fuel Protocol Cleared',desc:'All five meals hit. Macros locked. The body rebuilds.'},
-   lore:'Five meals. Every one. The machine is fuelled.',
    unlockStreak:0},
   {id:'gauntlet',       name:'The Gauntlet',             icon:'💀', type:'boss',
    questIds:['f6','f7','f8','f13','j_core','y_core','gr_core','s5'],
