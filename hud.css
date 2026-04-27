@@ -1694,6 +1694,70 @@ button.qbtn.done,button.qbtn[disabled]{
 .qcard[data-stat="SEN"]{ --qc:#ffc85e; }
 .qcard{ --qc:var(--qc, #a878ff); }
 
+/* ── Mission card BACKGROUND ART  (animated GIFs: Toji + Sung Jin-Woo) ──
+   Layer order on each card:
+     1. dark side-scrim gradient (text legibility)
+     2. animated GIF (Tenor 220px variant ≈ 150-300 KB each)
+     3. anchor gradient fallback (in case GIF fails to load)
+   Backgrounds are bound to data-stat / data-type attributes — set by hud.js
+   when render.js writes a quest card.
+   ───────────────────────────────────────────────────────────────────── */
+.qcard[data-stat="STR"]{
+  background:
+    linear-gradient(90deg,
+      rgba(8,8,22,.94) 0%, rgba(8,8,22,.45) 38%,
+      rgba(8,8,22,.55) 65%, rgba(8,8,22,.92) 100%),
+    url('https://media.tenor.com/yTc6LBmgAPcAAAAM/jujutsu-kaisen-toji-fushiguro.gif')
+      center 30% / cover no-repeat,
+    linear-gradient(180deg, rgba(18,16,42,.90), rgba(8,8,22,.96)) !important;
+}
+.qcard[data-stat="AGI"]{
+  background:
+    linear-gradient(90deg,
+      rgba(8,8,22,.94) 0%, rgba(8,8,22,.45) 38%,
+      rgba(8,8,22,.55) 65%, rgba(8,8,22,.92) 100%),
+    url('https://media.tenor.com/1-QQiZ7wnaEAAAAM/just.gif')
+      center 30% / cover no-repeat,
+    linear-gradient(180deg, rgba(18,16,42,.90), rgba(8,8,22,.96)) !important;
+}
+.qcard[data-stat="STA"]{
+  background:
+    linear-gradient(90deg,
+      rgba(8,8,22,.94) 0%, rgba(8,8,22,.45) 38%,
+      rgba(8,8,22,.55) 65%, rgba(8,8,22,.92) 100%),
+    url('https://media.tenor.com/e5niwcpbdEQAAAAM/toji-fushiguro-satoru-gojo.gif')
+      center 30% / cover no-repeat,
+    linear-gradient(180deg, rgba(18,16,42,.90), rgba(8,8,22,.96)) !important;
+}
+.qcard[data-stat="INT"]{
+  background:
+    linear-gradient(90deg,
+      rgba(8,8,22,.94) 0%, rgba(8,8,22,.45) 38%,
+      rgba(8,8,22,.55) 65%, rgba(8,8,22,.92) 100%),
+    url('https://media.tenor.com/cmGCMoAyI_cAAAAM/solo-leveling-solo-leveling-season-2.gif')
+      center 30% / cover no-repeat,
+    linear-gradient(180deg, rgba(18,16,42,.90), rgba(8,8,22,.96)) !important;
+}
+.qcard[data-stat="SEN"]{
+  background:
+    linear-gradient(90deg,
+      rgba(8,8,22,.94) 0%, rgba(8,8,22,.45) 38%,
+      rgba(8,8,22,.55) 65%, rgba(8,8,22,.92) 100%),
+    url('https://media.tenor.com/SOj3Xq1EAIYAAAAM/sjw-sung-jin-woo.gif')
+      center 25% / cover no-repeat,
+    linear-gradient(180deg, rgba(18,16,42,.90), rgba(8,8,22,.96)) !important;
+}
+/* Urgent overrides any stat — Toji vs Dagon (cinematic combat) */
+.qcard[data-type="urgent"]{
+  background:
+    linear-gradient(90deg,
+      rgba(20,4,8,.94) 0%, rgba(20,4,8,.40) 38%,
+      rgba(20,4,8,.55) 65%, rgba(20,4,8,.92) 100%),
+    url('https://media.tenor.com/1Y0q4-7XY1MAAAAM/toji-fushiguro-fight.gif')
+      center 25% / cover no-repeat,
+    linear-gradient(180deg, rgba(40,8,16,.90), rgba(8,4,8,.96)) !important;
+}
+
 /* Wash gradient drawn from left rail outward */
 .qcard::before{
   content:''; position:absolute; inset:0; z-index:-1;
@@ -1878,14 +1942,16 @@ button.qbtn.done,button.qbtn[disabled]{
   /* hide TAP label when edit affordances surface */
 }
 
-/* DONE state */
+/* DONE state — keep the data-stat GIF visible, tint it green via inset shadow */
 .qcard.done{
   border-color:rgba(43,227,149,.40) !important;
   border-left-color:var(--hud-grn-500) !important;
-  background:linear-gradient(180deg,rgba(8,30,22,.85),rgba(4,12,12,.95)) !important;
-  filter:saturate(.85);
+  filter:saturate(.7) brightness(.85);
   opacity:.78;
-  box-shadow:inset 4px 0 12px -4px var(--hud-grn-500), var(--hud-shadow-1);
+  box-shadow:
+    inset 0 0 999px rgba(8,30,22,.55),
+    inset 4px 0 12px -4px var(--hud-grn-500),
+    var(--hud-shadow-1) !important;
 }
 .qcard.done::before{
   background:linear-gradient(90deg, rgba(43,227,149,.25), transparent 45%) !important;
