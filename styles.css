@@ -2477,3 +2477,171 @@ body:has(.pz-persistent-banner.show)::after{
   .pz-persistent-banner::before{animation:none;}
   .qcard:active, .ic:active, .stat-hex:active{transform:none;}
 }
+
+
+/* ════════════════════════════════════════════════════════════════════
+   WAVE 2 — Iconography (static emoji-to-SVG)
+   The .w2-ico class styles inline SVGs that replaced top-level emojis
+   in headers and widgets.  Dynamic content (shop catalog, dungeon list)
+   still uses emojis — those will move in a later pass that touches JS.
+   ════════════════════════════════════════════════════════════════════ */
+
+.w2-ico{
+  width:14px;height:14px;
+  display:inline-block;vertical-align:-3px;
+  margin-right:6px;
+  filter:drop-shadow(0 0 6px currentColor);
+  flex-shrink:0;
+}
+.hsw-title .w2-ico, .hs-title .w2-ico{margin-right:6px;width:13px;height:13px;}
+.ub-title .w2-ico{color:var(--red-500);}
+.dung-sec-hdr .w2-ico{color:rgba(168,120,255,.7);}
+.sol-hdr-label .w2-ico{color:var(--violet-400);}
+
+/* Profile section icons — give them a real frame */
+.pfs-icon svg{
+  width:18px;height:18px;
+  filter:drop-shadow(0 0 8px var(--cyan-glow));
+  color:var(--cyan-400);
+}
+
+
+/* ════════════════════════════════════════════════════════════════════
+   WAVE 3 — Quest card rarity tiering
+   Uses :has() to detect the inner .qt-* tag and tier the entire card.
+   Daily=common silver hairline, Weekly=rare blue glow, Main=epic violet
+   with corner brackets + scan, Urgent=already styled but pushed harder.
+   ════════════════════════════════════════════════════════════════════ */
+
+/* Common (Daily) — keep clean, just unify the silver hairline */
+.qcard:has(.qt-daily){
+  border-color:rgba(184,192,208,.18);
+  border-left-color:var(--rar-D);
+}
+.qcard:has(.qt-daily)::before{
+  background:linear-gradient(90deg,var(--rar-D),transparent);
+  opacity:.55;
+}
+
+/* Rare (Weekly) — blue inner glow, brighter top hairline */
+.qcard:has(.qt-weekly){
+  border-color:rgba(32,144,232,.32);
+  border-left-color:var(--rar-B);
+  background:
+    linear-gradient(180deg, rgba(32,144,232,.04), rgba(12,14,22,.85));
+  box-shadow:inset 0 0 18px -4px rgba(32,144,232,.20);
+}
+.qcard:has(.qt-weekly)::before{
+  background:linear-gradient(90deg,transparent,var(--rar-B),transparent);
+  opacity:.85;height:1px;
+  box-shadow:0 0 8px rgba(32,144,232,.4);
+}
+
+/* Epic (Main) — violet emit, brighter frame, scan sweep, drawn corners */
+.qcard:has(.qt-main){
+  border:1px solid rgba(160,64,255,.42) !important;
+  border-left:2px solid var(--rar-A) !important;
+  background:
+    linear-gradient(180deg, rgba(160,64,255,.06), rgba(12,8,28,.90)) !important;
+  box-shadow:
+    inset 0 0 24px -6px rgba(160,64,255,.32),
+    0 0 18px -8px rgba(160,64,255,.55) !important;
+  padding-right:18px; /* room for corner mark */
+  position:relative;
+  overflow:hidden;
+}
+.qcard:has(.qt-main)::before{
+  background:linear-gradient(90deg,transparent,var(--rar-A),transparent) !important;
+  opacity:1 !important;height:1px;
+  box-shadow:0 0 10px rgba(160,64,255,.55);
+}
+/* drawn corner pip top-right via ::after */
+.qcard:has(.qt-main)::after{
+  content:'';position:absolute;top:5px;right:6px;
+  width:9px;height:9px;
+  background:
+    linear-gradient(var(--rar-A),var(--rar-A)) no-repeat,
+    linear-gradient(var(--rar-A),var(--rar-A)) no-repeat;
+  background-size:1.2px 9px, 9px 1.2px;
+  background-position:100% 0, 100% 0;
+  filter:drop-shadow(0 0 4px var(--rar-A));
+  pointer-events:none;
+}
+/* slow scan sweep across the card */
+.qcard:has(.qt-main) .qbody{
+  position:relative;
+}
+.qcard:has(.qt-main) .qbody::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(115deg,transparent 40%,rgba(255,255,255,.04) 50%,transparent 60%);
+  background-size:250% 100%;
+  background-position:100% 0;
+  animation:w3-main-scan 7s ease-in-out infinite;
+  pointer-events:none;
+}
+@keyframes w3-main-scan{
+  0%, 28% { background-position:100% 0; }
+  60%, 100%{ background-position:-50% 0; }
+}
+
+/* Legendary (Urgent) — inherits old red treatment, push harder with red glow + tremor */
+.qcard:has(.qt-urgent){
+  border:1px solid var(--red-500) !important;
+  border-left:2px solid var(--red-500) !important;
+  background:
+    linear-gradient(180deg, rgba(224,32,64,.10), rgba(20,4,12,.92)) !important;
+  box-shadow:
+    inset 0 0 30px -6px rgba(224,32,64,.32),
+    0 0 22px -6px var(--red-glow) !important;
+  animation:w3-urgent-pulse 2.4s ease-in-out infinite alternate;
+}
+.qcard:has(.qt-urgent)::before{
+  background:linear-gradient(90deg,transparent,var(--red-500),transparent) !important;
+  opacity:1 !important;height:1px;
+  box-shadow:0 0 12px var(--red-glow);
+}
+@keyframes w3-urgent-pulse{
+  0%   { box-shadow: inset 0 0 30px -6px rgba(224,32,64,.32), 0 0 14px -8px var(--red-glow); }
+  100% { box-shadow: inset 0 0 36px -4px rgba(224,32,64,.42), 0 0 26px -4px var(--red-glow); }
+}
+
+/* Done state always wins — desaturate / dim regardless of rarity */
+.qcard.done:has(.qt-main),
+.qcard.done:has(.qt-weekly),
+.qcard.done:has(.qt-urgent){
+  background:rgba(12,14,22,.65) !important;
+  box-shadow:none !important;
+  animation:none !important;
+}
+.qcard.done:has(.qt-main)::after{display:none;}
+.qcard.done .qbody::after{display:none;}
+
+
+/* ════════════════════════════════════════════════════════════════════
+   WAVE 4 — Event tier model
+   The full-screen #cq overlay was firing Ritual-tier choreography for a
+   daily quest tap.  We compress its timeline ~40% and add an auto-close
+   shim (in JS at the bottom of index.html) so dailies feel like a Beat
+   instead of a held cinematic.  Tap-to-continue still works.
+   Level Up / Rank Up / Rank Promotion overlays are untouched.
+   ════════════════════════════════════════════════════════════════════ */
+
+/* Compress quest-complete timeline */
+#cq .qc-chk-wrap{animation-duration:.32s !important; animation-delay:.18s !important;}
+#cq .qc-chk-wrap::after{animation-duration:1.4s !important; animation-delay:.18s !important;}
+#cq .qc-lbl{animation-duration:.28s !important; animation-delay:.42s !important;}
+#cq .qc-name{animation-duration:.28s !important; animation-delay:.52s !important;}
+#cq .qc-rewards{animation-duration:.28s !important; animation-delay:.66s !important;}
+#cq .qc-stag{animation-duration:.25s !important; animation-delay:.80s !important;}
+#cq .qc-streak{animation-duration:.22s !important; animation-delay:.92s !important;}
+/* Auto-close hint: fade out the cine-tap blink — auto-dismiss replaces it */
+#cq .cine-tap{display:none;}
+
+/* Beat-style fade-out, applied via .w4-fade class added by JS just before close */
+#cq.w4-fade{
+  animation:w4-cq-fade .22s var(--ease-quick) forwards;
+}
+@keyframes w4-cq-fade{
+  from{opacity:1;}
+  to  {opacity:0; transform:scale(.985);}
+}
