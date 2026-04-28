@@ -1668,7 +1668,7 @@ button.qbtn.done,button.qbtn[disabled]{
   gap:0;
   padding:0 !important;
   margin:0 !important;
-  min-height:84px;
+  min-height:160px;     /* v6.3 — taller banner card so GIFs read as a poster */
   background:linear-gradient(180deg,rgba(18,16,42,.90) 0%,rgba(8,8,22,.96) 100%);
   border:1px solid var(--hud-line) !important;
   box-shadow:var(--hud-shadow-1), inset 0 1px 0 rgba(255,255,255,.035);
@@ -1702,59 +1702,62 @@ button.qbtn.done,button.qbtn[disabled]{
    Backgrounds are bound to data-stat / data-type attributes — set by hud.js
    when render.js writes a quest card.
    ───────────────────────────────────────────────────────────────────── */
+/* v6.3 — right-portrait framing (option F): darker scrim left → clear right,
+   GIF anchored right at natural card-height (auto 100%). Each character
+   reads as a poster portrait inside a banner card. */
 .qcard[data-stat="STR"]{
   background:
     linear-gradient(90deg,
-      rgba(8,8,22,.94) 0%, rgba(8,8,22,.45) 38%,
-      rgba(8,8,22,.55) 65%, rgba(8,8,22,.92) 100%),
+      rgba(8,8,22,.95) 0%, rgba(8,8,22,.85) 28%,
+      rgba(8,8,22,.20) 60%, rgba(8,8,22,.55) 100%),
     url('https://media.tenor.com/yTc6LBmgAPcAAAAM/jujutsu-kaisen-toji-fushiguro.gif')
-      center 30% / cover no-repeat,
+      right center / auto 100% no-repeat,
     linear-gradient(180deg, rgba(18,16,42,.90), rgba(8,8,22,.96)) !important;
 }
 .qcard[data-stat="AGI"]{
   background:
     linear-gradient(90deg,
-      rgba(8,8,22,.94) 0%, rgba(8,8,22,.45) 38%,
-      rgba(8,8,22,.55) 65%, rgba(8,8,22,.92) 100%),
+      rgba(8,8,22,.95) 0%, rgba(8,8,22,.85) 28%,
+      rgba(8,8,22,.20) 60%, rgba(8,8,22,.55) 100%),
     url('https://media.tenor.com/1-QQiZ7wnaEAAAAM/just.gif')
-      center 30% / cover no-repeat,
+      right center / auto 100% no-repeat,
     linear-gradient(180deg, rgba(18,16,42,.90), rgba(8,8,22,.96)) !important;
 }
 .qcard[data-stat="STA"]{
   background:
     linear-gradient(90deg,
-      rgba(8,8,22,.94) 0%, rgba(8,8,22,.45) 38%,
-      rgba(8,8,22,.55) 65%, rgba(8,8,22,.92) 100%),
+      rgba(8,8,22,.95) 0%, rgba(8,8,22,.85) 28%,
+      rgba(8,8,22,.20) 60%, rgba(8,8,22,.55) 100%),
     url('https://media.tenor.com/e5niwcpbdEQAAAAM/toji-fushiguro-satoru-gojo.gif')
-      center 30% / cover no-repeat,
+      right center / auto 100% no-repeat,
     linear-gradient(180deg, rgba(18,16,42,.90), rgba(8,8,22,.96)) !important;
 }
 .qcard[data-stat="INT"]{
   background:
     linear-gradient(90deg,
-      rgba(8,8,22,.94) 0%, rgba(8,8,22,.45) 38%,
-      rgba(8,8,22,.55) 65%, rgba(8,8,22,.92) 100%),
+      rgba(8,8,22,.95) 0%, rgba(8,8,22,.85) 28%,
+      rgba(8,8,22,.20) 60%, rgba(8,8,22,.55) 100%),
     url('https://media.tenor.com/cmGCMoAyI_cAAAAM/solo-leveling-solo-leveling-season-2.gif')
-      center 30% / cover no-repeat,
+      right center / auto 100% no-repeat,
     linear-gradient(180deg, rgba(18,16,42,.90), rgba(8,8,22,.96)) !important;
 }
 .qcard[data-stat="SEN"]{
   background:
     linear-gradient(90deg,
-      rgba(8,8,22,.94) 0%, rgba(8,8,22,.45) 38%,
-      rgba(8,8,22,.55) 65%, rgba(8,8,22,.92) 100%),
+      rgba(8,8,22,.95) 0%, rgba(8,8,22,.85) 28%,
+      rgba(8,8,22,.20) 60%, rgba(8,8,22,.55) 100%),
     url('https://media.tenor.com/SOj3Xq1EAIYAAAAM/sjw-sung-jin-woo.gif')
-      center 25% / cover no-repeat,
+      right center / auto 100% no-repeat,
     linear-gradient(180deg, rgba(18,16,42,.90), rgba(8,8,22,.96)) !important;
 }
 /* Urgent overrides any stat — Toji vs Dagon (cinematic combat) */
 .qcard[data-type="urgent"]{
   background:
     linear-gradient(90deg,
-      rgba(20,4,8,.94) 0%, rgba(20,4,8,.40) 38%,
-      rgba(20,4,8,.55) 65%, rgba(20,4,8,.92) 100%),
+      rgba(20,4,8,.95) 0%, rgba(20,4,8,.85) 28%,
+      rgba(20,4,8,.20) 60%, rgba(20,4,8,.55) 100%),
     url('https://media.tenor.com/1Y0q4-7XY1MAAAAM/toji-fushiguro-fight.gif')
-      center 25% / cover no-repeat,
+      right center / auto 100% no-repeat,
     linear-gradient(180deg, rgba(40,8,16,.90), rgba(8,4,8,.96)) !important;
 }
 
