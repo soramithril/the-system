@@ -859,28 +859,32 @@
   if (!cq) return;
   var t1 = null, t2 = null;
   function clearTimers(){ if(t1) clearTimeout(t1); if(t2) clearTimeout(t2); t1=t2=null; }
+  // Simple, single-timer auto-dismiss. State tracked via a data attribute so
+  // the MutationObserver can't re-trigger itself from our own class writes.
   new MutationObserver(function(){
-    if (cq.classList.contains('show') && !cq.classList.contains('w4-fade')) {
-      clearTimers();
-      // Hold 0.55s after reveal then fade in 180ms — keeps the moment but
-      // doesn't eat the user's next tap on the next quest card.
+    var isShow = cq.classList.contains('show');
+    if (isShow && !cq.dataset.w4armed) {
+      cq.dataset.w4armed = '1';
+      if (t1) clearTimeout(t1);
       t1 = setTimeout(function(){
-        if (!cq.classList.contains('show')) return;
-        cq.classList.add('w4-fade');
-        // During the fade, let pointer events fall through so a quick tap
-        // on the next quest lands on the card, not the closing overlay.
+        t1 = null;
+        // Make sure we're still showing before we try to close.
+        if (!cq.classList.contains('show')) { cq.dataset.w4armed = ''; return; }
+        // Pointer-events:none so a tap during the close lands on the next card.
         cq.style.pointerEvents = 'none';
-        t2 = setTimeout(function(){
-          if (typeof window.closeCine === 'function') {
-            try { window.closeCine('cq'); } catch(e) {}
-          }
-          cq.classList.remove('w4-fade');
+        if (typeof window.closeCine === 'function') {
+          try { window.closeCine('cq'); } catch(e) {}
+        }
+        // Reset our state slightly after closeCine's internal 300ms removal.
+        setTimeout(function(){
+          cq.dataset.w4armed = '';
           cq.style.pointerEvents = '';
-        }, 180);
-      }, 550);
-    } else if (!cq.classList.contains('show')) {
-      clearTimers();
-      cq.classList.remove('w4-fade');
+        }, 350);
+      }, 700);
+    } else if (!isShow && cq.dataset.w4armed) {
+      // Manually dismissed (or already gone) — reset cleanly.
+      if (t1) { clearTimeout(t1); t1 = null; }
+      cq.dataset.w4armed = '';
       cq.style.pointerEvents = '';
     }
   }).observe(cq, { attributes:true, attributeFilter:['class'] });
