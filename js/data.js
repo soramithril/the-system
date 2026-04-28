@@ -121,7 +121,7 @@ const DEFAULT_QUESTS=[
   // Low-friction habits that maintain baseline identity.
   // ══════════════════════════════════════════════════════
   {id:'f5',    m:'fitness',  t:'daily', layer:'core', n:'Hit daily protein target',                                 s:'STA',xp:12,g:5, mp:0, streak:0,done:false},
-  {id:'s5',    m:'supps',    t:'daily', layer:'core', n:'Drink 3 litres of water',                                  s:'STA',xp:10,g:4, mp:0, streak:0,done:false},
+  // s5 "Drink 3 litres of water" retired (removed by player request 2026-04-27)
   {id:'s8',    m:'supps',    t:'daily', layer:'core', n:'Vitamins',                                                  s:'STA',xp:7, g:3, mp:0, streak:0,done:false},
   {id:'j_core',m:'japanese', t:'daily', layer:'core', n:'Japanese practice — minimum 15 min',                      s:'INT',xp:38,g:15,mp:15,streak:0,done:false},
   {id:'y_core',m:'youtube',  t:'daily', layer:'core', n:'One content action — film, edit or upload',               s:'SEN',xp:40,g:16,mp:15,streak:0,done:false},
@@ -134,7 +134,7 @@ const DEFAULT_QUESTS=[
   // Five checkable meals per day. Each one eaten = dopamine hit + streak.
   // Full run (all 5) triggers the Full Fuel Protocol dungeon clear.
   // ══════════════════════════════════════════════════════
-  {id:'m_shake2', m:'meals', t:'daily', layer:'core', n:'Afternoon shake — 1 scoop whey in water',                   s:'STA',xp:7, g:3, mp:0, streak:0,done:false},
+  // m_shake2 "Afternoon shake" retired (removed by player request 2026-04-27)
 
   // ══════════════════════════════════════════════════════
   // TRAINING SCHEDULE — v1 (Apr 2026)
@@ -162,7 +162,7 @@ const DEFAULT_QUESTS=[
   {id:'j6',  m:'japanese', t:'weekly',layer:'weekly', n:'Full Japanese listening session (×3/week)',                s:'INT',xp:40,g:16,mp:20,streak:0,done:false,weekDone:0},
   {id:'j7',  m:'japanese', t:'weekly',layer:'weekly', n:'Write a short journal entry in Japanese (×1/week)',        s:'INT',xp:35,g:14,mp:15,streak:0,done:false,weekDone:0},
   // LIFE
-  {id:'c3',  m:'cooking',  t:'weekly',layer:'weekly', n:'Meal prep for the week (×1/week)',                         s:'SEN',xp:45,g:18,mp:0, streak:0,done:false,weekDone:0},
+  // c3 "Meal prep for the week" retired (removed by player request 2026-04-27)
   {id:'gr5', m:'grind',    t:'weekly',layer:'weekly', n:'Clean your room — full tidy, vacuum, surfaces (×1/week)', s:'STA',xp:30,g:12,mp:0, streak:0,done:false,weekDone:0},
   {id:'gr6', m:'grind',    t:'weekly',layer:'weekly', n:'Do laundry — wash, dry, put away (×1/week)',               s:'STA',xp:20,g:8, mp:0, streak:0,done:false,weekDone:0},
   {id:'gr8', m:'grind',    t:'weekly',layer:'weekly', n:'Plan next 7 days — goals, tasks, schedule (×1/week)',      s:'INT',xp:35,g:14,mp:0, streak:0,done:false,weekDone:0},

@@ -117,7 +117,7 @@ function mergeRemote(data){
         if(def)return {...q, n:def.n, s:def.s, xp:def.xp, g:def.g, mp:def.mp, t:def.t};
         return q;
       });
-      const REMOVED_QUEST_IDS=new Set(['h3','h4','gr3','s1','s2','j5']);
+      const REMOVED_QUEST_IDS=new Set(['h3','h4','gr3','s1','s2','j5','s5','m_shake2','c3']);
       G.quests=G.quests.filter(q=>!REMOVED_QUEST_IDS.has(q.id)||q.m==='custom');
       DEFAULT_QUESTS.forEach(dq=>{
         if(!savedIds.has(dq.id)&&!REMOVED_QUEST_IDS.has(dq.id)){

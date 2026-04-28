@@ -123,7 +123,7 @@ function ld(){
           return q;
         });
         // Remove quests that no longer exist in defaults (except custom quests)
-        const REMOVED_QUEST_IDS=new Set(['h3','h4','gr3','s1','s2','j5']);
+        const REMOVED_QUEST_IDS=new Set(['h3','h4','gr3','s1','s2','j5','s5','m_shake2','c3']);
         G.quests=G.quests.filter(q=>!REMOVED_QUEST_IDS.has(q.id)||q.m==='custom');
         // Add new quests that don't exist in saved data
         DEFAULT_QUESTS.forEach(dq=>{
@@ -177,6 +177,14 @@ function ld(){
         });
         if(G.activeDungeonId==='full_fuel'){G.activeDungeonId=null;G.activeDungeonDate='';}
         G._qmig5=true;
+        sv();
+      }
+      // -- QUEST MIGRATION v6 (2026-04-27) --
+      // Remove water (s5), afternoon shake (m_shake2), meal prep (c3) per player request.
+      if(!G._qmig6){
+        const REMOVED_V6=new Set(['s5','m_shake2','c3']);
+        G.quests=G.quests.filter(q=>!REMOVED_V6.has(q.id)||q.m==='custom');
+        G._qmig6=true;
         sv();
       }
       // ── FRESH START RESET (runs once, 2026-04-20) ──
