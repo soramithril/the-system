@@ -190,15 +190,16 @@ function cineNext(){if(!cineQ.length){cineActive=false;return;}cineActive=true;c
 function closeCine(id){
   const el=document.getElementById(id);
   if(!el)return;
-  // Drain any queued duplicates of this cinematic so a single tap clears the
-  // whole chain (especially for 'cq' which can stack with rapid quest taps).
-  if(id==='cq') cineQ=cineQ.filter(x=>x!=='cq');
+  // Tap-to-skip-all: a single tap drains EVERY queued cinematic so the user
+  // never feels trapped in a chain of overlays (cq → csk → clu → ctl …).
+  // Each individual cinematic still gets its moment of display until the tap.
+  cineQ.length=0;
   el.style.opacity='0';el.style.transition='opacity .3s';
   setTimeout(()=>{
     el.classList.remove('show');
     el.style.opacity='';el.style.transition='';
     cineActive=false;
-    cineNext();
+    cineNext();    // queue is empty, just resets active=false
     renderAll();
   },300);
 }

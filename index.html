@@ -854,40 +854,41 @@
      dismisses early via the existing onclick handler).
      Level Up / Rank Up / other overlays are untouched. -->
 <script>
+// Auto-dismiss every cinematic overlay after 10s of being shown, OR on tap
+// (closeCine already drains the queue so a single tap clears the whole chain).
+// State per-element via data-w4armed flag so the MutationObserver can't re-fire
+// itself from our own class writes.
 (function(){
-  var cq = document.getElementById('cq');
-  if (!cq) return;
-  var t1 = null, t2 = null;
-  function clearTimers(){ if(t1) clearTimeout(t1); if(t2) clearTimeout(t2); t1=t2=null; }
-  // Simple, single-timer auto-dismiss. State tracked via a data attribute so
-  // the MutationObserver can't re-trigger itself from our own class writes.
-  new MutationObserver(function(){
-    var isShow = cq.classList.contains('show');
-    if (isShow && !cq.dataset.w4armed) {
-      cq.dataset.w4armed = '1';
-      if (t1) clearTimeout(t1);
-      t1 = setTimeout(function(){
-        t1 = null;
-        // Make sure we're still showing before we try to close.
-        if (!cq.classList.contains('show')) { cq.dataset.w4armed = ''; return; }
-        // Pointer-events:none so a tap during the close lands on the next card.
-        cq.style.pointerEvents = 'none';
-        if (typeof window.closeCine === 'function') {
-          try { window.closeCine('cq'); } catch(e) {}
-        }
-        // Reset our state slightly after closeCine's internal 300ms removal.
-        setTimeout(function(){
-          cq.dataset.w4armed = '';
-          cq.style.pointerEvents = '';
-        }, 350);
-      }, 700);
-    } else if (!isShow && cq.dataset.w4armed) {
-      // Manually dismissed (or already gone) — reset cleanly.
-      if (t1) { clearTimeout(t1); t1 = null; }
-      cq.dataset.w4armed = '';
-      cq.style.pointerEvents = '';
-    }
-  }).observe(cq, { attributes:true, attributeFilter:['class'] });
+  var IDS = ['cq','clu','cru','ctl','csk','cit','csu','cstr','curg'];
+  var TIMEOUT_MS = 10000;
+  IDS.forEach(function(id){
+    var el = document.getElementById(id);
+    if (!el) return;
+    var t = null;
+    new MutationObserver(function(){
+      var isShow = el.classList.contains('show');
+      if (isShow && !el.dataset.w4armed) {
+        el.dataset.w4armed = '1';
+        if (t) clearTimeout(t);
+        t = setTimeout(function(){
+          t = null;
+          if (!el.classList.contains('show')) { el.dataset.w4armed = ''; return; }
+          el.style.pointerEvents = 'none';
+          if (typeof window.closeCine === 'function') {
+            try { window.closeCine(id); } catch(e) {}
+          }
+          setTimeout(function(){
+            el.dataset.w4armed = '';
+            el.style.pointerEvents = '';
+          }, 350);
+        }, TIMEOUT_MS);
+      } else if (!isShow && el.dataset.w4armed) {
+        if (t) { clearTimeout(t); t = null; }
+        el.dataset.w4armed = '';
+        el.style.pointerEvents = '';
+      }
+    }).observe(el, { attributes:true, attributeFilter:['class'] });
+  });
 })();
 </script>
 
