@@ -506,7 +506,12 @@
     try { wireDeck(); }           catch (e) { console.warn('hud:wireDeck',e); }
     try { wireQtabs(); }          catch (e) { console.warn('hud:wireQtabs',e); }
     try { wireMilestones(); }     catch (e) { console.warn('hud:wireMilestones',e); }
-    try { wireQcardVideos(); }    catch (e) { console.warn('hud:wireQcardVideos',e); }
+    // wireQcardVideos disabled — was leaking HLS.js instances on every re-render
+    // (each quest completion ran renderAll which made new qcards, each one got a
+    // fresh HLS attach but the old HLS instances on detached nodes were never
+    // destroyed — multi-second freeze after 5-10 quest completions).
+    // Static poster images via CSS data-stat backgrounds still display fine.
+    // try { wireQcardVideos(); }    catch (e) { console.warn('hud:wireQcardVideos',e); }
 
     // Re-arm any new HUD numerics that get created later (defensive)
     const root = $('#app') || document.body;
