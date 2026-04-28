@@ -399,13 +399,13 @@
   // picks them; if a stat isn't in this map, we just keep the GIF bg.
   // Per-stat HLS streams. URGENT keys override the stat-based mapping
   // (urgent quests get the URGENT video regardless of their stat).
+  // STA + STR use static images via CSS — no video injection.
   const QCARD_VIDEOS = {
-    STR:    'https://v1.pinimg.com/videos/iht/hls/92/9e/18/929e18f6503f46de0635e96528aebaf8.m3u8',
-    AGI:    'https://v1.pinimg.com/videos/iht/hls/dd/07/12/dd0712f7246bdfa1502753464dd08685.m3u8',
-    INT:    'https://v1.pinimg.com/videos/iht/hls/05/40/70/054070ffa0eb0314cf3d9f80a271abf4.m3u8',
-    SEN:    'https://v1.pinimg.com/videos/iht/hls/55/9a/02/559a02fc3e48443affacb8fecce002cf.m3u8',
-    URGENT: 'https://v1.pinimg.com/videos/iht/hls/05/75/eb/0575eb36443a5b528c81c2c9ef051b1e.m3u8',
-    // STA uses a static GIF (set via CSS) — no video injection needed.
+    // STR — barbell lift (static, see CSS).
+    AGI:    'https://v1.pinimg.com/videos/iht/hls/3c/a3/03/3ca303b99ad24f089167fb983a1c7ade.m3u8', // sprint
+    INT:    'https://v1.pinimg.com/videos/iht/hls/05/40/70/054070ffa0eb0314cf3d9f80a271abf4.m3u8', // focused gaze
+    SEN:    'https://v1.pinimg.com/videos/iht/hls/39/5c/48/395c481e1376ba1a90a2ee1b5108ab9f.m3u8', // shadow aura
+    URGENT: 'https://v1.pinimg.com/videos/iht/hls/05/75/eb/0575eb36443a5b528c81c2c9ef051b1e.m3u8', // threat
   };
   let _hlsLoading = null;
   const loadHls = () => {

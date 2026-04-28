@@ -1710,14 +1710,16 @@ button.qbtn.done,button.qbtn[disabled]{
    HLS streams are loading or if HLS fails). Hud.js attaches a video
    element on top for STR/AGI/INT/SEN/URGENT. STA stays a pure GIF. */
 .qcard[data-stat="STR"]{
+  /* Toji lifting barbell — clearly relates to STRENGTH (still image, no video) */
   background:
-    url('https://i.pinimg.com/videos/thumbnails/originals/92/9e/18/929e18f6503f46de0635e96528aebaf8.0000000.jpg')
+    url('https://i.pinimg.com/originals/00/90/30/00903002fd20ac50a1c830271ef118e4.jpg')
       center / cover no-repeat,
     #04050d !important;
 }
 .qcard[data-stat="AGI"]{
+  /* Sprint clip — clearly relates to AGILITY/SPEED (video poster as fallback) */
   background:
-    url('https://i.pinimg.com/736x/42/d7/02/42d7029be5fdb78b6fac6096d3ac0747.jpg')
+    url('https://i.pinimg.com/736x/b7/00/e4/b700e49087866586da9fc621cf48bea4.jpg')
       center / cover no-repeat,
     #04050d !important;
 }
@@ -1734,8 +1736,9 @@ button.qbtn.done,button.qbtn[disabled]{
     #04050d !important;
 }
 .qcard[data-stat="SEN"]{
+  /* Jin-Woo with shadow aura — clearly relates to SENSE/PERCEPTION (video poster) */
   background:
-    url('https://i.pinimg.com/videos/thumbnails/originals/55/9a/02/559a02fc3e48443affacb8fecce002cf.0000000.jpg')
+    url('https://i.pinimg.com/736x/c4/33/84/c43384fb36cc8a995807550b3648ffa8.jpg')
       center / cover no-repeat,
     #04050d !important;
 }
