@@ -137,16 +137,16 @@ const DEFAULT_QUESTS=[
   // m_shake2 "Afternoon shake" retired (removed by player request 2026-04-27)
 
   // ══════════════════════════════════════════════════════
-  // TRAINING SCHEDULE — v1 (Apr 2026)
+  // TRAINING SCHEDULE — v2 (2026-04-27)
   // Day-scheduled — only today's session appears on the board.
-  // Sat/Tue = Upper · Sun/Thu = Lower · Mon = Peloton Z2 40 · Fri = Peloton Z2 45 · Wed = Active Recovery
+  // Mon/Sat = Upper · Sun/Wed = Lower · Tue = Peloton Z2 40 · Fri = Peloton Z2 45 · Thu = OFF
   // `days` uses JS weekday index: 0=Sun, 1=Mon, 2=Tue, 3=Wed, 4=Thu, 5=Fri, 6=Sat
   // ══════════════════════════════════════════════════════
-  {id:'w_upper',   m:'fitness', t:'daily', layer:'discipline', days:[2,6], n:'Upper-body workout — chest, back, shoulders, arms',       s:'STR',xp:60,g:24,mp:0, streak:0,done:false},
-  {id:'w_lower',   m:'fitness', t:'daily', layer:'discipline', days:[0,4], n:'Lower-body workout — quads, hams, glutes, calves',        s:'STR',xp:60,g:24,mp:0, streak:0,done:false},
-  {id:'w_pel40',   m:'fitness', t:'daily', layer:'discipline', days:[1],   n:'Peloton — 40 min Zone 2 ride',                            s:'AGI',xp:45,g:18,mp:0, streak:0,done:false},
+  {id:'w_upper',   m:'fitness', t:'daily', layer:'discipline', days:[1,6], n:'Upper-body workout — chest, back, shoulders, arms',       s:'STR',xp:60,g:24,mp:0, streak:0,done:false},
+  {id:'w_lower',   m:'fitness', t:'daily', layer:'discipline', days:[0,3], n:'Lower-body workout — quads, hams, glutes, calves',        s:'STR',xp:60,g:24,mp:0, streak:0,done:false},
+  {id:'w_pel40',   m:'fitness', t:'daily', layer:'discipline', days:[2],   n:'Peloton — 40 min Zone 2 ride',                            s:'AGI',xp:45,g:18,mp:0, streak:0,done:false},
   {id:'w_pel45',   m:'fitness', t:'daily', layer:'discipline', days:[5],   n:'Peloton — 45 min Zone 2 ride',                            s:'AGI',xp:50,g:20,mp:0, streak:0,done:false},
-  {id:'w_recover', m:'fitness', t:'daily', layer:'core',       days:[3],   n:'Active recovery — walk, stretch, mobility (20 min)',      s:'AGI',xp:20,g:8, mp:-15,streak:0,done:false},
+  // w_recover "Active recovery" retired — Thursday is now a full off-day (player request 2026-04-27)
 
   // ══════════════════════════════════════════════════════
   // TIER 4 — WEEKLY QUESTS (Structure Layer — All Domains)
@@ -301,7 +301,7 @@ const BUILTIN_SHOP=[
   {id:'choc',    cat:'Treats',icon:'🍫',n:'Chocolate Bar',         d:'One proper chocolate bar. You did the work.',                cost:200,coolDays:7, cons:true,rar:'normal'},
   {id:'soda',    cat:'Treats',icon:'🥤',n:'Soda',                  d:'One cold can or bottle. Refreshing. Earned.',                cost:120,coolDays:3, cons:true,rar:'normal'},
   {id:'takeaway',cat:'Treats',icon:'🍕',n:'Takeaway Meal',         d:'Order whatever you want. One proper cheat meal.',            cost:500,coolDays:7, cons:true,rar:'magic'},
-  {id:'cinema',  cat:'Treats',icon:'🎬',n:'Cinema Trip',           d:'A full cinema trip. Get the popcorn too.',                   cost:800,coolDays:21,cons:true,rar:'rare'},
+  {id:'cinema',  cat:'Treats',icon:'🎬',n:'Cinema Trip',           d:'A full cinema trip. Get the popcorn too.',                   cost:30, coolDays:21,cons:true,rar:'rare'},
   {id:'icecream',cat:'Treats',icon:'🍦',n:'Ice Cream',             d:'One tub or scoop. You earned this.',                        cost:180,coolDays:7, cons:true,rar:'normal'},
   {id:'purchase',cat:'Treats',icon:'📦',n:'Online Purchase ≤£20', d:'One guilt-free online buy under £20. No justification needed.',cost:1000,coolDays:30,cons:true,rar:'rare'},
   {id:'snack',   cat:'Treats',icon:'🥐',n:'Fancy Snack',           d:'Pastry, croissant, nice crisps — something premium.',        cost:140,coolDays:4, cons:true,rar:'normal'},

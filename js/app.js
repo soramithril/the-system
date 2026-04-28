@@ -123,7 +123,7 @@ function ld(){
           return q;
         });
         // Remove quests that no longer exist in defaults (except custom quests)
-        const REMOVED_QUEST_IDS=new Set(['h3','h4','gr3','s1','s2','j5','s5','m_shake2','c3']);
+        const REMOVED_QUEST_IDS=new Set(['h3','h4','gr3','s1','s2','j5','s5','m_shake2','c3','w_recover']);
         G.quests=G.quests.filter(q=>!REMOVED_QUEST_IDS.has(q.id)||q.m==='custom');
         // Add new quests that don't exist in saved data
         DEFAULT_QUESTS.forEach(dq=>{
@@ -185,6 +185,16 @@ function ld(){
         const REMOVED_V6=new Set(['s5','m_shake2','c3']);
         G.quests=G.quests.filter(q=>!REMOVED_V6.has(q.id)||q.m==='custom');
         G._qmig6=true;
+        sv();
+      }
+      // -- QUEST MIGRATION v7 (2026-04-27) --
+      // Training schedule rewrite: Mon/Sat=Upper, Sun/Wed=Lower, Tue=Pel40, Fri=Pel45,
+      // Thu=OFF. Retire w_recover.
+      if(!G._qmig7){
+        G.quests=G.quests.filter(q=>q.id!=='w_recover'||q.m==='custom');
+        const DAY_UPDATES={w_upper:[1,6], w_lower:[0,3], w_pel40:[2], w_pel45:[5]};
+        G.quests=G.quests.map(q=>DAY_UPDATES[q.id] ? {...q, days:DAY_UPDATES[q.id]} : q);
+        G._qmig7=true;
         sv();
       }
       // ── FRESH START RESET (runs once, 2026-04-20) ──

@@ -2052,16 +2052,25 @@ button.qbtn.done,button.qbtn[disabled]{
    data-stat GIF mapping. Each card becomes a 1:1 tile in a 3-col grid.
    ============================================================================ */
 
-/* Containers become 3-col grids */
-#q-list, #h-qprev, .qsec{
+/* #q-list stays a vertical stack of section headers (.msec) + card grids (.qsec).
+   Only the actual card containers are 3-col grids. */
+#q-list{
+  display:block !important;
+  padding:0 14px 8px !important;
+  overflow:visible !important;
+}
+#q-list > .msec{
+  grid-column:1 / -1 !important;       /* defensive — span full width if a parent grid creeps in */
+}
+#q-list > .qsec, #h-qprev{
   display:grid !important;
   grid-template-columns:repeat(3,1fr) !important;
   gap:6px !important;
-  padding:0 14px 8px !important;
   align-items:stretch !important;
   overflow:visible !important;
   flex-direction:unset !important;
   scroll-snap-type:none !important;
+  padding:0 0 14px !important;
 }
 #h-qprev{ padding:0 14px 14px !important; }
 
