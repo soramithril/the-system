@@ -2092,17 +2092,20 @@ button.qbtn.done,button.qbtn[disabled]{
     8px 100%, 0 calc(100% - 8px), 0 8px) !important;
 }
 
-/* Override the banner's left-edge wash with a bottom-anchored scrim.
-   z-index:1 sits above any injected <video> (z-index:0) but below content. */
+/* Stronger uniform scrim + slight blur over the bg art so the text is the
+   hero. backdrop-filter handles GIFs; the video also gets its own filter:blur
+   as a fallback for browsers that don't support backdrop-filter. */
 .qcard::before{
   background:linear-gradient(180deg,
-    rgba(0,0,0,.05) 0%,
-    rgba(0,0,0,.15) 50%,
-    rgba(0,0,0,.85) 100%) !important;
+    rgba(0,0,0,.45) 0%,
+    rgba(0,0,0,.55) 50%,
+    rgba(0,0,0,.70) 100%) !important;
   inset:0 !important;
   opacity:1 !important;
   z-index:1 !important;
   pointer-events:none !important;
+  backdrop-filter:blur(2.5px) saturate(.9) !important;
+  -webkit-backdrop-filter:blur(2.5px) saturate(.9) !important;
 }
 
 /* Injected HLS video (hud.js attaches one per data-stat in QCARD_VIDEOS) */
@@ -2115,6 +2118,8 @@ button.qbtn.done,button.qbtn[disabled]{
   z-index:0 !important;
   pointer-events:none !important;
   background:#04050d;
+  filter:blur(1.2px) brightness(.85);
+  transform:scale(1.06);  /* hide the blur edge */
 }
 
 /* qchk → repurposed as the top-right STAT pill (and as the DONE check) */
@@ -2157,24 +2162,28 @@ button.qbtn.done,button.qbtn[disabled]{
   transform:none !important;
 }
 
-/* Body → absolutely positioned bottom block */
+/* Body → fills the whole tile, centered. Quest name is the focal point. */
 .qcard > .qbody{
   position:absolute !important;
-  left:0 !important;
-  right:0 !important;
-  bottom:0 !important;
-  padding:8px 9px 9px !important;
+  inset:0 !important;
+  padding:28px 12px 14px !important;        /* room for top corner pills */
   display:flex !important;
   flex-direction:column !important;
-  gap:4px !important;
+  align-items:center !important;
+  justify-content:center !important;
+  text-align:center !important;
+  gap:8px !important;
   z-index:2 !important;
   align-self:unset !important;
 }
 .qcard .qn{
-  font-size:11.5px !important;
-  line-height:1.18 !important;
-  -webkit-line-clamp:2 !important;
+  font-size:14.5px !important;
+  line-height:1.20 !important;
+  -webkit-line-clamp:4 !important;
   margin:0 !important;
+  text-align:center !important;
+  text-shadow:0 2px 12px rgba(0,0,0,.95), 0 0 26px rgba(0,0,0,.55), 0 0 1px rgba(0,0,0,.6) !important;
+  letter-spacing:.4px !important;
 }
 
 /* Show only XP chip; hide the rest to stay readable in the small tile */
@@ -2184,15 +2193,16 @@ button.qbtn.done,button.qbtn[disabled]{
   gap:3px !important;
   margin:0 !important;
   padding:0 !important;
+  justify-content:center !important;
 }
 .qcard .qmeta .qtag,
 .qcard .qmeta .qtype-tag,
 .qcard .qmeta .qgd,
 .qcard .qmeta .qmp{ display:none !important; }
 .qcard .qmeta .qxp{
-  font-size:7.5px !important;
-  padding:2px 5px !important;
-  align-self:flex-start !important;
+  font-size:8px !important;
+  padding:2px 6px !important;
+  align-self:center !important;
 }
 
 /* Streak floats at the top-left corner */
