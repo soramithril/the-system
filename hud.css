@@ -2057,5 +2057,181 @@ button.qbtn.done,button.qbtn[disabled]{
   100% { box-shadow:0 0 0 1px rgba(255,70,112,.40), 0 12px 30px -10px rgba(255,70,112,.55), 0 0 22px rgba(255,70,112,.25); }
 }
 
-/* end of v6 */
+/* ============================================================================
+   v6.6 — 3-COLUMN SQUARE MISSION GRID
+   Replaces the horizontal banner layout while keeping every existing
+   data-stat GIF mapping. Each card becomes a 1:1 tile in a 3-col grid.
+   ============================================================================ */
+
+/* Containers become 3-col grids */
+#q-list, #h-qprev, .qsec{
+  display:grid !important;
+  grid-template-columns:repeat(3,1fr) !important;
+  gap:6px !important;
+  padding:0 14px 8px !important;
+  align-items:stretch !important;
+  overflow:visible !important;
+  flex-direction:unset !important;
+  scroll-snap-type:none !important;
+}
+#h-qprev{ padding:0 14px 14px !important; }
+
+/* Card geometry → square, full-bleed art, no internal columns */
+.qcard{
+  display:block !important;
+  grid-template-columns:unset !important;
+  aspect-ratio:1/1 !important;
+  min-height:0 !important;
+  padding:0 !important;
+  position:relative !important;
+  overflow:hidden !important;
+  flex:none !important;
+  clip-path:polygon(
+    8px 0, calc(100% - 8px) 0, 100% 8px,
+    100% calc(100% - 8px), calc(100% - 8px) 100%,
+    8px 100%, 0 calc(100% - 8px), 0 8px) !important;
+}
+
+/* Override the banner's left-edge wash with a bottom-anchored scrim.
+   z-index:1 sits above any injected <video> (z-index:0) but below content. */
+.qcard::before{
+  background:linear-gradient(180deg,
+    rgba(0,0,0,.05) 0%,
+    rgba(0,0,0,.15) 50%,
+    rgba(0,0,0,.85) 100%) !important;
+  inset:0 !important;
+  opacity:1 !important;
+  z-index:1 !important;
+  pointer-events:none !important;
+}
+
+/* Injected HLS video (hud.js attaches one per data-stat in QCARD_VIDEOS) */
+.qcard > video[data-hud-video]{
+  position:absolute !important;
+  inset:0 !important;
+  width:100% !important;
+  height:100% !important;
+  object-fit:cover !important;
+  z-index:0 !important;
+  pointer-events:none !important;
+  background:#04050d;
+}
+
+/* qchk → repurposed as the top-right STAT pill (and as the DONE check) */
+.qcard > .qchk{
+  position:absolute !important;
+  top:6px !important;
+  right:6px !important;
+  left:auto !important;
+  bottom:auto !important;
+  width:auto !important;
+  height:auto !important;
+  display:inline-block !important;
+  background:rgba(7,9,20,.82) !important;
+  border:1px solid var(--qc,#a878ff) !important;
+  color:var(--qc,#a878ff) !important;
+  padding:2px 6px !important;
+  font-family:'Share Tech Mono',monospace !important;
+  font-size:7.5px !important;
+  font-weight:800 !important;
+  letter-spacing:1.5px !important;
+  line-height:1.3 !important;
+  clip-path:polygon(0 0,calc(100% - 3px) 0,100% 50%,calc(100% - 3px) 100%,0 100%,3px 50%) !important;
+  box-shadow:none !important;
+  z-index:3 !important;
+  text-shadow:0 0 6px var(--qc,#a878ff);
+}
+.qcard > .qchk::before{ display:none !important; }
+.qcard > .qchk::after{
+  content:attr(data-stat-letter) !important;
+  position:static !important;
+  display:inline !important;
+  width:auto !important;
+  height:auto !important;
+  background:transparent !important;
+  border:0 !important;
+  font:inherit !important;
+  letter-spacing:inherit !important;
+  text-shadow:inherit !important;
+  color:inherit !important;
+  transform:none !important;
+}
+
+/* Body → absolutely positioned bottom block */
+.qcard > .qbody{
+  position:absolute !important;
+  left:0 !important;
+  right:0 !important;
+  bottom:0 !important;
+  padding:8px 9px 9px !important;
+  display:flex !important;
+  flex-direction:column !important;
+  gap:4px !important;
+  z-index:2 !important;
+  align-self:unset !important;
+}
+.qcard .qn{
+  font-size:11.5px !important;
+  line-height:1.18 !important;
+  -webkit-line-clamp:2 !important;
+  margin:0 !important;
+}
+
+/* Show only XP chip; hide the rest to stay readable in the small tile */
+.qcard .qmeta{
+  display:flex !important;
+  flex-wrap:wrap !important;
+  gap:3px !important;
+  margin:0 !important;
+  padding:0 !important;
+}
+.qcard .qmeta .qtag,
+.qcard .qmeta .qtype-tag,
+.qcard .qmeta .qgd,
+.qcard .qmeta .qmp{ display:none !important; }
+.qcard .qmeta .qxp{
+  font-size:7.5px !important;
+  padding:2px 5px !important;
+  align-self:flex-start !important;
+}
+
+/* Streak floats at the top-left corner */
+.qcard .qmeta .qstr{
+  position:absolute !important;
+  top:6px !important;
+  left:11px !important;
+  font-size:7.5px !important;
+  padding:2px 5px !important;
+  z-index:3 !important;
+  margin:0 !important;
+}
+
+/* Hide right TAP column + corner orn (whole card is tap) */
+.qcard > div:last-child:not(.qbody):not(.qchk){
+  display:none !important;
+}
+.qcard > .qc-orn{ display:none !important; }
+
+/* DONE state — green checkmark hex on the chip + desaturated card */
+.qcard.done > .qchk{
+  background:rgba(8,30,22,.88) !important;
+  border-color:#2be395 !important;
+  color:#2be395 !important;
+  text-shadow:0 0 8px #2be395 !important;
+}
+.qcard.done > .qchk::after{
+  content:'\2713' !important;
+  font-size:11px !important;
+}
+.qcard.done{
+  filter:saturate(.5) brightness(.7) !important;
+  opacity:.78 !important;
+}
+.qcard.done .qn{
+  text-decoration:line-through !important;
+  text-decoration-color:rgba(43,227,149,.6) !important;
+}
+.qcard.done::after{ display:none !important; }   /* kill banner-layout CLEARED text */
+
+/* end of v6.6 */
 

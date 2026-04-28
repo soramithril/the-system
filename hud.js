@@ -394,6 +394,98 @@
     });
   };
 
+  /* ── HLS video backgrounds  (Pinterest m3u8 → muted-loop poster) ────── */
+  // Map a stat key to a Pinterest .m3u8 URL. Add more entries as the user
+  // picks them; if a stat isn't in this map, we just keep the GIF bg.
+  const QCARD_VIDEOS = {
+    STR: 'https://v1.pinimg.com/videos/iht/hls/a0/ef/a8/a0efa847369ff87fd6079c28957cfae9.m3u8',
+  };
+  let _hlsLoading = null;
+  const loadHls = () => {
+    if (_hlsLoading) return _hlsLoading;
+    if (window.Hls) return Promise.resolve(window.Hls);
+    _hlsLoading = new Promise((resolve, reject) => {
+      const s = document.createElement('script');
+      s.src = 'https://cdn.jsdelivr.net/npm/hls.js@1.5.13/dist/hls.min.js';
+      s.async = true;
+      s.crossOrigin = 'anonymous';
+      s.onload  = () => resolve(window.Hls);
+      s.onerror = () => reject(new Error('hls.js load failed'));
+      document.head.appendChild(s);
+    });
+    return _hlsLoading;
+  };
+
+  // Pause/play videos as cards enter & leave the viewport (perf + battery).
+  const _vidIo = ('IntersectionObserver' in window) ? new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      const v = e.target.querySelector('video[data-hud-video]');
+      if (!v) return;
+      if (e.isIntersecting) {
+        try { const p = v.play(); if (p && p.catch) p.catch(()=>{}); } catch (_) {}
+      } else {
+        try { v.pause(); } catch (_) {}
+      }
+    });
+  }, { threshold: 0.05 }) : null;
+
+  const attachVideoTo = async (card) => {
+    if (!card || RM) return;
+    const stat = card.getAttribute('data-stat');
+    const url = QCARD_VIDEOS[stat];
+    if (!url) return;
+    if (card.querySelector('video[data-hud-video]')) return;     // already attached
+
+    const video = document.createElement('video');
+    video.dataset.hudVideo = '1';
+    video.muted = true;
+    video.loop = true;
+    video.autoplay = true;
+    video.playsInline = true;
+    video.setAttribute('playsinline', '');
+    video.setAttribute('webkit-playsinline', '');
+    video.preload = 'auto';
+    video.disablePictureInPicture = true;
+    card.insertBefore(video, card.firstChild);
+
+    const cleanup = () => { try { video.remove(); } catch (_) {} };
+
+    if (video.canPlayType('application/vnd.apple.mpegurl')) {
+      video.src = url;                                          // Safari native HLS
+      video.addEventListener('error', cleanup, { once:true });
+    } else {
+      try {
+        const Hls = await loadHls();
+        if (!Hls || !Hls.isSupported()) { cleanup(); return; }
+        const hls = new Hls({ lowLatencyMode: false, capLevelToPlayerSize: true });
+        hls.on(Hls.Events.ERROR, (_evt, data) => {
+          if (data && data.fatal) { try { hls.destroy(); } catch (_) {} cleanup(); }
+        });
+        hls.loadSource(url);
+        hls.attachMedia(video);
+        // store for potential later cleanup
+        video._hls = hls;
+      } catch (e) {
+        console.warn('hud:hls', e);
+        cleanup();
+        return;
+      }
+    }
+    if (_vidIo) _vidIo.observe(card);
+  };
+
+  const wireQcardVideos = () => {
+    const sweep = (root) => {
+      $$('.qcard', root || document).forEach(c => attachVideoTo(c));
+    };
+    sweep();
+    ['#q-list', '#h-qprev'].forEach(sel => {
+      const host = $(sel);
+      if (!host) return;
+      new MutationObserver(() => sweep(host)).observe(host, { childList:true, subtree:true });
+    });
+  };
+
   /* ── boot ───────────────────────────────────────────────────────────── */
   const boot = () => {
     try { wireHud(); }            catch (e) { console.warn('hud:wireHud',e); }
@@ -405,6 +497,7 @@
     try { wireDeck(); }           catch (e) { console.warn('hud:wireDeck',e); }
     try { wireQtabs(); }          catch (e) { console.warn('hud:wireQtabs',e); }
     try { wireMilestones(); }     catch (e) { console.warn('hud:wireMilestones',e); }
+    try { wireQcardVideos(); }    catch (e) { console.warn('hud:wireQcardVideos',e); }
 
     // Re-arm any new HUD numerics that get created later (defensive)
     const root = $('#app') || document.body;
