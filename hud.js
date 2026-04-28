@@ -397,8 +397,15 @@
   /* ── HLS video backgrounds  (Pinterest m3u8 → muted-loop poster) ────── */
   // Map a stat key to a Pinterest .m3u8 URL. Add more entries as the user
   // picks them; if a stat isn't in this map, we just keep the GIF bg.
+  // Per-stat HLS streams. URGENT keys override the stat-based mapping
+  // (urgent quests get the URGENT video regardless of their stat).
   const QCARD_VIDEOS = {
-    STR: 'https://v1.pinimg.com/videos/iht/hls/a0/ef/a8/a0efa847369ff87fd6079c28957cfae9.m3u8',
+    STR:    'https://v1.pinimg.com/videos/iht/hls/92/9e/18/929e18f6503f46de0635e96528aebaf8.m3u8',
+    AGI:    'https://v1.pinimg.com/videos/iht/hls/dd/07/12/dd0712f7246bdfa1502753464dd08685.m3u8',
+    INT:    'https://v1.pinimg.com/videos/iht/hls/05/40/70/054070ffa0eb0314cf3d9f80a271abf4.m3u8',
+    SEN:    'https://v1.pinimg.com/videos/iht/hls/55/9a/02/559a02fc3e48443affacb8fecce002cf.m3u8',
+    URGENT: 'https://v1.pinimg.com/videos/iht/hls/05/75/eb/0575eb36443a5b528c81c2c9ef051b1e.m3u8',
+    // STA uses a static GIF (set via CSS) — no video injection needed.
   };
   let _hlsLoading = null;
   const loadHls = () => {
@@ -432,7 +439,9 @@
   const attachVideoTo = async (card) => {
     if (!card || RM) return;
     const stat = card.getAttribute('data-stat');
-    const url = QCARD_VIDEOS[stat];
+    const type = card.getAttribute('data-type');
+    // Urgent overrides stat
+    const url = (type === 'urgent' && QCARD_VIDEOS.URGENT) || QCARD_VIDEOS[stat];
     if (!url) return;
     if (card.querySelector('video[data-hud-video]')) return;     // already attached
 

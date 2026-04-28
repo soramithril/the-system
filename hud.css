@@ -1705,60 +1705,46 @@ button.qbtn.done,button.qbtn[disabled]{
 /* v6.3 — right-portrait framing (option F): darker scrim left → clear right,
    GIF anchored right at natural card-height (auto 100%). Each character
    reads as a poster portrait inside a banner card. */
+/* v6.8 — square-card art mappings.
+   Posters from the Pinterest pins act as fallback (also visible while
+   HLS streams are loading or if HLS fails). Hud.js attaches a video
+   element on top for STR/AGI/INT/SEN/URGENT. STA stays a pure GIF. */
 .qcard[data-stat="STR"]{
   background:
-    linear-gradient(90deg,
-      rgba(8,8,22,.95) 0%, rgba(8,8,22,.85) 28%,
-      rgba(8,8,22,.20) 60%, rgba(8,8,22,.55) 100%),
-    url('https://media.tenor.com/eF6CmB2MtZsAAAAM/toji-fushiguro-toji.gif')
-      right center / auto 100% no-repeat,
-    linear-gradient(180deg, rgba(18,16,42,.90), rgba(8,8,22,.96)) !important;
+    url('https://i.pinimg.com/videos/thumbnails/originals/92/9e/18/929e18f6503f46de0635e96528aebaf8.0000000.jpg')
+      center / cover no-repeat,
+    #04050d !important;
 }
 .qcard[data-stat="AGI"]{
   background:
-    linear-gradient(90deg,
-      rgba(8,8,22,.95) 0%, rgba(8,8,22,.85) 28%,
-      rgba(8,8,22,.20) 60%, rgba(8,8,22,.55) 100%),
-    url('https://media.tenor.com/1-QQiZ7wnaEAAAAM/just.gif')
-      right center / auto 100% no-repeat,
-    linear-gradient(180deg, rgba(18,16,42,.90), rgba(8,8,22,.96)) !important;
+    url('https://i.pinimg.com/736x/42/d7/02/42d7029be5fdb78b6fac6096d3ac0747.jpg')
+      center / cover no-repeat,
+    #04050d !important;
 }
 .qcard[data-stat="STA"]{
   background:
-    linear-gradient(90deg,
-      rgba(8,8,22,.95) 0%, rgba(8,8,22,.85) 28%,
-      rgba(8,8,22,.20) 60%, rgba(8,8,22,.55) 100%),
-    url('https://media.tenor.com/EYZNexulDkQAAAAM/toji-shibuya.gif')
-      right center / auto 100% no-repeat,
-    linear-gradient(180deg, rgba(18,16,42,.90), rgba(8,8,22,.96)) !important;
+    url('https://i.pinimg.com/originals/29/96/40/29964078bb55b335f62496c81ce637bc.gif')
+      center / cover no-repeat,
+    #04050d !important;
 }
 .qcard[data-stat="INT"]{
   background:
-    linear-gradient(90deg,
-      rgba(8,8,22,.95) 0%, rgba(8,8,22,.85) 28%,
-      rgba(8,8,22,.20) 60%, rgba(8,8,22,.55) 100%),
-    url('https://media.tenor.com/cmGCMoAyI_cAAAAM/solo-leveling-solo-leveling-season-2.gif')
-      right center / auto 100% no-repeat,
-    linear-gradient(180deg, rgba(18,16,42,.90), rgba(8,8,22,.96)) !important;
+    url('https://i.pinimg.com/videos/thumbnails/originals/05/40/70/054070ffa0eb0314cf3d9f80a271abf4.0000000.jpg')
+      center / cover no-repeat,
+    #04050d !important;
 }
 .qcard[data-stat="SEN"]{
   background:
-    linear-gradient(90deg,
-      rgba(8,8,22,.95) 0%, rgba(8,8,22,.85) 28%,
-      rgba(8,8,22,.20) 60%, rgba(8,8,22,.55) 100%),
-    url('https://media.tenor.com/SOj3Xq1EAIYAAAAM/sjw-sung-jin-woo.gif')
-      right center / auto 100% no-repeat,
-    linear-gradient(180deg, rgba(18,16,42,.90), rgba(8,8,22,.96)) !important;
+    url('https://i.pinimg.com/videos/thumbnails/originals/55/9a/02/559a02fc3e48443affacb8fecce002cf.0000000.jpg')
+      center / cover no-repeat,
+    #04050d !important;
 }
-/* Urgent overrides any stat — Toji vs Dagon (cinematic combat) */
+/* Urgent overrides any stat — Toji manga animation (cinematic threat) */
 .qcard[data-type="urgent"]{
   background:
-    linear-gradient(90deg,
-      rgba(20,4,8,.95) 0%, rgba(20,4,8,.85) 28%,
-      rgba(20,4,8,.20) 60%, rgba(20,4,8,.55) 100%),
-    url('https://media.tenor.com/1Y0q4-7XY1MAAAAM/toji-fushiguro-fight.gif')
-      right center / auto 100% no-repeat,
-    linear-gradient(180deg, rgba(40,8,16,.90), rgba(8,4,8,.96)) !important;
+    url('https://i.pinimg.com/videos/thumbnails/originals/05/75/eb/0575eb36443a5b528c81c2c9ef051b1e.0000000.jpg')
+      center / cover no-repeat,
+    #08020a !important;
 }
 
 /* Wash gradient drawn from left rail outward */
