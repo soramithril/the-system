@@ -7,6 +7,14 @@ function togQ(id,evt){
   if(!q)return;
   if(!q.done){
     sfx('check');q.done=true;q.streak=(q.streak||0)+1;
+    // Dual-complete: keep urgent + its source daily in sync so completing one
+    // marks both done (no double-dipping, no stale orphan card).
+    if(q.t==='urgent'&&q.srcId){
+      const src=G.quests.find(x=>x.id===q.srcId);
+      if(src&&!src.done){ src.done=true; src.streak=(src.streak||0)+1; }
+    } else if(G.urgentQuest&&!G.urgentQuest.done&&G.urgentQuest.srcId===q.id){
+      G.urgentQuest.done=true;
+    }
     G.questsTotal=(G.questsTotal||0)+1;
     if(!G.qsd)G.qsd={STR:0,AGI:0,STA:0,INT:0,SEN:0,savings:0};
     G.qsd[q.s]=(G.qsd[q.s]||0)+1;

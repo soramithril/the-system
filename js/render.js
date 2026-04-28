@@ -93,8 +93,10 @@ function rHome(){
     np.style.display='none';
   }
   const urgents=(G.urgentQuest&&!G.urgentQuest.done)?[G.urgentQuest]:[];
-  // Show ALL daily quests scheduled for today — incomplete first, then done — plus any active urgent
-  const allDailies=G.quests.filter(q=>q.t==='daily'&&isScheduledToday(q));
+  // Dedupe: if an urgent is active and was generated from a daily, hide the daily
+  // so it doesn't appear twice (once as urgent, once as the original daily).
+  const urgentSrc=(G.urgentQuest&&!G.urgentQuest.done)?(G.urgentQuest.srcId||''):'';
+  const allDailies=G.quests.filter(q=>q.t==='daily'&&isScheduledToday(q)&&q.id!==urgentSrc);
   const prev=[...urgents,...allDailies.filter(q=>!q.done),...allDailies.filter(q=>q.done)];
   document.getElementById('h-qprev').innerHTML=prev.length?prev.map(q=>qCardHTML(q)).join(''):'<div style="text-align:center;padding:30px 20px;color:rgba(140,155,180,.25);font-family:\'Share Tech Mono\',monospace;font-size:9px;letter-spacing:3px;">NO DAILY QUESTS YET — TAP + TO CREATE ONE</div>';
 

@@ -170,21 +170,22 @@ const DEFAULT_QUESTS=[
   // ══════════════════════════════════════════════════════
   // MAIN QUESTS — Long-term milestones
   // ══════════════════════════════════════════════════════
-  {id:'fw1', m:'fitness',  t:'main',  layer:'main', n:'Reach 190 lbs',                                              s:'STR',xp:150, g:60, mp:0,streak:0,done:false},
-  {id:'fw2', m:'fitness',  t:'main',  layer:'main', n:'Reach 180 lbs',                                              s:'STR',xp:300, g:120,mp:0,streak:0,done:false},
-  {id:'fw3', m:'fitness',  t:'main',  layer:'main', n:'Reach 175 lbs',                                              s:'STR',xp:500, g:200,mp:0,streak:0,done:false},
-  {id:'f10', m:'fitness',  t:'main',  layer:'main', n:'Reach 15% body fat',                                        s:'STR',xp:200, g:80, mp:0,streak:0,done:false},
-  {id:'f11', m:'fitness',  t:'main',  layer:'main', n:'Reach 12% body fat',                                        s:'STR',xp:400, g:160,mp:0,streak:0,done:false},
-  {id:'y4',  m:'youtube',  t:'main',  layer:'main', n:'Reach 100 subscribers',                                     s:'SEN',xp:100, g:40, mp:0,streak:0,done:false},
-  {id:'y5',  m:'youtube',  t:'main',  layer:'main', n:'Reach 1,000 subscribers',                                   s:'SEN',xp:250, g:100,mp:0,streak:0,done:false},
-  {id:'y6',  m:'youtube',  t:'main',  layer:'main', n:'Reach 10,000 subscribers',                                  s:'SEN',xp:500, g:200,mp:0,streak:0,done:false},
-  {id:'y7',  m:'youtube',  t:'main',  layer:'main', n:'Reach 100,000 subscribers',                                 s:'SEN',xp:1000,g:400,mp:0,streak:0,done:false},
-  {id:'j8',  m:'japanese', t:'main',  layer:'main', n:'Complete Genki I textbook',                                  s:'INT',xp:200, g:80, mp:0,streak:0,done:false},
-  {id:'j9',  m:'japanese', t:'main',  layer:'main', n:'Pass JLPT N5',                                              s:'INT',xp:300, g:120,mp:0,streak:0,done:false},
-  {id:'j10', m:'japanese', t:'main',  layer:'main', n:'Pass JLPT N4',                                              s:'INT',xp:400, g:160,mp:0,streak:0,done:false},
-  {id:'j11', m:'japanese', t:'main',  layer:'main', n:'Pass JLPT N2',                                              s:'INT',xp:800, g:320,mp:0,streak:0,done:false},
-  {id:'sa3', m:'savings',  t:'main',  layer:'main', n:'Save first £1,000',                                         s:'SEN',xp:200, g:80, mp:0,streak:0,done:false},
-  {id:'sa4', m:'savings',  t:'main',  layer:'main', n:'Save first £5,000',                                         s:'SEN',xp:500, g:200,mp:0,streak:0,done:false},
+  // v2 (2026-04-27) — main-quest reward floor at 3000 g / 7500 xp, scaling above for harder tiers
+  {id:'fw1', m:'fitness',  t:'main',  layer:'main', n:'Reach 190 lbs',                                              s:'STR',xp:7500,  g:3000, mp:0,streak:0,done:false},
+  {id:'fw2', m:'fitness',  t:'main',  layer:'main', n:'Reach 180 lbs',                                              s:'STR',xp:7500,  g:3000, mp:0,streak:0,done:false},
+  {id:'fw3', m:'fitness',  t:'main',  layer:'main', n:'Reach 175 lbs',                                              s:'STR',xp:12500, g:5000, mp:0,streak:0,done:false},
+  {id:'f10', m:'fitness',  t:'main',  layer:'main', n:'Reach 15% body fat',                                        s:'STR',xp:7500,  g:3000, mp:0,streak:0,done:false},
+  {id:'f11', m:'fitness',  t:'main',  layer:'main', n:'Reach 12% body fat',                                        s:'STR',xp:10000, g:4000, mp:0,streak:0,done:false},
+  {id:'y4',  m:'youtube',  t:'main',  layer:'main', n:'Reach 100 subscribers',                                     s:'SEN',xp:7500,  g:3000, mp:0,streak:0,done:false},
+  {id:'y5',  m:'youtube',  t:'main',  layer:'main', n:'Reach 1,000 subscribers',                                   s:'SEN',xp:7500,  g:3000, mp:0,streak:0,done:false},
+  {id:'y6',  m:'youtube',  t:'main',  layer:'main', n:'Reach 10,000 subscribers',                                  s:'SEN',xp:12500, g:5000, mp:0,streak:0,done:false},
+  {id:'y7',  m:'youtube',  t:'main',  layer:'main', n:'Reach 100,000 subscribers',                                 s:'SEN',xp:25000, g:10000,mp:0,streak:0,done:false},
+  {id:'j8',  m:'japanese', t:'main',  layer:'main', n:'Complete Genki I textbook',                                  s:'INT',xp:7500,  g:3000, mp:0,streak:0,done:false},
+  {id:'j9',  m:'japanese', t:'main',  layer:'main', n:'Pass JLPT N5',                                              s:'INT',xp:7500,  g:3000, mp:0,streak:0,done:false},
+  {id:'j10', m:'japanese', t:'main',  layer:'main', n:'Pass JLPT N4',                                              s:'INT',xp:10000, g:4000, mp:0,streak:0,done:false},
+  {id:'j11', m:'japanese', t:'main',  layer:'main', n:'Pass JLPT N2',                                              s:'INT',xp:20000, g:8000, mp:0,streak:0,done:false},
+  {id:'sa3', m:'savings',  t:'main',  layer:'main', n:'Save first £1,000',                                         s:'SEN',xp:7500,  g:3000, mp:0,streak:0,done:false},
+  {id:'sa4', m:'savings',  t:'main',  layer:'main', n:'Save first £5,000',                                         s:'SEN',xp:12500, g:5000, mp:0,streak:0,done:false},
 ];
 
 // URGENT QUEST POOL — spawns randomly once every 1–3 days

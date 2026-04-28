@@ -197,6 +197,20 @@ function ld(){
         G._qmig7=true;
         sv();
       }
+      // -- QUEST MIGRATION v8 (2026-04-27) --
+      // Main-quest reward floor: minimum 3000 g / 7500 xp, scales for harder tiers.
+      if(!G._qmig8){
+        const MAIN_REWARDS={
+          fw1:{g:3000,xp:7500},  fw2:{g:3000,xp:7500},  fw3:{g:5000,xp:12500},
+          f10:{g:3000,xp:7500},  f11:{g:4000,xp:10000},
+          y4: {g:3000,xp:7500},  y5: {g:3000,xp:7500},  y6: {g:5000,xp:12500}, y7:{g:10000,xp:25000},
+          j8: {g:3000,xp:7500},  j9: {g:3000,xp:7500},  j10:{g:4000,xp:10000}, j11:{g:8000,xp:20000},
+          sa3:{g:3000,xp:7500},  sa4:{g:5000,xp:12500},
+        };
+        G.quests=G.quests.map(q=>MAIN_REWARDS[q.id] ? {...q, ...MAIN_REWARDS[q.id]} : q);
+        G._qmig8=true;
+        sv();
+      }
       // ── FRESH START RESET (runs once, 2026-04-20) ──
       // Full progress wipe requested by player. Heatmap begins Mon Apr 20 2026.
       // Preserves: player name, gate cinematic flag, firstLaunch flag (cosmetic only).
@@ -489,6 +503,7 @@ function maybeSpawnUrgent(){
     G.urgentQuest={
       ...base,
       id:'urg_'+Date.now(),
+      srcId:base.id,                  // remember source so render can dedupe + togQ can dual-complete
       m:'urgent',t:'urgent',done:false,streak:0,
       xp:Math.round(base.xp*1.6),   // +60% XP bonus for urgency
       g:Math.round((base.g||0)*1.6),
