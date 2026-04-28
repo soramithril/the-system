@@ -862,20 +862,26 @@
   new MutationObserver(function(){
     if (cq.classList.contains('show') && !cq.classList.contains('w4-fade')) {
       clearTimers();
-      // Hold 1.25s after reveal, then fade.  Fade lasts 220ms before close.
+      // Hold 0.55s after reveal then fade in 180ms — keeps the moment but
+      // doesn't eat the user's next tap on the next quest card.
       t1 = setTimeout(function(){
         if (!cq.classList.contains('show')) return;
         cq.classList.add('w4-fade');
+        // During the fade, let pointer events fall through so a quick tap
+        // on the next quest lands on the card, not the closing overlay.
+        cq.style.pointerEvents = 'none';
         t2 = setTimeout(function(){
           if (typeof window.closeCine === 'function') {
             try { window.closeCine('cq'); } catch(e) {}
           }
           cq.classList.remove('w4-fade');
-        }, 230);
-      }, 1250);
+          cq.style.pointerEvents = '';
+        }, 180);
+      }, 550);
     } else if (!cq.classList.contains('show')) {
       clearTimers();
       cq.classList.remove('w4-fade');
+      cq.style.pointerEvents = '';
     }
   }).observe(cq, { attributes:true, attributeFilter:['class'] });
 })();
