@@ -1717,9 +1717,9 @@ button.qbtn.done,button.qbtn[disabled]{
     #04050d !important;
 }
 .qcard[data-stat="AGI"]{
-  /* Sprint clip — clearly relates to AGILITY/SPEED (video poster as fallback) */
+  /* Sung Jin-Woo dash — Solo Leveling speed (video poster as fallback) */
   background:
-    url('https://i.pinimg.com/736x/b7/00/e4/b700e49087866586da9fc621cf48bea4.jpg')
+    url('https://i.pinimg.com/videos/thumbnails/originals/cf/00/8e/cf008edffae639da404b36cc02d8e44c.0000000.jpg')
       center / cover no-repeat,
     #04050d !important;
 }

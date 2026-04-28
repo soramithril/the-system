@@ -402,7 +402,7 @@
   // STA + STR use static images via CSS — no video injection.
   const QCARD_VIDEOS = {
     // STR — barbell lift (static, see CSS).
-    AGI:    'https://v1.pinimg.com/videos/iht/hls/3c/a3/03/3ca303b99ad24f089167fb983a1c7ade.m3u8', // sprint
+    AGI:    'https://v1.pinimg.com/videos/iht/hls/cf/00/8e/cf008edffae639da404b36cc02d8e44c.m3u8', // Sung Jin-Woo dash
     INT:    'https://v1.pinimg.com/videos/iht/hls/05/40/70/054070ffa0eb0314cf3d9f80a271abf4.m3u8', // focused gaze
     SEN:    'https://v1.pinimg.com/videos/iht/hls/39/5c/48/395c481e1376ba1a90a2ee1b5108ab9f.m3u8', // shadow aura
     URGENT: 'https://v1.pinimg.com/videos/iht/hls/05/75/eb/0575eb36443a5b528c81c2c9ef051b1e.m3u8', // threat
