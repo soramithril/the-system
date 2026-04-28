@@ -179,9 +179,29 @@ async function deleteShopItem(id){
 // ══════════════════════════════════════════════
 // CINEMATIC QUEUE
 // ══════════════════════════════════════════════
-function cineShow(id){cineQ.push(id);if(!cineActive)cineNext();}
+function cineShow(id){
+  // Quest-complete cinematics are non-essential and should NEVER queue —
+  // chaining them traps the user in sequential overlays they can't dismiss.
+  if(id==='cq' && (cineActive || cineQ.includes('cq'))) return;
+  cineQ.push(id);
+  if(!cineActive)cineNext();
+}
 function cineNext(){if(!cineQ.length){cineActive=false;return;}cineActive=true;const id=cineQ.shift();const el=document.getElementById(id);if(!el){cineActive=false;cineNext();return;}el.classList.remove('show');void el.offsetWidth;el.classList.add('show');}
-function closeCine(id){const el=document.getElementById(id);if(!el)return;el.style.opacity='0';el.style.transition='opacity .3s';setTimeout(()=>{el.classList.remove('show');el.style.opacity='';el.style.transition='';cineActive=false;cineNext();renderAll();},300);}
+function closeCine(id){
+  const el=document.getElementById(id);
+  if(!el)return;
+  // Drain any queued duplicates of this cinematic so a single tap clears the
+  // whole chain (especially for 'cq' which can stack with rapid quest taps).
+  if(id==='cq') cineQ=cineQ.filter(x=>x!=='cq');
+  el.style.opacity='0';el.style.transition='opacity .3s';
+  setTimeout(()=>{
+    el.classList.remove('show');
+    el.style.opacity='';el.style.transition='';
+    cineActive=false;
+    cineNext();
+    renderAll();
+  },300);
+}
 
 function showQuestCine(q,xp,gold){sfx('questCine');
   const sc={STR:'var(--str)',AGI:'var(--agi)',STA:'var(--sta)',INT:'var(--int)',SEN:'var(--sen)'};
