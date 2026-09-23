@@ -1,0 +1,17 @@
+# Secrets — never commit
+.github-token
+.dev.vars
+.env
+.env.*
+
+# Stale v1 deploy copy (superseded by Pages serving the branch directly)
+the-system-push-ready/
+
+# Worker tooling
+node_modules/
+worker/.wrangler/
+.wrangler/
+
+# OS noise
+.DS_Store
+Thumbs.db
