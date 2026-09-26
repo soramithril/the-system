@@ -52,6 +52,9 @@
   </div>
 </section>
 
+<!-- one System line at a time. spoken once, tap to dismiss. -->
+<div id="line" class="line mono pl" hidden></div>
+
 <!-- shown only after a real absence, and it never scolds -->
 <section class="hex pl" id="comeback" hidden>
   <div class="k cond">THE GATE REOPENS</div>
@@ -69,27 +72,48 @@
   </div>
   <div id="grid"></div>
   <div class="stats mono">
-    <div><div class="n lit" id="streak">0</div><div class="k">streak</div></div>
-    <div><div class="n" id="best">0</div><div class="k">best</div></div>
+    <div><div class="n lit"><span id="week">0</span><small id="weekof">/7</small></div><div class="k">this week</div></div>
+    <div><div class="n" id="cleared">0</div><div class="k">gates</div></div>
     <div><div class="n" id="rate">0%</div><div class="k">30&#8209;day</div></div>
-    <div class="push"><div class="n" id="life">0</div><div class="k">lifetime</div></div>
+    <div class="push"><div class="n" id="life">0</div><div class="k">logged</div></div>
   </div>
 </section>
 
+<!-- the status window. a row per stat with a live habit. -->
+<section class="hex pl" id="statsbox" hidden>
+  <div class="rowhead">
+    <i class="bar"></i>
+    <h2 class="cond">STATUS</h2>
+    <span class="aside mono">14&#8209;day</span>
+  </div>
+  <div id="stats" class="mono"></div>
+  <div class="statnote mono">how consistently you've shown up lately</div>
+</section>
+
 <div class="qhead">
-  <h2 class="cond">DAILY QUESTS</h2>
+  <h2 class="cond">DAILY QUEST</h2>
+  <span class="clock mono" id="clock">—</span>
   <span class="rule"></span>
   <span class="n mono" id="count">0/0</span>
 </div>
 
 <div id="list"></div>
 
-<div id="notify"></div>
+<div id="notify" class="mono"></div>
 
-<div class="foot">
+<div class="foot mono">
   <span id="lv">lv 1</span>
-  <span style="flex:1"></span>
-  <span><b id="gold" style="color:var(--gold);font-weight:700">0</b> gold</span>
+</div>
+
+<!-- rank promotion: the biggest visual moment in the app. tap anywhere. -->
+<div id="promo" hidden>
+  <div class="promo-in">
+    <div class="promo-k mono">THE SYSTEM</div>
+    <div class="promo-h cond">RANK UP.</div>
+    <div class="promo-r cond"><span class="from">E</span><i>&#8594;</i><span class="to">D</span></div>
+    <div class="loot mono"></div>
+    <div class="promo-tap mono">tap anywhere</div>
+  </div>
 </div>
 
 <script type="module" src="app.js"></script>

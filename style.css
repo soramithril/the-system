@@ -218,3 +218,49 @@ body > *:not(.art) { position: relative; z-index: 1; }
 .foot { display: flex; align-items: center; gap: 11px; margin-top: auto; font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--dim); }
 
 @media (min-width: 620px) { body { max-width: 430px; margin: 0 auto; } }
+
+/* ---- one-sitting additions ---------------------------------------------- */
+
+/* system line */
+.line { border-left: 2px solid var(--cyan); padding: 9px 12px; font-size: 10px; line-height: 1.6; color: #a8e4f5;
+  background: linear-gradient(90deg, rgba(90,209,255,.10), transparent); cursor: pointer; }
+
+/* earned title in the identity plate */
+.title { color: #c9bcff; }
+
+/* the record: "this week" reads N/7 */
+.stats .n small { font-size: 12px; color: var(--dim); margin-left: 1px; }
+
+/* status window rows */
+#statsbox { padding: 12px 15px 11px; display: flex; flex-direction: column; gap: 10px; animation-delay: .16s; }
+#stats { display: flex; flex-direction: column; gap: 8px; }
+.stat { display: flex; align-items: center; gap: 10px; font-size: 10px; }
+.stat b { width: 30px; letter-spacing: 1.5px; color: var(--label); }
+.stat .bar { flex: 1; height: 4px; background: rgba(0,0,0,.55); border: 1px solid rgba(255,255,255,.07); overflow: hidden; }
+.stat .bar span { display: block; height: 100%; background: linear-gradient(90deg, var(--violet), var(--cyan)); transition: width .45s cubic-bezier(.22,1,.36,1); }
+.stat u { text-decoration: none; width: 26px; text-align: right; color: var(--text); }
+.stat .up { color: var(--cyan); font-size: 8px; }
+.stat .dn { color: #8791a3; font-size: 8px; }
+.stat .fl { color: #3f4857; font-size: 8px; }
+.statnote { font-size: 8.5px; color: #4e5766; margin-top: 2px; }
+
+/* sealed quests: visible, not yet granted. more solo leveling than a full board. */
+.q.locked { border-left-color: rgba(255,255,255,.14); box-shadow: inset 0 1px 0 rgba(255,255,255,.04); opacity: .55; cursor: default; }
+.q.locked .dia { border-color: rgba(255,255,255,.18); border-style: dashed; }
+.q.locked .qt b { color: #78828f; }
+.q.locked:active { transform: none; }
+
+/* rank promotion overlay — the one place the app is allowed to be a screen */
+#promo { position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; cursor: pointer;
+  background: radial-gradient(120% 80% at 50% 40%, rgba(106,58,214,.55), rgba(7,9,14,.96) 70%); }
+.promo-in { text-align: center; padding: 0 28px; animation: plate .6s cubic-bezier(.22,1,.36,1) both; }
+.promo-k { font-size: 10.5px; letter-spacing: 8px; text-indent: 8px; color: rgba(255,255,255,.75); }
+.promo-h { font-size: 64px; font-weight: 800; line-height: .9; color: #fff; margin-top: 18px; text-shadow: 0 4px 30px rgba(0,0,0,.8); }
+.promo-r { display: flex; align-items: center; justify-content: center; gap: 16px; margin-top: 26px; font-size: 30px; font-weight: 800; }
+.promo-r .from { opacity: .45; }
+.promo-r .to { color: #fff; text-shadow: 0 0 30px rgba(255,255,255,.7); }
+.promo-r i { font-style: normal; opacity: .6; font-size: 20px; }
+#promo .loot { margin-top: 28px; font-size: 11px; letter-spacing: 2px; color: var(--gold); min-height: 14px; }
+.promo-tap { margin-top: 36px; font-size: 9px; letter-spacing: 1.6px; color: rgba(255,255,255,.4); }
+
+.qhead .clock { font-size: 9px; color: #5c6476; letter-spacing: .5px; }
