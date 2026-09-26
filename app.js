@@ -97,8 +97,9 @@ function streak() {
     const got = S.log[key] || []
     const perfect = due.every((h) => got.indexOf(h.id) !== -1)
     if (i === 0 && !perfect) continue          // today still in progress
-    if (perfect) { n++; misses = Math.max(0, misses - 0) }
-    else { misses++; if (misses >= 2) break; n++ }
+    if (perfect) { n++; continue }
+    misses++                                   // tolerated, but never counted
+    if (misses >= 2) break
   }
   return n
 }
@@ -187,7 +188,8 @@ function render() {
   const st = streak()
 
   $('#rank').textContent = rank
-  $('#meta').innerHTML = `${new Date().toLocaleDateString(undefined, { weekday: 'short', day: '2-digit', month: 'short' }).toLowerCase()}<br>${rank}&#8209;rank &#183; lv ${L.level}`
+  $('#meta').textContent = new Date().toLocaleDateString(undefined, { weekday: 'short', day: '2-digit', month: 'short' }).toLowerCase()
+  $('#metaline').innerHTML = `${rank}&#8209;rank &#183; lv ${L.level} &#183; ${lifetime()} logged`
   $('#count').textContent = `${got.length}/${due.length}`
   $('#xpbar').style.width = Math.round((L.into / L.need) * 100) + '%'
   $('#xpnum').textContent = `${L.into}/${L.need}`

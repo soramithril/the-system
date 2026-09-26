@@ -31,12 +31,20 @@ export function animateNumber(el, to, suffix = '', dur = 520) {
   const start = Number.isFinite(from) ? from : to
   if (reduceMotion || start === to) { el.textContent = to + suffix; return }
 
+  // requestAnimationFrame does not fire while the page is hidden, so a tween
+  // started off-screen would park on its START value and silently show a stale
+  // number the next time you look. On a phone that is the COMMON case: the app
+  // is reopened from the background constantly. Write the truth immediately and
+  // only animate when something is actually watching.
+  if (document.hidden) { el.textContent = to + suffix; return }
+
   const t0 = performance.now()
   const tick = (now) => {
     const p = Math.min(1, (now - t0) / dur)
     const e = 1 - Math.pow(1 - p, 3)              // easeOutCubic
     el.textContent = Math.round(start + (to - start) * e) + suffix
     if (p < 1) requestAnimationFrame(tick)
+    else el.textContent = to + suffix
   }
   requestAnimationFrame(tick)
 }
