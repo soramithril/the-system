@@ -16,6 +16,7 @@
 
 import { HABITS, STATS, RANKS, TITLES, LINES } from './habits.js'
 import { haptic, animateNumber, sparks, floatUp, reduceMotion } from './fx.js'
+import { initSync, pushState, exportLog, importLog, syncStatus } from './sync.js'
 
 const KEY = 'system_v2'
 const RETURN_BONUS = 15   // the Return Quest — top of 54 interventions, Milkman 2021
@@ -48,6 +49,7 @@ function save() {
   S._ts = Date.now()
   try { localStorage.setItem(KEY, JSON.stringify(S)) } catch (_) {}
   pushBadge()
+  pushState(S)            // debounced; does nothing until sync is ready
 }
 
 /* ---------- catalog views -------------------------------------------------- */
@@ -437,6 +439,31 @@ function syncNotifyUI() {
   box.hidden = true   // push lands after day 7 at the earliest; the badge already works
 }
 
+/* ---------- backup ---------------------------------------------------------- */
+/* Union the two logs rather than picking a winner by timestamp. Last-writer-
+   wins was v1's model and it silently loses a day when two copies disagree;
+   a union can only ADD days, never remove one you actually logged. */
+function mergeRemote(r) {
+  if (!r || typeof r !== 'object' || !r.log) return
+  let added = 0
+  for (const k in r.log) {
+    const mine = S.log[k] || []
+    const theirs = Array.isArray(r.log[k]) ? r.log[k] : []
+    const union = Array.from(new Set(mine.concat(theirs)))
+    if (union.length !== mine.length) added++
+    if (union.length) S.log[k] = union
+  }
+  if (r.first && (!S.first || r.first < S.first)) S.first = r.first
+  if (Array.isArray(r.seen)) S.seen = Array.from(new Set(S.seen.concat(r.seen)))
+  if (added) { save(); render(); speak('Record restored from the System archive.', null) }
+}
+
+export function backup() { exportLog(S) }
+export async function restore(file) {
+  try { mergeRemote(await importLog(file)); save(); render() }
+  catch (_) { speak('That file could not be read.', null) }
+}
+
 /* ---------- boot ----------------------------------------------------------- */
 function boot() {
   document.body.addEventListener('click', (e) => {
@@ -445,6 +472,8 @@ function boot() {
     if (e.target.id === 'cbclose') { S.lastOpen = today(); save(); render(); return }
     if (e.target.closest('#promo')) { $('#promo').hidden = true; return }
     if (e.target.id === 'line') { $('#line').hidden = true; return }
+    if (e.target.id === 'backup') { backup(); return }
+    if (e.target.id === 'restore') { $('#restorefile').click(); return }
   })
 
   render()
@@ -453,6 +482,12 @@ function boot() {
   save()
 
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js', { scope: './' }).catch(() => {})
+
+  // AFTER first paint, but NOT via requestIdleCallback — rIC does not fire in a
+  // hidden tab, and "app not in front" is the normal state on a phone, not the
+  // edge case. Same trap as the count-up tween. A plain timeout always fires.
+  setTimeout(() => initSync(mergeRemote), 900)
+  setInterval(() => { const el = $('#sync'); if (el) el.dataset.s = syncStatus() }, 4000)
 
   setInterval(render, 60000)
   document.addEventListener('visibilitychange', () => { if (!document.hidden) render() })

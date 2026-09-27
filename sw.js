@@ -11,7 +11,7 @@
    later with nothing in any log.
    ========================================================================= */
 
-const CACHE = 'system-v2-3'
+const CACHE = 'system-v2-5'
 const SHELL = [
   './',
   './index.html',
@@ -19,6 +19,7 @@ const SHELL = [
   './app.js',
   './habits.js',
   './fx.js',
+  './sync.js',
   './sfx.js',
   './icon-192.png',
   './manifest.webmanifest',

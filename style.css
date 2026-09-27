@@ -264,3 +264,10 @@ body > *:not(.art) { position: relative; z-index: 1; }
 .promo-tap { margin-top: 36px; font-size: 9px; letter-spacing: 1.6px; color: rgba(255,255,255,.4); }
 
 .qhead .clock { font-size: 9px; color: #5c6476; letter-spacing: .5px; }
+
+/* backup controls */
+.foot button { font-size: 8.5px; letter-spacing: 1.4px; color: #5c6476; padding: 8px 6px; }
+.foot button:active { color: var(--cyan); }
+#sync { width: 5px; height: 5px; border-radius: 50%; background: #2a3242; margin-left: 4px; }
+#sync[data-s="ready"] { background: var(--cyan); box-shadow: 0 0 6px rgba(90,209,255,.8); }
+#sync[data-s="offline"], #sync[data-s="error"] { background: var(--gold); }
