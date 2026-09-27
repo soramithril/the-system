@@ -16,7 +16,7 @@
 
 import { HABITS, STATS, RANKS, TITLES, LINES } from './habits.js'
 import { haptic, animateNumber, sparks, floatUp, reduceMotion } from './fx.js'
-import { initSync, pushState, exportLog, importLog, syncStatus } from './sync.js'
+import { initSync, pushState, exportLog, importLog } from './sync.js'
 
 const KEY = 'system_v2'
 const RETURN_BONUS = 15   // the Return Quest — top of 54 interventions, Milkman 2021
@@ -487,7 +487,6 @@ function boot() {
   // hidden tab, and "app not in front" is the normal state on a phone, not the
   // edge case. Same trap as the count-up tween. A plain timeout always fires.
   setTimeout(() => initSync(mergeRemote), 900)
-  setInterval(() => { const el = $('#sync'); if (el) el.dataset.s = syncStatus() }, 4000)
 
   setInterval(render, 60000)
   document.addEventListener('visibilitychange', () => { if (!document.hidden) render() })

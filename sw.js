@@ -11,7 +11,7 @@
    later with nothing in any log.
    ========================================================================= */
 
-const CACHE = 'system-v2-5'
+const CACHE = 'system-v2-7'
 const SHELL = [
   './',
   './index.html',
@@ -37,15 +37,35 @@ self.addEventListener('activate', (e) => {
   )
 })
 
-/* Cache-first for the shell, network-first for everything else. The app is
-   local-first — the save lives in localStorage — so a cold offline launch
-   must still render today's list. */
+/* NETWORK-FIRST for our own code, cache as the offline fallback.
+
+   Cache-first was wrong here and cost real time: after a deploy the phone
+   kept running the previous build until the cache name changed, and during
+   development it silently served stale app.js three separate times. Bumping
+   CACHE on every edit is a rule you forget exactly once.
+
+   So: try the network, and refresh the cache when it answers. If it does not
+   answer — offline, plane, tunnel — serve the cached copy. The app still
+   opens and still logs, because the save is local either way. */
 self.addEventListener('fetch', (e) => {
   const req = e.request
   if (req.method !== 'GET') return
-  e.respondWith(
-    caches.match(req).then((hit) => hit || fetch(req).catch(() => caches.match('./index.html')))
-  )
+  const url = new URL(req.url)
+  if (url.origin !== self.location.origin) return          // fonts, SDK: leave alone
+
+  e.respondWith((async () => {
+    try {
+      const fresh = await fetch(req)
+      if (fresh && fresh.ok) {
+        const c = await caches.open(CACHE)
+        c.put(req, fresh.clone())
+      }
+      return fresh
+    } catch (_) {
+      const hit = await caches.match(req)
+      return hit || caches.match('./index.html')
+    }
+  })())
 })
 
 /* --------------------------------------------------------------------------

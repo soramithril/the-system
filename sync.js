@@ -61,12 +61,21 @@ let db = null, uid = null, ref = null, set = null, get = null
 let timer = null
 let status = 'idle'      // idle | connecting | ready | offline | error
 
+/* Write straight to the DOM rather than having app.js poll this binding on an
+   interval. Polling an imported live binding across modules read stale during
+   testing and is more machinery than a status dot deserves. */
+function setStatus(s) {
+  status = s
+  const el = document.getElementById('sync')
+  if (el) { el.dataset.s = s; el.title = 'backup: ' + s }
+}
+
 export const syncStatus = () => status
 
 /* Called once, after first paint. Never awaited by the render path. */
 export async function initSync(onRemote) {
   if (status !== 'idle') return
-  status = 'connecting'
+  setStatus('connecting')
   try {
     const [{ initializeApp }, auth, rtdb] = await Promise.all([
       import(SDK + 'firebase-app.js'),
@@ -86,9 +95,9 @@ export async function initSync(onRemote) {
     const snap = await get(ref(db, 'saves/' + uid))
     if (snap.exists() && typeof onRemote === 'function') onRemote(snap.val())
 
-    status = 'ready'
+    setStatus('ready')
   } catch (e) {
-    status = (e && /network|offline|fetch/i.test(String(e.message))) ? 'offline' : 'error'
+    setStatus((e && /network|offline|fetch/i.test(String(e.message))) ? 'offline' : 'error')
     console.warn('[sync] unavailable —', e && e.message)
   }
 }
