@@ -16,40 +16,58 @@
 
 import { HABITS, STATS, RANKS, TITLES, LINES } from './habits.js'
 import { haptic, animateNumber, sparks, floatUp, reduceMotion } from './fx.js'
-import { initSync, pushState, exportLog, importLog } from './sync.js'
+import { connect, writeState, flush, onStatus } from './sync.js'
 
-const KEY = 'system_v2'
 const RETURN_BONUS = 15   // the Return Quest — top of 54 interventions, Milkman 2021
 
-/* ---------- dates ---------------------------------------------------------- */
-const iso = (d) => { const z = new Date(d.getTime() - d.getTimezoneOffset() * 60000); return z.toISOString().slice(0, 10) }
+/* ---------- dates ----------------------------------------------------------
+   Local-time day keys. Deliberately NOT toISOString() on the raw date: that
+   is UTC, so anything logged after 19:00 EDT would land on tomorrow's key and
+   silently split a day in two. The offset shift makes the key match the day
+   you are actually living in. */
+const iso = (d) => {
+  const z = new Date(d.getTime() - d.getTimezoneOffset() * 60000)
+  return z.toISOString().slice(0, 10)
+}
 const today = () => iso(new Date())
 const daysAgo = (n) => { const d = new Date(); d.setDate(d.getDate() - n); return iso(d) }
 const dow = (key) => new Date(key + 'T12:00:00').getDay()
 const diffDays = (a, b) => Math.round((new Date(b + 'T12:00:00') - new Date(a + 'T12:00:00')) / 86400000)
 
-/* ---------- state ---------------------------------------------------------- */
-let S = load()
+/* ---------- state ---------------------------------------------------------
+   Firebase is the only copy. `loaded` stays false until the real record has
+   come back, and every write is gated on it.
 
-function load() {
-  let s = null
-  try { s = JSON.parse(localStorage.getItem(KEY) || 'null') } catch (_) { s = null }
-  if (!s || typeof s !== 'object') s = {}
+   That gate is the whole reason this is safe. Without it, opening the app
+   before the network answers would render an empty board, and one tap would
+   write a save containing exactly one day — silently destroying the record.
+   A blank screen for a second is recoverable; that is not. */
+let S = blank()
+let loaded = false
+
+function blank() {
+  return { v: 2, log: {}, first: null, lastOpen: null, seen: [], _ts: 0 }
+}
+
+/* Accepts whatever came back and fills in anything missing, so a partial or
+   older document can never produce undefined downstream. */
+function adopt(r) {
+  if (!r || typeof r !== 'object') return blank()
   return {
     v: 2,
-    log: (s.log && typeof s.log === 'object') ? s.log : {},
-    first: s.first || null,          // the day the System awakened — day 0
-    lastOpen: s.lastOpen || null,
-    seen: Array.isArray(s.seen) ? s.seen : [],   // system lines already spoken
-    _ts: s._ts || 0,
+    log: (r.log && typeof r.log === 'object') ? r.log : {},
+    first: r.first || null,
+    lastOpen: r.lastOpen || null,
+    seen: Array.isArray(r.seen) ? r.seen : [],
+    _ts: r._ts || 0,
   }
 }
 
 function save() {
+  if (!loaded) return            // never write over a record we have not read
   S._ts = Date.now()
-  try { localStorage.setItem(KEY, JSON.stringify(S)) } catch (_) {}
+  writeState(S)
   pushBadge()
-  pushState(S)            // debounced; does nothing until sync is ready
 }
 
 /* ---------- catalog views -------------------------------------------------- */
@@ -246,6 +264,7 @@ function earnedTitles() {
 
 /* ---------- actions -------------------------------------------------------- */
 export function toggle(id, ev) {
+  if (!loaded) return            // the board is not yours yet
   const h = byId(id)
   if (!h || !granted(h)) return
   const k = today()
@@ -439,32 +458,6 @@ function syncNotifyUI() {
   box.hidden = true   // push lands after day 7 at the earliest; the badge already works
 }
 
-/* ---------- backup ---------------------------------------------------------- */
-/* Union the two logs rather than picking a winner by timestamp. Last-writer-
-   wins was v1's model and it silently loses a day when two copies disagree;
-   a union can only ADD days, never remove one you actually logged. */
-function mergeRemote(r) {
-  if (!r || typeof r !== 'object' || !r.log) return
-  let added = 0
-  for (const k in r.log) {
-    const mine = S.log[k] || []
-    const theirs = Array.isArray(r.log[k]) ? r.log[k] : []
-    const union = Array.from(new Set(mine.concat(theirs)))
-    if (union.length !== mine.length) added++
-    if (union.length) S.log[k] = union
-  }
-  if (r.first && (!S.first || r.first < S.first)) S.first = r.first
-  if (Array.isArray(r.seen)) S.seen = Array.from(new Set(S.seen.concat(r.seen)))
-  if (added) { save(); render(); speak('Record restored from the System archive.', null) }
-}
-
-/* No UI for these now — the footer buttons were removed. Kept exported so
-   putting them back is two lines of HTML rather than a rewrite. */
-export function backup() { exportLog(S) }
-export async function restore(file) {
-  try { mergeRemote(await importLog(file)); save(); render() }
-  catch (_) { speak('That file could not be read.', null) }
-}
 
 /* ---------- boot ----------------------------------------------------------- */
 function boot() {
@@ -476,20 +469,37 @@ function boot() {
     if (e.target.id === 'line') { $('#line').hidden = true; return }
   })
 
-  render()
-  syncNotifyUI()
-  S.lastOpen = today()
-  save()
-
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js', { scope: './' }).catch(() => {})
 
-  // AFTER first paint, but NOT via requestIdleCallback — rIC does not fire in a
-  // hidden tab, and "app not in front" is the normal state on a phone, not the
-  // edge case. Same trap as the count-up tween. A plain timeout always fires.
-  setTimeout(() => initSync(mergeRemote), 900)
+  onStatus((st) => {
+    document.documentElement.dataset.store = st
+    if (st === 'offline' && loaded) speak('Connection lost. Taps are held until it returns.', null)
+  })
 
-  setInterval(render, 60000)
-  document.addEventListener('visibilitychange', () => { if (!document.hidden) render() })
+  render()                       // skeleton, so the frame is up immediately
+  start()
+
+  setInterval(() => { if (loaded) render() }, 60000)
+  document.addEventListener('visibilitychange', () => { if (!document.hidden && loaded) render() })
+  addEventListener('pagehide', flush)
+}
+
+async function start() {
+  try {
+    const remote = await connect()
+    S = adopt(remote)
+    loaded = true
+    render()
+    syncNotifyUI()
+    S.lastOpen = today()
+    save()
+  } catch (e) {
+    /* Do NOT fall through to an empty board. An unreadable record must look
+       like a problem, not like a fresh start. */
+    document.documentElement.dataset.store = 'error'
+    speak('The System cannot reach the archive. Your record is safe — reopen when you have signal.', null)
+    console.warn('[store] connect failed —', e && e.message)
+  }
 }
 
 if (reduceMotion) document.documentElement.classList.add('rm')

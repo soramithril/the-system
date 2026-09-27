@@ -11,7 +11,7 @@
    later with nothing in any log.
    ========================================================================= */
 
-const CACHE = 'system-v2-9'
+const CACHE = 'system-v2-13'
 const SHELL = [
   './',
   './index.html',
@@ -55,7 +55,14 @@ self.addEventListener('fetch', (e) => {
 
   e.respondWith((async () => {
     try {
-      const fresh = await fetch(req)
+      /* cache:'reload' bypasses the HTTP cache for our own files. Without it
+         a deploy can sit behind a stale cached app.js for as long as the
+         Cache-Control max-age — which during development silently served an
+         OLD build through several rounds of testing, and on a phone would
+         mean tweaking the code and not seeing the change. */
+      const fresh = await fetch(new Request(req.url, {
+        cache: 'reload', credentials: 'same-origin', mode: 'same-origin',
+      }))
       if (fresh && fresh.ok) {
         const c = await caches.open(CACHE)
         c.put(req, fresh.clone())

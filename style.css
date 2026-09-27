@@ -26,8 +26,16 @@
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
 
-html { scrollbar-width: none; -ms-overflow-style: none; }
-html::-webkit-scrollbar, body::-webkit-scrollbar { width: 0; height: 0; display: none; }
+/* No visible scrollbar anywhere. It still scrolls — the track is just not
+   painted, which matters on a screen whose whole job is to look uncluttered.
+
+   overflow-x lives on html, NOT body. Per spec, hiding one axis forces the
+   other to `auto`, so `overflow-x: hidden` on body silently made BODY its own
+   scroll container — and then a scrollbar-width rule aimed at html never
+   touched the element actually doing the scrolling. */
+html, body { scrollbar-width: none; -ms-overflow-style: none; }
+html { overflow-x: hidden; }
+*::-webkit-scrollbar { width: 0; height: 0; display: none; }
 
 html, body {
   margin: 0;
@@ -46,7 +54,6 @@ body {
   flex-direction: column;
   gap: 13px;
   position: relative;
-  overflow-x: hidden;
 }
 
 button { font: inherit; color: inherit; border: 0; background: none; padding: 0; cursor: pointer; }
@@ -269,3 +276,21 @@ body > *:not(.art) { position: relative; z-index: 1; }
 .qhead .clock { font-size: 9px; color: #5c6476; letter-spacing: .5px; }
 
 /* backup controls */
+
+/* ---- store state --------------------------------------------------------
+   Firebase is the only copy, so the seconds before the record arrives are a
+   real state the UI has to have. Quests are visibly not-yet-yours until then
+   — dimmed and pointer-events:none — because a tap on an empty board would
+   otherwise write a save containing one day over a real record. */
+html[data-store="connecting"] #list,
+html[data-store="error"] #list { opacity: .28; pointer-events: none; filter: saturate(.4); }
+html[data-store="connecting"] .record,
+html[data-store="connecting"] #statsbox { opacity: .4; }
+
+.hud .when::after { content: ''; }
+html[data-store="connecting"] .hud .when::after { content: ' · connecting'; color: #5f7386; }
+html[data-store="offline"] .hud .when::after { content: ' · offline'; color: var(--gold); }
+html[data-store="error"] .hud .when::after { content: ' · no archive'; color: var(--gold); }
+
+html[data-store="offline"] .hud { border-top-color: rgba(217,168,78,.55); }
+html[data-store="error"] .hud { border-top-color: rgba(217,168,78,.55); }

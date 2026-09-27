@@ -1,49 +1,27 @@
 /* ============================================================================
-   BACKUP — Firebase Realtime Database, repaired.
+   THE STORE — Firebase Realtime Database. The only copy.
 
-   WHAT THIS IS FOR: the log lives in localStorage on the phone. An installed
-   home-screen web app is exempt from Safari's 7-day storage wipe, but deleting
-   the app or clearing website data still erases it with no warning and no
-   recovery. This is the copy that survives that.
+   No localStorage. The log lives at saves/<uid> and nowhere else.
 
-   WHAT WAS WRONG IN v1, and is fixed here:
+   WHAT THAT COSTS, stated plainly so it is not a surprise later:
 
-     v1 rules:  {"saves": {"player": {".read": true, ".write": true}}}
-     v1 user:   fbUserId = 'player'   // hardcoded
+     - The app cannot open without a network. There is no local copy to
+       render from, so a cold launch offline shows CONNECTING and nothing
+       else.
+     - RTDB's web SDK queues writes offline IN MEMORY ONLY (unlike the iOS
+       and Android SDKs, which persist to disk). A tap made offline is held
+       in RAM and flushed on reconnect — but closing the app before it
+       reconnects loses it silently.
+     - Every tap is a network write.
 
-   The database URL sits in this public repo, so those rules meant anyone who
-   read the repo could dump or erase the save. The API key being public is
-   fine and by design — it identifies the project, it does not authorise
-   anything. THE RULES WERE ALWAYS THE ONLY SECURITY, and they were off.
+   If offline logging ever matters, the fix is Firestore rather than
+   hand-rolled caching: its SDK persists to IndexedDB itself, so it stays
+   "Firebase only" while surviving a tunnel. Bigger change, not what was
+   asked for here.
 
-   Now: anonymous auth gives the device a real uid, the save lives at
-   saves/<uid>, and the rules below let only that uid touch it.
-
-     PASTE THIS into Firebase console -> Realtime Database -> Rules:
-
-     {
-       "rules": {
-         "saves": {
-           "$uid": {
-             ".read":  "auth != null && auth.uid === $uid",
-             ".write": "auth != null && auth.uid === $uid"
-           }
-         }
-       }
-     }
-
-     Then Authentication -> Sign-in method -> enable Anonymous.
-
-   OFF THE BOOT PATH. v1 loaded the SDK via an importmap before the app could
-   render. Here the whole module is dynamically imported AFTER first paint, so
-   a slow or dead network costs nothing — the app is local-first and simply
-   renders from localStorage. If this never loads, nothing breaks; you just
-   have no backup until it does.
-
-   ANONYMOUS UID IS PER-INSTALL. Delete the app and you get a new uid, so the
-   old backup becomes unreachable even though it still exists. That is why
-   exportLog() exists below and why the restore code is keyed off a recovery
-   phrase you can write down. Backup is not the same as being able to restore.
+   SECURITY: rules are scoped to auth.uid (database.rules.json in this repo).
+   The API key is a public project identifier and authorises nothing; the
+   rules are the security, which is what v1 got wrong.
    ========================================================================= */
 
 const CONFIG = {
@@ -57,76 +35,69 @@ const CONFIG = {
 }
 
 const SDK = 'https://www.gstatic.com/firebasejs/10.12.2/'
-let db = null, uid = null, ref = null, set = null, get = null
-let timer = null
-let status = 'idle'      // idle | connecting | ready | offline | error
 
-/* Backup runs silently. There was a status dot in the footer; it reported
-   'idle' while a full signInAnonymously -> write -> read -> delete round trip
-   against this same project succeeded, so it was misreporting. A silent
-   backup that works beats an indicator that lies. syncStatus() is still
-   exported for the console if you ever need to know. */
-function setStatus(s) { status = s }
+let db = null, uid = null, rtdb = null
+let state = 'connecting'          // connecting | ready | offline | error
+let listeners = []
+let writeTimer = null
+let pending = null
 
-export const syncStatus = () => status
+export const storeState = () => state
+export const onStatus = (fn) => { listeners.push(fn); fn(state) }
+function setState(s) { state = s; listeners.forEach((f) => { try { f(s) } catch (_) {} }) }
 
-/* Called once, after first paint. Never awaited by the render path. */
-export async function initSync(onRemote) {
-  if (status !== 'idle') return
-  setStatus('connecting')
-  try {
-    const [{ initializeApp }, auth, rtdb] = await Promise.all([
-      import(SDK + 'firebase-app.js'),
-      import(SDK + 'firebase-auth.js'),
-      import(SDK + 'firebase-database.js'),
-    ])
-    const app = initializeApp(CONFIG)
+/* Auth + first read. Resolves with the saved state, or null for a new user.
+   THROWS on failure — the caller must not fall back to an empty save, or a
+   transient blip would look like a fresh install and the next tap would
+   overwrite a real record with one day. */
+export async function connect() {
+  setState('connecting')
+  const [{ initializeApp }, auth, database] = await Promise.all([
+    import(SDK + 'firebase-app.js'),
+    import(SDK + 'firebase-auth.js'),
+    import(SDK + 'firebase-database.js'),
+  ])
+  rtdb = database
+  const app = initializeApp(CONFIG)
 
-    const cred = await auth.signInAnonymously(auth.getAuth(app))
-    uid = cred.user.uid
+  const cred = await auth.signInAnonymously(auth.getAuth(app))
+  uid = cred.user.uid
+  db = rtdb.getDatabase(app)
 
-    ;({ ref, set, get } = rtdb)
-    db = rtdb.getDatabase(app)
-
-    /* Pull once on boot. Newer wins by _ts. Phone-only, so this matters on a
-       reinstall, not day to day. */
-    const snap = await get(ref(db, 'saves/' + uid))
-    if (snap.exists() && typeof onRemote === 'function') onRemote(snap.val())
-
-    setStatus('ready')
-  } catch (e) {
-    setStatus((e && /network|offline|fetch/i.test(String(e.message))) ? 'offline' : 'error')
-    console.warn('[sync] unavailable —', e && e.message)
-  }
-}
-
-/* Debounced. Called on every save; costs nothing when sync never came up. */
-export function pushState(S) {
-  if (status !== 'ready' || !db || !uid) return
-  clearTimeout(timer)
-  timer = setTimeout(async () => {
-    try { await set(ref(db, 'saves/' + uid), JSON.parse(JSON.stringify(S))) }
-    catch (e) { console.warn('[sync] write failed —', e && e.message) }
-  }, 2000)
-}
-
-/* The thing a remote backup cannot do for you: survive losing the uid.
-   Dumps the save as a file you can keep anywhere. */
-export function exportLog(S) {
-  const blob = new Blob([JSON.stringify(S, null, 2)], { type: 'application/json' })
-  const a = document.createElement('a')
-  a.href = URL.createObjectURL(blob)
-  a.download = 'the-system-' + new Date().toISOString().slice(0, 10) + '.json'
-  document.body.appendChild(a)
-  a.click()
-  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove() }, 1000)
-}
-
-export function importLog(file) {
-  return new Promise((res, rej) => {
-    const r = new FileReader()
-    r.onload = () => { try { res(JSON.parse(r.result)) } catch (e) { rej(e) } }
-    r.onerror = rej
-    r.readAsText(file)
+  /* Surface the live connection, so a dropped network is visible rather than
+     silently queueing writes into memory that may never flush. */
+  rtdb.onValue(rtdb.ref(db, '.info/connected'), (snap) => {
+    setState(snap.val() === true ? 'ready' : 'offline')
   })
+
+  const snap = await rtdb.get(rtdb.ref(db, 'saves/' + uid))
+  setState('ready')
+  return snap.exists() ? snap.val() : null
 }
+
+/* Debounced write. Failures surface through onStatus rather than a throw, so
+   a tap never fails visibly mid-animation. */
+export function writeState(S) {
+  if (!db || !uid) return
+  pending = JSON.parse(JSON.stringify(S))
+  clearTimeout(writeTimer)
+  writeTimer = setTimeout(async () => {
+    try {
+      await rtdb.set(rtdb.ref(db, 'saves/' + uid), pending)
+      if (state !== 'offline') setState('ready')
+    } catch (e) {
+      setState('error')
+      console.warn('[store] write failed —', e && e.message)
+    }
+  }, 700)
+}
+
+/* Flush on pagehide so a tap made inside the debounce window is not lost when
+   the app is swiped away. */
+export function flush() {
+  if (!db || !uid || !pending) return
+  clearTimeout(writeTimer)
+  try { rtdb.set(rtdb.ref(db, 'saves/' + uid), pending) } catch (_) {}
+}
+
+export const currentUid = () => uid
