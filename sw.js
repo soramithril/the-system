@@ -11,16 +11,21 @@
    later with nothing in any log.
    ========================================================================= */
 
-const CACHE = 'system-v2-13'
+const CACHE = 'system-v3-1'
 const SHELL = [
   './',
   './index.html',
   './style.css',
   './app.js',
+  './model.js',
   './habits.js',
+  './lore.js',
+  './ui.js',
   './fx.js',
   './sync.js',
   './sfx.js',
+  './archive.js',
+  './push.js',
   './icon-192.png',
   './manifest.webmanifest',
 ]

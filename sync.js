@@ -13,18 +13,21 @@
        in RAM and flushed on reconnect — but closing the app before it
        reconnects loses it silently.
      - Every tap is a network write.
-
-   If offline logging ever matters, the fix is Firestore rather than
-   hand-rolled caching: its SDK persists to IndexedDB itself, so it stays
-   "Firebase only" while surviving a tunnel. Bigger change, not what was
-   asked for here.
+     - The uid is ANONYMOUS. Deleting the home-screen app deletes the key to
+       the record. That is what the archive copy (archive.js) is for.
 
    SECURITY: rules are scoped to auth.uid (database.rules.json in this repo).
    The API key is a public project identifier and authorises nothing; the
    rules are the security, which is what v1 got wrong.
+
+   THE INBOX (inbox/<uid>): the one path something other than this app can
+   write to. An iOS Shortcut — run from an NFC sticker or a tap — POSTs
+   { q, t, k } there over REST with no sign-in; the rules accept it only if
+   k matches the secret stored in the save. The app applies each entry to
+   the log on the day it was sent, then deletes it.
    ========================================================================= */
 
-const CONFIG = {
+export const CONFIG = {
   apiKey: 'AIzaSyAYd3KGSylkvpWJUSEti-PSb4ir5Xbp0qE',
   authDomain: 'the-system-970f9.firebaseapp.com',
   databaseURL: 'https://the-system-970f9-default-rtdb.firebaseio.com',
@@ -75,21 +78,42 @@ export async function connect() {
   return snap.exists() ? snap.val() : null
 }
 
+/* A record with no logged day is never written. The rules reject a save
+   without a `log` child (RTDB drops empty objects, so {log:{}} arrives as
+   no log at all) — and that rule is the net under the whole design, so the
+   client respects it instead of weakening it. Before the first tap there is
+   nothing worth keeping anyway. */
+const writable = (S) => S && S.log && Object.keys(S.log).length > 0
+
 /* Debounced write. Failures surface through onStatus rather than a throw, so
-   a tap never fails visibly mid-animation. */
+   a tap never fails visibly mid-animation. The returned promise settles when
+   the write carrying this state has landed — the inbox waits on it before
+   deleting an entry. */
+let waiters = []
 export function writeState(S) {
-  if (!db || !uid) return
+  if (!db || !uid || !writable(S)) return Promise.resolve()
   pending = JSON.parse(JSON.stringify(S))
   clearTimeout(writeTimer)
-  writeTimer = setTimeout(async () => {
-    try {
-      await rtdb.set(rtdb.ref(db, 'saves/' + uid), pending)
-      if (state !== 'offline') setState('ready')
-    } catch (e) {
-      setState('error')
-      console.warn('[store] write failed —', e && e.message)
-    }
-  }, 700)
+  const done = new Promise((res, rej) => waiters.push({ res, rej }))
+  writeTimer = setTimeout(send, 700)
+  return done
+}
+
+async function send() {
+  const body = pending
+  const ws = waiters
+  pending = null
+  waiters = []
+  if (!body) return
+  try {
+    await rtdb.set(rtdb.ref(db, 'saves/' + uid), body)
+    if (state !== 'offline') setState('ready')
+    ws.forEach((w) => w.res())
+  } catch (e) {
+    setState('error')
+    console.warn('[store] write failed —', e && e.message)
+    ws.forEach((w) => w.rej(e))
+  }
 }
 
 /* Flush on pagehide so a tap made inside the debounce window is not lost when
@@ -97,7 +121,21 @@ export function writeState(S) {
 export function flush() {
   if (!db || !uid || !pending) return
   clearTimeout(writeTimer)
-  try { rtdb.set(rtdb.ref(db, 'saves/' + uid), pending) } catch (_) {}
+  send()
+}
+
+/* Every entry already waiting, then each new one as it lands — so a sticker
+   tapped while the app is open shows up live. */
+export function onInbox(fn) {
+  if (!db || !uid) return
+  rtdb.onChildAdded(rtdb.ref(db, 'inbox/' + uid), (snap) => {
+    try { fn(snap.key, snap.val()) } catch (e) { console.warn('[inbox]', e && e.message) }
+  })
+}
+export function clearInbox(key) {
+  if (!db || !uid) return
+  rtdb.remove(rtdb.ref(db, 'inbox/' + uid + '/' + key)).catch(() => {})
 }
 
 export const currentUid = () => uid
+export const inboxUrl = () => (uid ? `${CONFIG.databaseURL}/inbox/${uid}.json` : '')

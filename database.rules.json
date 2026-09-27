@@ -6,6 +6,20 @@
         ".write": "auth != null && auth.uid === $uid",
         ".validate": "newData.hasChildren(['log'])"
       }
+    },
+    "inbox": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && auth.uid === $uid",
+        "$entry": {
+          ".write": "!data.exists() && newData.exists() && root.child('saves').child($uid).child('ink').isString() && newData.child('k').val() === root.child('saves').child($uid).child('ink').val()",
+          ".validate": "newData.hasChildren(['q', 't', 'k'])",
+          "q": { ".validate": "newData.isString() && newData.val().length <= 32" },
+          "t": { ".validate": "newData.isNumber() && newData.val() <= now + 60000" },
+          "k": { ".validate": "newData.isString()" },
+          "$other": { ".validate": false }
+        }
+      }
     }
   }
 }

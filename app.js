@@ -1,485 +1,1064 @@
 /* ============================================================================
-   THE SYSTEM v2 — state, render, loop.
+   THE SYSTEM v3 — state, actions, the director, render, boot.
 
-   THE ONE IDEA: the log is the only truth. Everything else is derived.
+   THE ONE IDEA, still: the log is the only truth. model.js derives every
+   number on screen from it; this file only changes the log, asks the model
+   what changed, and shows it.
 
-     save = { v, log: { "2026-09-26": ["bodyweight","vitamins"] }, first, seen }
+     save = { v, log: { "2026-09-26": ["bodyweight","vitamins"] }, first,
+              seen, name, title, equip, ink, dq, rep, arch, push }
 
-   XP, level, rank, stats, titles, the week — all computed from that map on
-   every render. Nothing accumulates in a counter, so nothing can drift, and a
-   double-tap or a reload CANNOT double-grant anything. v1 had the inverse
-   bug (js/quests.js:138-141): undo refunded raw q.xp while completion granted
-   buffed calcXP, so check/uncheck cycling printed free XP forever.
-
-   Derived-from-log makes that class of bug unrepresentable.
+   Everything beyond `log` and `first` is presentation: which one-time
+   announcements have been made, what you named yourself, what you equipped.
+   None of it feeds XP, and none of it can be lost in a way that costs you
+   progress.
    ========================================================================= */
 
-import { HABITS, STATS, RANKS, TITLES, LINES } from './habits.js'
-import { haptic, animateNumber, sparks, floatUp, reduceMotion } from './fx.js'
-import { connect, writeState, flush, onStatus } from './sync.js'
-
-const RETURN_BONUS = 15   // the Return Quest — top of 54 interventions, Milkman 2021
-
-/* ---------- dates ----------------------------------------------------------
-   Local-time day keys. Deliberately NOT toISOString() on the raw date: that
-   is UTC, so anything logged after 19:00 EDT would land on tomorrow's key and
-   silently split a day in two. The offset shift makes the key match the day
-   you are actually living in. */
-const iso = (d) => {
-  const z = new Date(d.getTime() - d.getTimezoneOffset() * 60000)
-  return z.toISOString().slice(0, 10)
-}
-const today = () => iso(new Date())
-const daysAgo = (n) => { const d = new Date(); d.setDate(d.getDate() - n); return iso(d) }
-const dow = (key) => new Date(key + 'T12:00:00').getDay()
-const diffDays = (a, b) => Math.round((new Date(b + 'T12:00:00') - new Date(a + 'T12:00:00')) / 86400000)
+import { HABITS, STATS, RANKS, LINES, PERMITS, JOB_LEVEL } from './habits.js'
+import { BOSSES, ITEMS, RARITY } from './lore.js'
+import { derive, diff, byId, partsFor, questName, iso, addDays, diffDays, gradeOf } from './model.js'
+import { haptic, animateNumber, sparks, floatUp, pulse, riseFrom, reduceMotion } from './fx.js'
+import { play } from './sfx.js'
+import { notify, dismiss, openSheet, closeSheet, sheetOpen, esc } from './ui.js'
+import { connect, writeState, flush, onStatus, onInbox, clearInbox, currentUid, inboxUrl } from './sync.js'
+import * as archive from './archive.js'
+import * as push from './push.js'
 
 /* ---------- state ---------------------------------------------------------
    Firebase is the only copy. `loaded` stays false until the real record has
-   come back, and every write is gated on it.
-
-   That gate is the whole reason this is safe. Without it, opening the app
-   before the network answers would render an empty board, and one tap would
-   write a save containing exactly one day — silently destroying the record.
-   A blank screen for a second is recoverable; that is not. */
+   come back, and every write is gated on it. Without that gate, opening the
+   app before the network answers would render an empty board, and one tap
+   would write a save containing exactly one day — silently destroying the
+   record. A blank screen for a second is recoverable; that is not. */
 let S = blank()
 let loaded = false
 
 function blank() {
-  return { v: 2, log: {}, first: null, lastOpen: null, seen: [], _ts: 0 }
+  return { v: 3, log: {}, first: null, lastOpen: null, seen: [], name: '', title: '', equip: {}, ink: '', dq: '', rep: '', arch: '', push: null, _ts: 0 }
 }
 
+const DAY = /^\d{4}-\d{2}-\d{2}$/
 /* Accepts whatever came back and fills in anything missing, so a partial or
-   older document can never produce undefined downstream. */
+   older document can never produce undefined downstream. RTDB hands arrays
+   back as objects when they have gaps; both shapes are read. */
 function adopt(r) {
   if (!r || typeof r !== 'object') return blank()
+  const log = {}
+  for (const k of Object.keys(r.log || {})) {
+    if (!DAY.test(k)) continue
+    const v = Array.isArray(r.log[k]) ? r.log[k] : Object.values(r.log[k] || {})
+    const ids = v.filter((x) => typeof x === 'string')
+    if (ids.length) log[k] = ids
+  }
+  const keys = Object.keys(log).sort()
   return {
-    v: 2,
-    log: (r.log && typeof r.log === 'object') ? r.log : {},
-    first: r.first || null,
-    lastOpen: r.lastOpen || null,
-    seen: Array.isArray(r.seen) ? r.seen : [],
+    ...blank(),
+    ...r,
+    v: 3,
+    log,
+    first: r.first || keys[0] || null,
+    seen: Array.isArray(r.seen) ? r.seen.filter((x) => typeof x === 'string') : Object.values(r.seen || {}),
+    equip: r.equip && typeof r.equip === 'object' ? r.equip : {},
     _ts: r._ts || 0,
   }
 }
 
+let writing = null
 function save() {
-  if (!loaded) return            // never write over a record we have not read
+  if (!loaded) return                   // never write over a record we have not read
   S._ts = Date.now()
-  writeState(S)
+  writing = writeState(S)
   pushBadge()
 }
 
-/* ---------- catalog views -------------------------------------------------- */
-const byId = (id) => HABITS.find((h) => h.id === id)
-const xpOf = (id) => { const h = byId(id); return h ? h.xp : 0 }
+const seen = (k) => S.seen.indexOf(k) !== -1
+const mark = (k) => { if (!seen(k)) S.seen.push(k) }
 
-/* day index since the first logged day; 0 before anything is logged */
-const dayIndex = (key = today()) => (S.first ? Math.max(0, diffDays(S.first, key)) : 0)
-
-/* granted = past its unlock day. locked = visible but not yet granted. */
-const granted = (h, key = today()) => !h.archived && (h.unlock || 0) <= dayIndex(key)
-const scheduledOn = (h, key) => granted(h, key) && (!h.days || h.days.indexOf(dow(key)) !== -1)
-const dueOn = (key) => HABITS.filter((h) => scheduledOn(h, key))
-const dueToday = () => dueOn(today())
-const lockedToday = () => HABITS.filter((h) => !h.archived && !granted(h))
-
-/* ---------- derived: xp / level / rank ------------------------------------- */
-function totalXp() {
-  let t = 0
-  for (const k in S.log) {
-    const ids = S.log[k]
-    for (const id of ids) t += xpOf(id)
-    if (ids.length && ids.indexOf('__return') !== -1) t += RETURN_BONUS
-  }
-  return t
+/* ---------- the model, cached ----------------------------------------------
+   derive() is a pure function of the log and the date, so it is recomputed
+   only when one of those changes: a tap bumps `rev`, midnight changes the
+   day key, noon closes the late report. */
+let rev = 0, cacheKey = '', M = null
+function model() {
+  const now = new Date()
+  const k = rev + '|' + iso(now) + '|' + (now.getHours() < 12)
+  if (k !== cacheKey || !M) { M = derive(S, now); cacheKey = k }
+  return M
 }
-
-/* Linear: level N -> N+1 costs N*100. Overflow carries, so a fresh bar never
-   sits at exactly 0% after a level-up. */
-function levelFromXp(t) {
-  let lv = 1, need = 100, left = t
-  while (left >= need) { left -= need; lv++; need = lv * 100 }
-  return { level: lv, into: left, need }
-}
-
-const rankIndex = (t) => RANKS.reduce((acc, r, i) => (t >= r.at ? i : acc), 0)
-
-/* average xp/day over the last 7 logged days -> "N days to Level X" */
-function daysToNextLevel(t) {
-  let earned = 0, days = 0
-  for (let i = 1; i <= 7; i++) {
-    const k = daysAgo(i)
-    if (!S.first || diffDays(S.first, k) < 0) continue
-    days++
-    for (const id of (S.log[k] || [])) earned += xpOf(id)
-  }
-  const L = levelFromXp(t)
-  if (!days || !earned) return null
-  return Math.max(1, Math.ceil((L.need - L.into) / (earned / days)))
-}
-
-/* ---------- derived: the week ---------------------------------------------- */
-/* "kept" = every due habit done that day. A partial day is still a logged
-   day (it fills a cell); a kept day is the stronger thing. */
-function keptOn(key) {
-  const due = dueOn(key)
-  if (!due.length) return false
-  const got = S.log[key] || []
-  return due.every((h) => got.indexOf(h.id) !== -1)
-}
-const loggedOn = (key) => !!(S.log[key] && S.log[key].filter((x) => x[0] !== '_').length)
-
-function thisWeek() {
-  const d = new Date(); const day = (d.getDay() + 6) % 7   // Mon=0
-  let kept = 0, due = 0
-  for (let i = 0; i <= day; i++) {
-    const k = daysAgo(day - i)
-    if (!dueOn(k).length) continue
-    due++
-    if (keptOn(k)) kept++
-  }
-  return { kept, due, day }
-}
-
-function weeksCleared() {
-  if (!S.first) return 0
-  let n = 0
-  const d = new Date(); const day = (d.getDay() + 6) % 7
-  for (let w = 1; w < 60; w++) {
-    let kept = 0, any = false
-    for (let i = 0; i < 7; i++) {
-      const k = daysAgo(day + w * 7 - i)
-      if (diffDays(S.first, k) < 0) continue
-      any = true
-      if (keptOn(k)) kept++
-    }
-    if (!any) break
-    if (kept >= 5) n++
-  }
-  return n
-}
-
-function rate30() {
-  let due = 0, got = 0
-  for (let i = 0; i < 30; i++) {
-    const k = daysAgo(i)
-    const d = dueOn(k).length
-    if (!d) continue
-    due += d
-    got += (S.log[k] || []).filter((id) => byId(id)).length
-  }
-  return due ? Math.round((got / due) * 100) : 0
-}
-
-const lifetime = () => Object.keys(S.log).reduce((n, k) => n + S.log[k].filter((id) => byId(id)).length, 0)
-
-/* ---------- derived: stats (EWMA, 14-day) ---------------------------------- */
-/* s += (1 - e^(-1/14)) * (100*done - s), oldest to newest, scheduled days
-   only, today counted only once something is logged. A done day lifts it ~7%
-   of the remaining gap; a miss drops it ~7% of its value. It can never fall
-   on a day you did the habit — which is why this is an EWMA and not a
-   rolling window. */
-const ALPHA = 1 - Math.exp(-1 / 14)
-
-function statValues() {
-  const out = {}
-  const t = today()
-  for (const h of HABITS) {
-    if (!h.stat || !granted(h)) continue
-    let s = 0
-    const start = S.first ? Math.max(0, diffDays(S.first, t)) : 0
-    for (let i = start; i >= 0; i--) {
-      const k = daysAgo(i)
-      if (!scheduledOn(h, k)) continue
-      const done = (S.log[k] || []).indexOf(h.id) !== -1
-      if (i === 0 && !loggedOn(k)) continue
-      s += ALPHA * (100 * (done ? 1 : 0) - s)
-    }
-    out[h.stat] = (out[h.stat] || []).concat([s])
-  }
-  const res = {}
-  for (const k in out) res[k] = Math.round(out[k].reduce((a, b) => a + b, 0) / out[k].length)
-  return res
-}
-
-function statValuesAt(daysBack) {
-  // same walk, ending `daysBack` days ago — for the 7-day arrow
-  const out = {}
-  const end = daysAgo(daysBack)
-  for (const h of HABITS) {
-    if (!h.stat || !granted(h, end)) continue
-    let s = 0
-    const start = S.first ? Math.max(0, diffDays(S.first, end)) : 0
-    for (let i = start; i >= 0; i--) {
-      const k = daysAgo(daysBack + i)
-      if (!scheduledOn(h, k)) continue
-      const done = (S.log[k] || []).indexOf(h.id) !== -1
-      s += ALPHA * (100 * (done ? 1 : 0) - s)
-    }
-    out[h.stat] = (out[h.stat] || []).concat([s])
-  }
-  const res = {}
-  for (const k in out) res[k] = Math.round(out[k].reduce((a, b) => a + b, 0) / out[k].length)
-  return res
-}
-
-/* ---------- derived: titles ------------------------------------------------ */
-function earnedTitles() {
-  const keys = Object.keys(S.log).sort()
-  const logged = keys.filter(loggedOn).length
-  const anyFull = keys.some(keptOn)
-  const returned = keys.some((k) => (S.log[k] || []).indexOf('__return') !== -1)
-  const sv = statValues()
-  const maxStat = Object.keys(sv).reduce((m, k) => Math.max(m, sv[k]), 0)
-  const wk = weeksCleared()
-
-  let perfectWeek = false
-  if (S.first) {
-    const d = new Date(); const day = (d.getDay() + 6) % 7
-    for (let w = 1; w < 60 && !perfectWeek; w++) {
-      let kept = 0, any = false
-      for (let i = 0; i < 7; i++) {
-        const k = daysAgo(day + w * 7 - i)
-        if (diffDays(S.first, k) < 0) continue
-        any = true
-        if (keptOn(k)) kept++
-      }
-      if (!any) break
-      if (kept === 7) perfectWeek = true
-    }
-  }
-
-  return TITLES.filter((t) => ({
-    awakened: logged >= 1,
-    unbroken: anyFull,
-    returned,
-    gate: wk >= 1,
-    steady: logged >= 14,
-    redgate: perfectWeek,
-    iron: maxStat >= 80,
-    hunter: logged >= 50,
-  })[t.id])
-}
+const bump = () => { rev++ }
 
 /* ---------- actions -------------------------------------------------------- */
-export function toggle(id, ev) {
-  if (!loaded) return            // the board is not yours yet
+const lateOpen = (key, now = new Date()) =>
+  !!S.first && now.getHours() < 12 && key === addDays(iso(now), -1) && key >= S.first
+
+function offered(A, h, key) {
+  if (key === A.today) {
+    if (h.beyond) return A.opt.indexOf(h) !== -1 && ((S.log[key] || []).indexOf(h.id) !== -1 || (S.log[key] || []).indexOf('bodyweight') !== -1)
+    return A.req.indexOf(h) !== -1 || A.opt.indexOf(h) !== -1 || A.wk.indexOf(h) !== -1
+  }
+  const r = A.days[key]
+  return !!r && (r.req.indexOf(h.id) !== -1 || (r.opt.indexOf(h.id) !== -1 && !h.beyond))
+}
+
+/* Toggle one quest on one day. `key` is today, or yesterday for a late
+   report. Everything that follows — XP, the Gate, the boss, the box — is
+   the model's business; this only edits the log and asks what changed. */
+export function toggle(id, key, ctx = {}) {
+  if (!loaded) return                   // the board is not yours yet
+  const now = new Date()
+  const today = iso(now)
+  key = key || today
+  const late = key !== today
+  if (late && !lateOpen(key, now)) return
   const h = byId(id)
-  if (!h || !granted(h)) return
-  const k = today()
-  if (!S.first) { S.first = k; speak(LINES.firstDay, 'first') }   // the System awakens
-  if (!S.log[k]) S.log[k] = []
-  const at = S.log[k].indexOf(id)
+  if (!h) return
+  const A = model()
+  if (!offered(A, h, key)) return
+
+  const accepting = !S.first
+  if (accepting) { S.first = key; mark('awaken'); dismiss('awaken') }
+  if (!S.log[key]) S.log[key] = []
+  const day = S.log[key]
+  const at = day.indexOf(id)
   const adding = at === -1
-
-  const before = { t: totalXp(), first: loggedOn(k) }
-
-  if (adding) S.log[k].push(id)
-  else S.log[k].splice(at, 1)
+  if (adding) day.push(id)
+  else day.splice(at, 1)
 
   /* THE RETURN QUEST. First completion of the day, after a day with a
-     scheduled miss: bonus XP and a System line. It fires on a one-day gap
-     from day 2 onward. It is the comeback micro-reward — the top-ranked
-     intervention of 54 in a 61,000-person megastudy. It marks the log with
-     a sentinel so it is derived like everything else and can only pay once
-     per day. */
-  if (adding && !before.first) {
-    const y = daysAgo(1)
-    const missed = dueOn(y).length && !keptOn(y) && diffDays(S.first, y) >= 0
-    if (missed && S.log[k].indexOf('__return') === -1) {
-      S.log[k].push('__return')
-      speak(LINES.returned, 'returned-' + k)
-    }
+     scheduled miss: bonus XP and a System line. The comeback micro-reward —
+     the top-ranked intervention of 54 in a 61,000-person megastudy. A
+     sentinel in the log keeps it derived and pays it once per day. */
+  if (adding && !late && day.filter((x) => x[0] !== '_').length === 1 && day.indexOf('__return') === -1) {
+    const y = A.days[addDays(key, -1)]
+    if (y && y.req.length && !y.kept) day.push('__return')
   }
-  if (S.log[k].filter((x) => x[0] !== '_').length === 0) delete S.log[k]
+  if (!day.some((x) => x[0] !== '_')) delete S.log[key]
 
-  save()
-  const after = totalXp()
-  render()
-
+  bump()
+  const B = model()
+  render()                              // first, so the moment animates the new state
   if (adding) {
-    haptic(8)
-    if (ev) { sparks(ev); floatUp(ev, '+' + (after - before.t)) }
-    import('./sfx.js').then((m) => m.play('check')).catch(() => {})
-    // rank promotion is the biggest moment in the app
-    if (rankIndex(after) > rankIndex(before.t)) promote(rankIndex(after))
-    else if (levelFromXp(after).level > levelFromXp(before.t).level) import('./sfx.js').then((m) => m.play('levelUp')).catch(() => {})
+    const ev = diff(A, B, key)
+    if (accepting) ev.push({ type: 'accepted' })
+    moment(ev, { ...ctx, id, key, gain: B.xp - A.xp, late, req: !h.optional && !h.weekly })
+  } else {
+    play('uncheck')
+    haptic('light')
+  }
+  save()
+}
+
+/* ---------- the inbox: Shortcut / NFC taps -----------------------------------
+   Add-only and idempotent: a sticker can log a quest, never un-log one, and
+   the same entry arriving twice changes nothing. It is deleted only after the
+   save carrying it has been written. */
+function applyInbox(k, v) {
+  if (!loaded) return
+  if (!v || typeof v.q !== 'string' || typeof v.t !== 'number') { clearInbox(k); return }
+  const key = iso(new Date(v.t))
+  const h = byId(v.q)
+  const A = model()
+  const ok = h && key <= A.today && (!S.first || key >= S.first) && (S.first || key === A.today) && offered(A, h, key)
+  if (!ok || (S.log[key] || []).indexOf(h.id) !== -1) { clearInbox(k); return }
+  const accepting = !S.first
+  if (accepting) { S.first = key; mark('awaken'); dismiss('awaken') }
+  ;(S.log[key] = S.log[key] || []).push(h.id)
+  bump()
+  const B = model()
+  render()
+  const ev = diff(A, B, key)
+  if (accepting) ev.push({ type: 'accepted' })
+  moment(ev, { id: h.id, key, gain: B.xp - A.xp, remote: true, req: !h.optional && !h.weekly })
+  save()
+  Promise.resolve(writing).then(() => clearInbox(k)).catch(() => {})
+}
+
+/* ---------- ONE TAP, ONE MOMENT --------------------------------------------
+   A single tap can finish a quest, keep the day, kill the boss, drop a box,
+   level a skill and level you up. v1 played every one of those as its own
+   full-screen animation, twelve in a row. Here the events are ranked, the
+   biggest gets its effect and its sound, and the rest become lines inside
+   that one window. Nothing blocks the next tap. */
+const PRI = { accepted: 110, rank: 100, class: 90, kill: 80, red: 75, trial: 70, level: 60, title: 50, kept: 40, weekly: 35, returned: 32, box: 30, skill: 20 }
+const ONCE = {
+  rank: (e) => 'rank:' + RANKS[e.to].r,
+  class: () => 'class',
+  trial: () => 'trial',
+  kill: (e) => 'kill:' + e.kill.week,
+  red: (e) => 'red:' + e.week.start,
+  title: (e) => 'title:' + e.title.id,
+}
+const rarityName = (id) => (RARITY.find((r) => r.id === id) || {}).name || id
+
+function lineFor(e) {
+  switch (e.type) {
+    case 'accepted': return LINES.accepted
+    case 'rank': return `Rank reassessment: ${RANKS[e.from].r} → ${RANKS[e.to].r}`
+    case 'class': return `Job Change complete: ${e.job.name}`
+    case 'trial': return 'Job Change Quest has arrived'
+    case 'kill': return `${e.kill.boss.name} defeated · ARISE: ${e.kill.boss.shadow}`
+    case 'red': return `Red Gate · ${e.week.boss.shadow} → ${gradeOf(e.shadow)}`
+    case 'level': return `Level up! Lv.${e.to}`
+    case 'title': return `Title acquired: ${e.title.name}`
+    case 'kept': return LINES.complete.replace(/\.$/, '')
+    case 'weekly': return `Weekly Quest complete: ${byId(e.id).name}`
+    case 'returned': return LINES.returned.replace(/\.$/, '')
+    case 'box': return `Random Box: ${e.item.name} (${rarityName(e.item.rarity)})`
+    case 'skill': return `Skill level up: ${e.name} Lv.${e.level}`
+  }
+  return ''
+}
+
+function moment(evs, ctx = {}) {
+  evs = evs.filter((e) => {
+    const f = ONCE[e.type]
+    if (!f) return true
+    const k = f(e)
+    if (seen(k)) return false
+    mark(k)
+    return true
+  })
+  /* two rank-ups at once (a big late import) → the higher one only */
+  const ranks = evs.filter((e) => e.type === 'rank')
+  if (ranks.length > 1) evs = evs.filter((e) => e.type !== 'rank' || e === ranks[ranks.length - 1])
+  evs.sort((a, b) => PRI[b.type] - PRI[a.type])
+
+  tapFeel(ctx)
+  /* the record comes alive whether or not the kept day is the headline */
+  const kept = evs.find((e) => e.type === 'kept')
+  if (kept) flare(kept.key)
+  const top = evs[0]
+  buzzOk = !!(ctx.el || ctx.ev)          // haptics answer a thumb, never a background event
+  if (!top) { play('check'); buzz('light'); return }
+  let lines = evs.slice(1).map(lineFor).filter(Boolean)
+  if (lines.length > 5) lines = lines.slice(0, 4).concat([`+${lines.length - 4} more`])
+  bigEffect(top, lines, ctx)
+}
+let buzzOk = false
+const buzz = (k) => { if (buzzOk) haptic(k) }
+
+/* 11 + 12: the card presses in, light sweeps it, the diamond pops with a
+   ring, "+35 XP" rolls up; today's square charges, the boss flinches. */
+function tapFeel(ctx) {
+  const el = ctx.el
+  if (el) pulse(el, 'hit', 760)
+  const pt = ctx.ev && (ctx.ev.clientX || ctx.ev.clientY) ? ctx.ev : el ? centerOf(el) : null
+  if (pt && ctx.gain > 0) floatUp(pt.clientX, pt.clientY - 10, '+' + ctx.gain + ' XP')
+  if (ctx.ev) sparks(ctx.ev)
+  const cell = document.querySelector('#grid i[data-k="' + ctx.key + '"]')
+  if (cell) pulse(cell, 'charge', 520)
+  if (ctx.req && ctx.key === iso(new Date())) pulse(document.getElementById('gate'), 'hurt', 420)
+}
+const centerOf = (el) => { const r = el.getBoundingClientRect(); return { clientX: r.left + r.width * 0.72, clientY: r.top + r.height / 2 } }
+
+function bigEffect(top, lines, ctx) {
+  switch (top.type) {
+    case 'accepted':
+      buzz('double')
+      return notify({ title: LINES.accepted, sub: esc(LINES.firstDay), lines, big: true, sound: 'complete' })
+    case 'rank':
+      return reassess(top, lines)
+    case 'class':
+      buzz('heavy')
+      pulse(document.getElementById('plate'), 'slam', 800)
+      return notify({
+        head: 'JOB CHANGE', title: 'Job Change complete', big: true, tone: 'violet', sound: 'arise', lines,
+        sub: `<div class="cls cond">${esc(top.job.name)}</div><div>${esc(top.job.line)}</div>`,
+      })
+    case 'kill': {
+      buzz('heavy')
+      pulse(document.getElementById('gate'), 'killed', 1400)
+      const b = top.kill.boss
+      return notify({
+        head: 'GATE CLEARED', title: 'ARISE', big: true, tone: 'violet', sound: 'arise', lines,
+        img: `bosses/${b.id}.webp`,
+        sub: `${esc(b.name)} has fallen.<br>Shadow extracted: <b>${esc(b.shadow)}</b> &#183; ${esc(gradeOf(top.shadow))}`,
+        onShow: (el) => { const i = el.querySelector('.sw-img'); if (i) setTimeout(() => i.classList.add('risen'), 60) },
+      })
+    }
+    case 'red':
+      buzz('heavy')
+      pulse(document.getElementById('gate'), 'redflash', 1400)
+      return notify({
+        head: 'RED GATE', title: 'Red Gate cleared', big: true, tone: 'red', sound: 'red', lines,
+        img: `bosses/${top.week.boss.id}.webp`,
+        sub: `7 of 7. Not one permit spent.<br><b>${esc(top.week.boss.shadow)}</b> rises to ${esc(gradeOf(top.shadow))}.`,
+      })
+    case 'trial':
+      buzz('double')
+      return notify({
+        head: 'QUEST INFO', title: 'Job Change Quest has arrived', sound: 'key', lines, big: true,
+        sub: `Level ${JOB_LEVEL} reached. From tomorrow: keep 5 days inside any one week.<br>A short week just rolls into the next. Nothing is lost.`,
+      })
+    case 'level':
+      buzz('double')
+      riseFrom(document.getElementById('xpwrap'), '[LEVEL UP!]')
+      play('levelUp')
+      if (lines.length) notify({ title: `Level up! Lv.${top.to}`, lines, sound: null })
+      return
+    case 'title':
+      buzz('double')
+      stampTitle()
+      return notify({ title: 'Title acquired: ' + top.title.name, sub: esc(top.title.how), lines })
+    case 'kept':
+      buzz('double')
+      return notify({ head: 'QUEST INFO', title: LINES.complete, lines, sound: 'complete' })
+    case 'box':
+      buzz('light')
+      return notify({ title: 'Item acquired: Random Box', sub: `${esc(top.item.name)} &#183; ${esc(rarityName(top.item.rarity))}`, lines, sound: 'box' })
+    default:
+      buzz('light')
+      return notify({ title: lineFor(top), lines })
+  }
+}
+
+function flare(key) {
+  const cell = document.querySelector('#grid i[data-k="' + key + '"]')
+  if (cell) setTimeout(() => pulse(cell, 'flare', 1000), 120)
+}
+function stampTitle() {
+  setTimeout(() => pulse(document.querySelector('#metaline .title'), 'stamp', 900), 30)
+}
+
+/* 4: the Hunter Association reassessment. Mana counts up to your lifetime XP
+   and the new letter slams in with the sound. */
+function reassess(top, lines) {
+  const M = model()
+  const r = RANKS[top.to]
+  buzz('heavy')
+  return notify({
+    head: 'HUNTER ASSOCIATION', title: 'Rank reassessment', big: true, tone: 'gold', sound: null, lines,
+    sub: `<div class="mana"><span>MANA MEASURED</span><b class="mana-n">0</b></div>
+      <div class="reletter cond"><span class="from">${RANKS[top.from].r}</span><i>&#8594;</i><span class="to">${r.r}</span></div>
+      ${r.loot ? `<div class="loot">GRANTED: ${esc(r.loot)}</div>` : ''}`,
+    onShow: (el) => {
+      animateNumber(el.querySelector('.mana-n'), M.xp, '', 700, 0)
+      setTimeout(() => {
+        el.querySelector('.to').classList.add('slam')
+        pulse(document.getElementById('emblem'), 'slam', 800)
+        play('slam')
+      }, reduceMotion ? 0 : 720)
+    },
+  })
+}
+
+/* ---------- windows on open -------------------------------------------------
+   Awakening on day 0. Otherwise, at most: the Monday report, the Daily Quest
+   arrival (with any keys granted today folded in), and anything earned while
+   the app was closed (a sticker tap, a restored archive) that was never
+   announced. */
+function opening() {
+  const M = model()
+  if (!M.started) {
+    if (!seen('awaken')) awakening()
+    return
+  }
+  if (M.report && S.rep !== M.cur.start) { S.rep = M.cur.start; mondayReport(M) }
+  if (S.dq !== M.today) { S.dq = M.today; arrival(M) }
+  const pend = pendingEvents(M)
+  if (pend.length) moment(pend, {})
+  save()
+}
+
+function awakening() {
+  notify({
+    id: 'awaken', head: 'NOTIFICATION', title: LINES.awaken, big: true,
+    sub: 'Accept, or tap your first quest.',
+    actions: [
+      { label: 'RESTORE ARCHIVE', onClick: () => { restore(); return false } },
+      { label: 'ACCEPT', primary: true, onClick: () => { mark('awaken'); setTimeout(() => notify({ title: LINES.accepted, sub: 'Your first quest is below. Midnight is the only rule.', sound: 'complete' }), 200) } },
+    ],
+  })
+}
+
+function keyLines(M) {
+  const out = []
+  for (const h of HABITS) {
+    const g = M.grants[h.id]
+    if (g == null || g === 0 || g > M.dayIdx || seen('grant:' + h.id)) continue
+    mark('grant:' + h.id)
+    out.push(LINES.key, 'Quest unsealed: ' + questName(h, M.today).toUpperCase())
+    unsealing.add(h.id)
+  }
+  return out
+}
+const unsealing = new Set()
+
+function arrival(M) {
+  const keys = keyLines(M)
+  const goals = M.req.map((h) => {
+    const parts = partsFor(h, M.dayIdx, M.today, M.rankIdx)
+    if (!parts.length) return `<div class="goal"><b>${esc(h.name)}</b></div>`
+    return `<div class="goal"><b>${esc(h.name)}</b>${parts.map((p) => `<span>${esc(p.label)} [0/${fmtN(p)}]</span>`).join('')}</div>`
+  }).join('')
+  const dg = M.dungeon ? `<div class="goal dim">Today's Dungeon: ${esc(M.dungeon)} &#183; optional</div>` : ''
+  notify({
+    head: 'QUEST INFO', title: LINES.arrived, lines: keys, hold: 5200,
+    sound: keys.length ? 'key' : 'window',
+    sub: goals + dg,
+  })
+}
+
+function pendingEvents(M) {
+  const out = []
+  for (const t of M.earned) if (!seen('title:' + t.id)) out.push({ type: 'title', title: t })
+  for (const k of M.kills) if (!seen('kill:' + k.week)) out.push({ type: 'kill', kill: k, shadow: M.shadows[k.boss.id] })
+  for (const w of M.weeks) if (w.red && !seen('red:' + w.start)) out.push({ type: 'red', week: w, shadow: M.shadows[w.boss.id] })
+  if (M.job.state === 'revealed' && !seen('class')) out.push({ type: 'class', job: M.job })
+  if (M.job.state !== 'none' && !seen('trial')) out.push({ type: 'trial' })
+  for (let r = 1; r <= M.rankIdx; r++) if (!seen('rank:' + RANKS[r].r)) out.push({ type: 'rank', from: r - 1, to: r })
+  return out
+}
+
+/* A record from before v3 has earned things that were never announced under
+   this system. Mark them all as seen once, silently, so the first open of
+   the new version is not a flood of windows for old news. */
+function quietMigrate() {
+  const M = model()
+  for (const e of pendingEvents(M)) { const f = ONCE[e.type]; if (f) mark(f(e)) }
+  for (const h of HABITS) if (M.grants[h.id] != null && M.grants[h.id] <= M.dayIdx) mark('grant:' + h.id)
+  mark('awaken')
+}
+
+/* 26 + 30: the Monday report, and sending it to one person. */
+function mondayReport(M) {
+  const r = M.report
+  const boss = r.kill ? `${r.boss.name} &#8594; ${esc(r.boss.shadow)}` : `${esc(r.boss.name)} &#183; escaped`
+  const stale = !S.arch || diffDays(S.arch, M.today) >= 28
+  notify({
+    head: 'WEEKLY REPORT', title: r.red ? 'Red Gate cleared' : r.cleared ? 'Gate cleared' : 'The week closed', big: true,
+    tone: r.red ? 'red' : null,
+    sub: `<div class="rep">
+      <span>KEPT</span><b>${r.kept}/${r.avail} &#183; ${r.permitsUsed} permit${r.permitsUsed === 1 ? '' : 's'}</b>
+      <span>BOSS</span><b>${boss}</b>
+      <span>XP</span><b>+${r.xp}</b>
+      <span>LEVEL</span><b>${r.levelFrom === r.levelTo ? r.levelTo : r.levelFrom + ' &#8594; ' + r.levelTo}</b>
+      <span>RANK</span><b>${r.rankFrom === r.rankTo ? RANKS[r.rankTo].r : RANKS[r.rankFrom].r + ' &#8594; ' + RANKS[r.rankTo].r}</b>
+      <span>BOXES</span><b>${r.boxes}</b>
+    </div>${r.cleared ? '' : '<div class="dim">Nothing lost. The boss is back on Monday.</div>'}`,
+    actions: [
+      { label: 'SEND', onClick: () => { shareReport(); return false } },
+      ...(stale ? [{ label: 'ARCHIVE', onClick: () => { saveArchive(); return false } }] : []),
+      { label: 'CLOSE', primary: true },
+    ],
+  })
+}
+
+function reportText(M) {
+  const r = M.report
+  if (!r) return ''
+  const d = new Date(r.start + 'T12:00:00').toLocaleDateString(undefined, { day: 'numeric', month: 'short' })
+  return [
+    `THE SYSTEM — week of ${d}`,
+    `Gate: ${r.red ? 'RED GATE (7 of 7)' : r.cleared ? 'cleared' : 'not cleared'} — ${r.kept} of ${r.avail} kept, ${r.permitsUsed} rest permit${r.permitsUsed === 1 ? '' : 's'}`,
+    `Boss: ${r.boss.name}${r.kill ? ` — risen as ${r.boss.shadow}` : ' — escaped'}`,
+    `XP +${r.xp} · Level ${r.levelTo} · ${RANKS[r.rankTo].r}-rank`,
+  ].join('\n')
+}
+
+async function shareReport() {
+  const text = reportText(model())
+  if (!text) return notify({ title: 'No finished week to report yet', sound: null })
+  try {
+    if (navigator.share) { await navigator.share({ text }); return }
+    await navigator.clipboard.writeText(text)
+    notify({ title: 'Report copied', sound: null, hold: 2200 })
+  } catch (_) {}
+}
+
+async function saveArchive() {
+  const today = iso(new Date())
+  const r = await archive.saveArchive(S, today)
+  if (r === 'cancelled') return
+  S.arch = today
+  save()
+  notify({ title: 'Archive copy saved', sub: 'Keep it somewhere that is not this phone.', sound: null, hold: 2800 })
+  if (sheetOpen()) sheetSystem()
+}
+
+async function restore() {
+  try {
+    const inc = await archive.pickArchive()
+    if (!inc) return
+    if (!loaded) throw new Error('Wait for the archive to connect first.')
+    S = { ...archive.mergeSaves(S, inc), v: 3 }
+    dismiss('awaken')
+    bump()
+    quietMigrate()                      // it is your own history: no replay of every old moment
+    const B = model()
+    S.dq = B.today
+    const days = Object.keys(S.log).length
+    save()
+    render()
+    notify({ title: 'Archive restored', sub: `${days} logged day${days === 1 ? '' : 's'} &#183; level ${B.level} &#183; ${B.rank}&#8209;rank &#183; ${B.gates} shadow${B.gates === 1 ? '' : 's'}`, sound: 'complete' })
+    if (sheetOpen()) sheetSystem()
+  } catch (e) {
+    notify({ title: 'Restore failed', sub: esc(e.message || String(e)), sound: null })
   }
 }
 
 /* ---------- render --------------------------------------------------------- */
 const $ = (s) => document.querySelector(s)
-const esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]))
+const fmtN = (p) => (p.unit === 'km' ? p.n.toFixed(1) + ' km' : p.n + (p.unit ? ' ' + p.unit : ''))
 const RAMP = ['#0d1017', '#132534', '#17455f', '#1d7ba6', '#33b6e8']
 
-function heatCell(key, isToday) {
-  const before = S.first && diffDays(S.first, key) < 0
-  if (before) return '<i style="background:#0a0c12"></i>'          // before the awakening: void
-  const due = dueOn(key).length
-  const got = (S.log[key] || []).filter((id) => byId(id)).length
-  const pct = due ? got / due : 0
-  let lv = 0
-  if (pct > 0) lv = pct >= 1 ? 4 : pct >= 0.66 ? 3 : pct >= 0.34 ? 2 : 1
-  const lit = isToday && pct >= 1
-  const setup = S.first === key && !got                              // day 0: the first cell, filled at setup
-  const bg = lit ? '#5ad1ff' : setup ? '#1f3550' : RAMP[lv]
-  return `<i style="background:${bg};${lit ? 'box-shadow:0 0 12px rgba(90,209,255,.9)' : ''}"></i>`
-}
+let lastDay = null, lastLevel = null, awayAtOpen = 0, cbDismissed = false
 
 function render() {
-  const t = totalXp(), L = levelFromXp(t), ri = rankIndex(t), rank = RANKS[ri].r
-  const due = dueToday(), got = S.log[today()] || []
-  const doneN = due.filter((h) => got.indexOf(h.id) !== -1).length
-  const titles = earnedTitles()
-  const latest = titles.length ? titles[titles.length - 1] : null
-  const dtl = daysToNextLevel(t)
-  const wk = thisWeek()
+  const M = model()
+  const now = new Date()
+  const newDay = lastDay && lastDay !== M.today
+  lastDay = M.today
 
-  $('#rank').textContent = rank
-  $('#meta').textContent = new Date().toLocaleDateString(undefined, { weekday: 'short', day: '2-digit', month: 'short' }).toLowerCase()
-  $('#metaline').innerHTML = `${rank}&#8209;rank &#183; lv ${L.level}${latest ? ' &#183; <span class="title">' + esc(latest.name) + '</span>' : ''}`
-  $('#count').textContent = `${doneN}/${due.length}`
-  $('#xpbar').style.width = Math.round((L.into / L.need) * 100) + '%'
-  $('#xpnum').textContent = dtl ? `${dtl}d to lv ${L.level + 1}` : `${L.into}/${L.need}`
-  $('#lv').textContent = 'lv ' + L.level
-
-  animateNumber($('#week'), wk.kept)
-  $('#weekof').textContent = '/' + Math.max(wk.due, 1)
-  animateNumber($('#cleared'), weeksCleared())
-  animateNumber($('#rate'), rate30(), '%')
-  animateNumber($('#life'), lifetime())
-
-  // 18 weeks, oldest first, ending today
-  let cells = ''
-  const total = 18 * 7
-  for (let col = 0; col < 18; col++) {
-    cells += '<b>'
-    for (let row = 0; row < 7; row++) {
-      const back = total - 1 - (col * 7 + row)
-      cells += heatCell(daysAgo(back), back === 0)
-    }
-    cells += '</b>'
-  }
-  $('#grid').innerHTML = cells
-
-  // the status window: one row per stat with a live habit
-  const sv = statValues(), prev = statValuesAt(7)
-  const rows = Object.keys(STATS).filter((k) => sv[k] != null)
-  $('#stats').innerHTML = rows.map((k) => {
-    const v = sv[k], p = prev[k]
-    const d = (p == null) ? 0 : v - p
-    const arrow = d > 0 ? '<span class="up">&#9650;</span>' : d < 0 ? '<span class="dn">&#9660;</span>' : '<span class="fl">&#8212;</span>'
-    return `<div class="stat"><b>${k}</b><span class="bar"><span style="width:${v}%"></span></span><u>${v}</u>${arrow}</div>`
-  }).join('')
-  $('#statsbox').hidden = !rows.length
-
-  // quests: granted ones as cards, locked ones as sealed rows
-  const locked = lockedToday()
-  $('#list').innerHTML = due.map((h) => {
-    const done = got.indexOf(h.id) !== -1
-    return `<button class="q${done ? ' done' : ''}" data-id="${h.id}">
-      <i class="tick t"></i><i class="tick b"></i>
-      <span class="dia"></span>
-      <span class="qt"><b>${esc(h.name)}</b><em>${esc(h.detail || '')}</em></span>
-      <u>${done ? '+' : ''}${h.xp}</u>
-    </button>`
-  }).join('') + locked.map((h) => {
-    const inDays = (h.unlock || 0) - dayIndex()
-    return `<div class="q locked">
-      <span class="dia"></span>
-      <span class="qt"><b>${esc(h.name)}</b><em>sealed &#183; the System grants this in ${inDays} day${inDays === 1 ? '' : 's'}</em></span>
-    </div>`
-  }).join('')
-
-  // comeback: shown only after a real absence, and it never scolds
-  const away = S.lastOpen ? diffDays(S.lastOpen, today()) : 0
-  const cb = $('#comeback')
-  if (away >= 3) {
-    cb.hidden = false
-    cb.querySelector('h2').textContent = `${away} DAYS CLOSED.`
-    cb.querySelector('p').innerHTML = `level ${L.level} &#183; ${rank}&#8209;rank &#183; ${lifetime()} logged<br>nothing lost &#183; no debt &#183; one quest reopens the gate`
-  } else cb.hidden = true
-
-  // system lines, spoken once
-  for (const h of HABITS) {
-    if (granted(h) && (h.unlock || 0) > 0 && dayIndex() === (h.unlock || 0)) speak(`${LINES.granted} ${h.name.toUpperCase()}.`, 'grant-' + h.id)
-  }
-
-  document.documentElement.style.setProperty('--rem', due.length - doneN)
+  applyEquip(M)
+  renderPlate(M)
+  renderComeback(M)
+  renderRecord(M)
+  renderGate(M)
+  renderStatus(M)
+  renderQuests(M)
+  renderLate(M, now)
+  renderWeekly(M)
+  $('#lv').textContent = 'lv ' + M.level
+  $('#meta').textContent = now.toLocaleDateString(undefined, { weekday: 'short', day: '2-digit', month: 'short' }).toLowerCase()
+  document.documentElement.style.setProperty('--rem', M.req.length - M.today_.doneReq)
   tickClock()
+
+  /* 2 + 13: midnight while the app is open — the board resets with a sweep
+     and the next Daily Quest arrives. */
+  if (newDay && loaded) {
+    pulse($('#list'), 'newday', 900)
+    opening()
+  }
+}
+
+function applyEquip(M) {
+  const root = document.documentElement
+  const aura = S.equip.aura && M.inv[S.equip.aura] ? ITEMS.find((i) => i.id === S.equip.aura) : null
+  if (aura) root.style.setProperty('--acc-rgb', aura.rgb)
+  else root.style.removeProperty('--acc-rgb')
+  const sigil = S.equip.sigil && M.inv[S.equip.sigil] ? S.equip.sigil : ''
+  if (sigil) $('#emblem').dataset.sigil = sigil
+  else delete $('#emblem').dataset.sigil
+}
+
+const titleShown = (M) => (S.title && M.earned.find((t) => t.id === S.title)) || M.latest
+
+function renderPlate(M) {
+  const t = titleShown(M)
+  $('#rank').textContent = M.rank
+  $('#metaline').innerHTML = `${M.rank}&#8209;rank &#183; lv ${M.level}` +
+    (M.job.state === 'revealed' ? ' &#183; ' + esc(M.job.name.toLowerCase()) : '') +
+    (t ? ' &#183; <span class="title">' + esc(t.name) + '</span>' : '')
+  const pct = Math.round((M.into / M.need) * 100) + '%'
+  const bar = $('#xpbar')
+  /* a level-up fills the bar, then it restarts from the overflow */
+  if (lastLevel != null && M.level > lastLevel && !reduceMotion) {
+    bar.style.width = '100%'
+    setTimeout(() => {
+      bar.style.transition = 'none'
+      bar.style.width = '0%'
+      void bar.offsetWidth
+      bar.style.transition = ''
+      bar.style.width = pct
+    }, 460)
+  } else bar.style.width = pct
+  lastLevel = M.level
+  $('#xpnum').textContent = M.dtl ? `${M.dtl}d to lv ${M.level + 1}` : `${M.into}/${M.need}`
+}
+
+function renderComeback(M) {
+  const cb = $('#comeback')
+  if (awayAtOpen >= 3 && !cbDismissed) {
+    cb.hidden = false
+    cb.querySelector('h2').textContent = `${awayAtOpen} DAYS CLOSED.`
+    cb.querySelector('p').innerHTML = `level ${M.level} &#183; ${M.rank}&#8209;rank &#183; ${M.lifetime} logged<br>nothing lost &#183; no debt &#183; one quest reopens the gate`
+  } else cb.hidden = true
+}
+
+/* swap an element's state classes without touching one-shot animation
+   classes (charge, flare) that a tap may have just added */
+function setBase(el, cls) {
+  if (el._base === cls) return
+  if (el._base) el.classList.remove(...el._base.split(' '))
+  el.classList.add(...cls.split(' '))
+  el._base = cls
+}
+
+let gridBuilt = false
+function renderRecord(M) {
+  const g = $('#grid')
+  if (!gridBuilt) {
+    g.innerHTML = M.grid.map((c) => '<b>' + c.cells.map(() => '<i></i>').join('') + '</b>').join('')
+    gridBuilt = true
+  }
+  const cols = g.children
+  M.grid.forEach((c, ci) => {
+    const col = cols[ci]
+    col.className = c.red ? 'red' : ''
+    c.cells.forEach((cell, ri) => {
+      const el = col.children[ri]
+      el.dataset.k = cell.key
+      setBase(el, 'c-' + cell.st + (cell.today ? ' today' : '') + (cell.lv === 4 ? ' full' : ''))
+      el.style.background = cell.st === 'void' || cell.st === 'future' || cell.st === 'permit' ? '' : RAMP[cell.lv]
+    })
+  })
+  const w = M.cur
+  animateNumber($('#week'), w.kept)
+  $('#weekof').textContent = '/' + w.avail
+  animateNumber($('#cleared'), M.gates)
+  animateNumber($('#rate'), M.rate30, '%')
+  animateNumber($('#life'), M.lifetime)
+}
+
+const DL = ['M', 'T', 'W', 'T', 'F', 'S', 'S']
+function renderGate(M) {
+  const w = M.cur, b = w.boss
+  const img = $('#bossimg')
+  const src = `bosses/${b.id}.webp`
+  if (img.getAttribute('src') !== src) img.setAttribute('src', src)
+  $('#bossrank').textContent = b.rank
+  $('#bossname').textContent = b.name
+  $('#gatek').textContent = `GATE · WEEK ${M.weeks.length}` + (w.cycle ? ` · ${'+'.repeat(Math.min(w.cycle, 3))}` : '')
+  const left = diffDays(M.today, w.end) + 1
+  $('#gatewhen').textContent = w.cleared ? (w.red ? 'RED GATE' : 'CLEARED') : `${left}d left`
+  const gate = $('#gate')
+  gate.classList.toggle('cleared', w.cleared)
+  gate.classList.toggle('red', w.red)
+
+  /* HP: one segment per kept day needed. Today's quests charge the next
+     segment; it breaks when the day is kept. Nothing ever heals. */
+  const broken = Math.min(w.kept, w.need)
+  const charge = !w.cleared && !M.today_.kept ? M.today_.frac : 0
+  const hp = $('#hp')
+  if (hp.children.length !== w.need) hp.innerHTML = '<i><s></s></i>'.repeat(w.need)
+  Array.from(hp.children).forEach((seg, i) => {
+    const gone = i >= w.need - broken
+    seg.className = gone ? 'gone' : ''
+    const chargeIdx = w.need - broken - 1
+    seg.firstChild.style.width = !gone && i === chargeIdx ? Math.round(charge * 100) + '%' : '0%'
+  })
+
+  $('#strip').innerHTML = w.strip.map((d, i) =>
+    `<span class="pip p-${d.st}${d.key === M.today ? ' now' : ''}"><i></i><em>${DL[i]}</em></span>`).join('')
+
+  const pl = '&#9670;'.repeat(w.permitsLeft) + '<span class="used">' + '&#9671;'.repeat(PERMITS - w.permitsLeft) + '</span>'
+  let note
+  if (w.red) note = `7 of 7 &#183; ${esc(b.shadow)} rose, grade raised`
+  else if (w.cleared) note = `${esc(b.shadow)} rose as a shadow &#183; 7 of 7 turns the gate red`
+  else {
+    const togo = w.need - w.kept
+    note = `${togo} more kept day${togo === 1 ? '' : 's'} kills it &#183; rest permits <span class="permits">${pl}</span>`
+  }
+  $('#gatenote').innerHTML = note
+}
+
+function renderStatus(M) {
+  const t = titleShown(M)
+  const job = M.job.state === 'revealed' ? M.job.name
+    : M.job.state === 'trial' ? `Trial ${M.job.count}/5`
+    : 'None'
+  $('#idgrid').innerHTML = `
+    <span>NAME</span><b>${esc(S.name || 'Player')}</b>
+    <span>JOB</span><b>${esc(job)}</b>
+    <span>TITLE</span><b>${t ? esc(t.name) : '—'}</b>
+    <span>LEVEL</span><b>${M.level}</b>`
+  const box = $('#stats')
+  if (box.children.length !== M.stats.length || box.dataset.sig !== M.stats.map((s) => s.key).join()) {
+    box.innerHTML = M.stats.map((s) => `<div class="stat" data-s="${s.key}"><b>${s.key}</b><u></u><span class="bar"><span></span></span><i></i></div>`).join('')
+    box.dataset.sig = M.stats.map((s) => s.key).join()
+  }
+  M.stats.forEach((s, i) => {
+    const row = box.children[i]
+    animateNumber(row.querySelector('u'), s.value)
+    row.querySelector('.bar span').style.width = s.form + '%'
+    const a = row.querySelector('i')
+    a.className = s.trend > 0 ? 'up' : s.trend < 0 ? 'dn' : 'fl'
+    a.innerHTML = s.trend > 0 ? '&#9650;' : s.trend < 0 ? '&#9660;' : '&#8212;'
+  })
+}
+
+/* ---- quest cards, keyed: an element persists across renders, so a tap's
+   animation is never cut off by the render the tap itself causes. v2
+   rebuilt the list with innerHTML on every render, which replayed every
+   card's entrance animation on every tap. ------------------------------- */
+function keyed(parent, items, make, update) {
+  const old = new Map()
+  for (const el of Array.from(parent.children)) old.set(el.dataset.k, el)
+  let prev = null
+  for (const it of items) {
+    let el = old.get(it.k)
+    if (el && el.dataset.sig !== it.sig) { el.remove(); el = null }
+    if (!el) { el = make(it); el.dataset.k = it.k; el.dataset.sig = it.sig }
+    else old.delete(it.k)
+    update(el, it)
+    const at = prev ? prev.nextSibling : parent.firstChild
+    if (at !== el) parent.insertBefore(el, at)
+    prev = el
+  }
+  for (const el of old.values()) el.remove()
+}
+
+function cardView(M, h, key, done, dayIdx) {
+  const parts = partsFor(h, dayIdx, key, M.rankIdx)
+  const name = questName(h, key)
+  const tag = h.beyond ? 'HIDDEN QUEST' : h.lift ? "TODAY'S DUNGEON" : ''
+  const detail = h.lift ? 'optional · never costs the Gate' : h.beyond ? 'optional · +' + h.xp : h.detail || ''
+  return {
+    k: h.id + '@' + key, h, key, done, parts, name, tag,
+    detail: h.beyond ? '' : detail,
+    cue: !done && h.cue && M.sliding[h.id] ? h.cue : '',
+    xp: h.xp,
+    sig: [h.id, key, name, tag, detail, parts.map((p) => p.label + fmtN(p)).join(',')].join('|'),
+  }
+}
+
+function cardMake(v) {
+  const el = document.createElement('button')
+  el.type = 'button'
+  el.className = 'q' + (v.h.optional ? ' opt' : '') + (v.h.lift ? ' lift' : '') + (v.h.beyond ? ' beyond' : '')
+  el.dataset.id = v.h.id
+  el.dataset.day = v.key
+  el.innerHTML = `<i class="tick t"></i><i class="tick b"></i>
+    <span class="dia"><i class="ring"></i></span>
+    <span class="qt">
+      ${v.tag ? `<span class="tag mono">${esc(v.tag)}</span>` : ''}
+      <span class="cue mono" hidden></span>
+      <b>${esc(v.name)}</b>
+      ${v.parts.length
+        ? `<span class="parts mono">${v.parts.map((p) => `<span class="pt${p.short ? ' short' : ''}"><em>${esc(p.label)}</em><s></s></span>`).join('')}</span>`
+        : v.detail ? `<em class="det">${esc(v.detail)}</em>` : ''}
+    </span>
+    <u class="qx mono"></u>
+    <i class="sweep"></i>`
+  if (unsealing.has(v.h.id)) { unsealing.delete(v.h.id); pulse(el, 'unseal', 1200) }
+  return el
+}
+
+function cardUpdate(el, v) {
+  el.classList.toggle('done', v.done)
+  const cue = el.querySelector('.cue')
+  cue.hidden = !v.cue
+  if (v.cue) cue.textContent = v.cue + ' →'
+  el.querySelectorAll('.parts s').forEach((s, i) => {
+    const p = v.parts[i]
+    const n = p.unit === 'km' ? p.n.toFixed(1) : p.n
+    s.textContent = `[${v.done ? n : 0}/${n}${p.unit ? ' ' + p.unit : ''}]`
+  })
+  el.querySelector('.qx').textContent = (v.done ? '+' : '') + v.xp
+}
+
+const WHY = {
+  days: (s) => `sealed &#183; the System grants this in ${s.inDays} day${s.inDays === 1 ? '' : 's'}`,
+  after: (s) => `sealed &#183; from day ${s.day}, each cleared Gate unseals one`,
+  gate: () => 'sealed &#183; clear this week&#8217;s Gate to unseal',
+  monday: () => 'sealed &#183; the Gate is cleared &#8212; unseals Monday',
+  queued: () => 'sealed',
+}
+
+function renderQuests(M) {
+  const key = M.today
+  const got = S.log[key] || []
+  const cards = M.req.map((h) => cardView(M, h, key, got.indexOf(h.id) !== -1, M.dayIdx))
+  for (const h of M.opt) {
+    if (h.beyond && got.indexOf('bodyweight') === -1 && got.indexOf(h.id) === -1) continue
+    cards.push(cardView(M, h, key, got.indexOf(h.id) !== -1, M.dayIdx))
+  }
+  const sealed = M.sealed.map((s) => ({ k: 'sealed-' + s.h.id, sig: s.why + (s.inDays || '') + (s.day || ''), s }))
+  keyed($('#list'), cards.concat(sealed),
+    (v) => {
+      if (!v.s) return cardMake(v)
+      const el = document.createElement('div')
+      el.className = 'q locked'
+      el.innerHTML = `<span class="keyhole"><i></i></span><span class="qt"><b>${esc(questName(v.s.h, key))}</b><em>${WHY[v.s.why](v.s)}</em></span>`
+      return el
+    },
+    (el, v) => { if (!v.s) cardUpdate(el, v) })
+
+  const doneN = M.today_.doneReq
+  $('#count').textContent = `${doneN}/${M.req.length}`
+  $('#dungeon').innerHTML = `Today: <b>${esc(M.dungeon || 'REST')}</b> &#183; run week ${M.run.week}` +
+    (M.run.short ? ' &#183; short day' : '')
+}
+
+let lateSeenThisSession = false
+function renderLate(M, now) {
+  const y = addDays(M.today, -1)
+  const rec = M.days[y]
+  const box = $('#late')
+  const open = lateOpen(y, now) && rec
+  if (open && rec.req.length && !rec.kept) lateSeenThisSession = true
+  if (!open || !lateSeenThisSession) { box.hidden = true; $('#latelist').innerHTML = ''; return }
+  box.hidden = false
+  const got = S.log[y] || []
+  const hs = rec.req.concat(rec.opt.filter((id) => !byId(id).beyond)).map(byId)
+  keyed($('#latelist'), hs.map((h) => {
+    const v = cardView(M, h, y, got.indexOf(h.id) !== -1, rec.i)
+    v.cue = ''
+    return v
+  }), (v) => { const el = cardMake(v); el.classList.add('small'); return el }, cardUpdate)
+}
+
+function renderWeekly(M) {
+  const box = $('#weekly')
+  if (!M.wk.length) { box.hidden = true; return }
+  box.hidden = false
+  const left = diffDays(M.today, M.cur.end) + 1
+  $('#wkclock').textContent = `resets monday · ${left}d`
+  const got = S.log[M.today] || []
+  keyed($('#wklist'), M.wk.map((h) => ({ k: h.id, sig: h.id, h })),
+    (v) => {
+      const el = document.createElement('button')
+      el.type = 'button'
+      el.className = 'q wk'
+      el.dataset.id = v.h.id
+      el.dataset.day = M.today
+      el.innerHTML = `<i class="tick t"></i><i class="tick b"></i><span class="dia"><i class="ring"></i></span>
+        <span class="qt"><b>${esc(v.h.name)}</b><span class="pips mono"></span></span><u class="qx mono"></u><i class="sweep"></i>`
+      return el
+    },
+    (el, v) => {
+      const n = M.cur.sessions[v.h.id] || 0
+      const doneToday = got.indexOf(v.h.id) !== -1
+      el.classList.toggle('done', doneToday)
+      el.classList.toggle('met', n >= v.h.weekly)
+      el.querySelector('.pips').innerHTML = `[${n}/${v.h.weekly}] ` +
+        Array.from({ length: Math.max(v.h.weekly, n) }, (_, i) => `<i class="${i < n ? 'on' : ''}"></i>`).join('') +
+        (n >= v.h.weekly ? ' &#183; complete' : ' &#183; missing it costs nothing')
+      el.querySelector('.qx').textContent = (doneToday ? '+' : '') + v.h.xp
+    })
 }
 
 /* the fiction's rule: the Daily Quest resets at midnight. a countdown, not
    a time of day. */
 function tickClock() {
-  const el = $('#clock'); if (!el) return
-  const now = new Date(); const end = new Date(now); end.setHours(24, 0, 0, 0)
+  const el = $('#clock')
+  if (!el) return
+  const now = new Date(), end = new Date(now)
+  end.setHours(24, 0, 0, 0)
   const ms = end - now, h = Math.floor(ms / 3600000), m = Math.floor((ms % 3600000) / 60000)
   el.textContent = `${h}h ${String(m).padStart(2, '0')}m`
 }
-setInterval(tickClock, 30000)
-
-function speak(text, once) {
-  if (once && S.seen.indexOf(once) !== -1) return
-  if (once) { S.seen.push(once); save() }
-  const el = $('#line')
-  el.textContent = text
-  el.hidden = false
-  el.classList.remove('pl'); void el.offsetWidth; el.classList.add('pl')
-}
-
-function promote(ri) {
-  const r = RANKS[ri]
-  const ov = $('#promo')
-  ov.querySelector('.from').textContent = RANKS[ri - 1].r
-  ov.querySelector('.to').textContent = r.r
-  ov.querySelector('.loot').textContent = r.loot ? 'GRANTED: ' + r.loot : ''
-  ov.hidden = false
-  import('./sfx.js').then((m) => m.play('levelUp')).catch(() => {})
-}
 
 function pushBadge() {
-  const due = dueToday(), got = S.log[today()] || []
-  const n = due.filter((h) => got.indexOf(h.id) === -1).length
+  if (!loaded) return
+  const M = model()
+  const n = M.req.length - M.today_.doneReq
   try {
     if (navigator.setAppBadge) { n > 0 ? navigator.setAppBadge(n) : navigator.clearAppBadge() }
     navigator.serviceWorker?.controller?.postMessage({ type: 'badge', count: n })
   } catch (_) {}
+  if (S.push && S.push.on) push.report(currentUid(), S.push.hour, M.today, n)
 }
 
-/* ---------- notifications (later, and small) ------------------------------- */
-const standalone = () => window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true
-
-function syncNotifyUI() {
-  const box = $('#notify')
-  if (!box) return
-  if (!standalone()) { box.innerHTML = '<span>Share &#8594; Add to Home Screen</span>'; return }
-  box.hidden = true   // push lands after day 7 at the earliest; the badge already works
+/* ---------- sheets ---------------------------------------------------------- */
+function sheetStatus() {
+  const M = model()
+  const t = titleShown(M)
+  const job = M.job.state === 'revealed' ? `${M.job.name}`
+    : M.job.state === 'trial' ? `Trial &#183; ${M.job.count}/5 kept this week &#183; ${M.job.started ? M.job.left + 'd left' : 'starts tomorrow'}`
+    : `None &#183; the Job Change arrives at level ${JOB_LEVEL}`
+  const stats = M.stats.map((s) => `<div class="srow"><b>${s.key}</b><span>${esc(STATS[s.key].name)}</span><u>${s.value}</u></div>`).join('')
+  const skills = M.skills.map((s) => `<div class="skrow"><b>${esc(s.name)}</b><span class="lvl">Lv.${s.level}</span>
+      <span class="bar"><span style="width:${Math.round((s.into / s.need) * 100)}%"></span></span><em>${s.into}/${s.need}d</em></div>`).join('')
+  const titles = M.titles.map((x) => x.key
+    ? `<button type="button" class="trow${t && t.id === x.id ? ' on' : ''}" data-title="${x.id}"><b>${esc(x.name)}</b><em>${esc(x.how)}</em><span>${t && t.id === x.id ? 'EQUIPPED' : 'EQUIP'}</span></button>`
+    : `<div class="trow off"><b>[???]</b><em>${esc(x.how)}</em></div>`).join('')
+  openSheet('STATUS', `
+    <div class="idgrid big mono">
+      <span>NAME</span><b><input id="pname" maxlength="18" value="${esc(S.name || '')}" placeholder="Player" autocomplete="off"></b>
+      <span>JOB</span><b>${job}</b>
+      <span>TITLE</span><b>${t ? esc(t.name) : '—'}</b>
+      <span>LEVEL</span><b>${M.level} &#183; ${M.rank}&#8209;rank &#183; ${M.xp} xp</b>
+    </div>
+    <h3 class="cond">STATS</h3><div class="sgrid mono">${stats}</div>
+    <p class="note mono">Each is 10, plus one for every day you logged a quest that feeds it. They only go up. The bar on the main screen is the honest part: 14&#8209;day form.</p>
+    <h3 class="cond">SKILLS</h3><div class="mono">${skills || '<p class="note">No skills yet.</p>'}</div>
+    <h3 class="cond">TITLES</h3><div class="mono">${titles}</div>`,
+  (b) => {
+    const inp = b.querySelector('#pname')
+    inp.addEventListener('change', () => { S.name = inp.value.trim().slice(0, 18); save(); render() })
+    b.addEventListener('click', (e) => {
+      const tb = e.target.closest('[data-title]')
+      if (!tb) return
+      S.title = tb.dataset.title
+      save()
+      render()
+      sheetStatus()
+    })
+  })
 }
 
+function sheetShadows() {
+  const M = model()
+  const army = BOSSES.filter((b) => M.shadows[b.id]).map((b) => {
+    const sh = M.shadows[b.id]
+    return `<div class="shadow"><div class="simg"><img src="bosses/${b.id}.webp" alt="" loading="lazy"></div>
+      <b class="cond">${esc(b.shadow)}</b><em>${esc(gradeOf(sh))}</em><span>${sh.kills} kill${sh.kills === 1 ? '' : 's'}${sh.reds ? ` &#183; ${sh.reds} red` : ''}</span></div>`
+  }).join('')
+  const cur = M.cur.boss.id
+  const ladder = BOSSES.map((b, i) => {
+    const sh = M.shadows[b.id]
+    const now = b.id === cur && !M.cur.cleared
+    if (sh) return `<div class="rung won"><i>${i + 1}</i><span class="r cond">${b.rank}</span><b>${esc(b.name)}</b><em>${esc(b.shadow)} &#183; ${esc(gradeOf(sh))}</em></div>`
+    if (now) return `<div class="rung now"><i>${i + 1}</i><span class="r cond">${b.rank}</span><b>${esc(b.name)}</b><em>this week</em></div>`
+    return `<div class="rung"><i>${i + 1}</i><span class="r cond">${b.rank}</span><b>[???]</b><em>unbeaten</em></div>`
+  }).join('')
+  const n = Object.keys(M.shadows).length
+  openSheet('SHADOW ARMY', `
+    <p class="note mono">${n ? `${n} soldier${n === 1 ? '' : 's'} &#183; never spent, never lost` : 'Every Gate boss you kill rises here. None yet.'}</p>
+    <div class="army">${army}</div>
+    <h3 class="cond">THE LADDER</h3>
+    <div class="ladder mono">${ladder}</div>
+    <p class="note mono">A boss dies on the week's 5th kept day. 7 of 7 turns the gate red and raises that shadow's grade. After the 13th, the ladder climbs again.</p>`)
+}
+
+function sheetInventory() {
+  const M = model()
+  const kinds = [['aura', 'AURAS', 'recolour the System'], ['sigil', 'SIGILS', 'reframe your rank emblem'], ['relic', 'RELICS', 'kept for what they mean']]
+  const html = kinds.map(([k, label, about]) => {
+    const items = ITEMS.filter((i) => i.kind === k).map((i) => {
+      const own = M.inv[i.id]
+      if (!own) return `<div class="item off r-${i.rarity}"><b>[???]</b><em>${esc(rarityName(i.rarity))}</em></div>`
+      const on = S.equip[k] === i.id
+      return `<div class="item r-${i.rarity}${on ? ' on' : ''}">
+        ${i.rgb ? `<i class="sw8" style="background:rgb(${i.rgb})"></i>` : ''}
+        <b>${esc(i.name)}</b><em>${esc(rarityName(i.rarity))}${own.count > 1 ? ' &#183; x' + own.count : ''}</em>
+        ${i.about ? `<span class="about">${esc(i.about)}</span>` : ''}
+        ${k !== 'relic' ? `<button type="button" data-equip="${i.id}" data-kind="${k}">${on ? 'UNEQUIP' : 'EQUIP'}</button>` : ''}
+      </div>`
+    }).join('')
+    return `<h3 class="cond">${label}</h3><p class="note mono">${about}</p><div class="items mono">${items}</div>`
+  }).join('')
+  const total = M.boxes.length
+  openSheet('INVENTORY', `<p class="note mono">${total} Random Box${total === 1 ? '' : 'es'} opened &#183; one for every fully kept day. Cosmetic only &#8212; never XP, never stats.</p>${html}`,
+    (b) => b.addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-equip]')
+      if (!btn) return
+      const k = btn.dataset.kind
+      S.equip = { ...S.equip, [k]: S.equip[k] === btn.dataset.equip ? '' : btn.dataset.equip }
+      save()
+      render()
+      sheetInventory()
+    }))
+}
+
+function sheetSystem() {
+  const M = model()
+  const uid = currentUid()
+  let rem
+  if (!push.configured()) rem = `<p class="note">The reminder server is not deployed yet (worker/README.md). Once it is, turn it on here.</p>`
+  else if (!push.standalone()) rem = `<p class="note">iPhone only allows reminders from the home-screen app: Share &#8594; Add to Home Screen, then open it from there.</p>`
+  else {
+    const on = S.push && S.push.on
+    const hour = (S.push && S.push.hour) || 20
+    rem = `<p class="note">One a day at ${hour}:00, only while a quest is still open. Never when you are done.</p>
+      <label class="row">TIME <select id="remhour">${[17, 18, 19, 20, 21, 22].map((h) => `<option value="${h}"${h === hour ? ' selected' : ''}>${h}:00</option>`).join('')}</select></label>
+      <button type="button" id="remtoggle" class="${on ? '' : 'pri'}">${on ? 'TURN OFF' : 'TURN ON'}</button>`
+  }
+  const nfc = !uid ? '<p class="note">Connect first.</p>'
+    : !Object.keys(S.log).length ? '<p class="note">Log your first quest, then come back to set this up.</p>'
+    : S.ink ? nfcHelp(uid)
+    : `<p class="note">Tap an NFC sticker by the dumbbells, or run a Shortcut, and the quest is logged. This creates a private key for your record.</p><button type="button" id="nfcmake" class="pri">SET UP</button>`
+  openSheet('SYSTEM', `
+    <section><h3 class="cond">ARCHIVE COPY</h3>
+      <p class="note">Your record lives under an anonymous key. Delete the home-screen app and the key is gone. An archive copy is a file you keep: restore it after a reinstall. Restoring merges &#8212; it can never lose a day.</p>
+      <button type="button" id="arcsave" class="pri">SAVE ARCHIVE COPY</button><button type="button" id="arcload">RESTORE FROM FILE</button>
+      <p class="note dim">${S.arch ? 'last saved ' + esc(S.arch) : 'never saved'}</p></section>
+    <section><h3 class="cond">REPORT</h3>
+      <p class="note">Send last week's report to one person. Telling someone is what makes keeping count work.</p>
+      <button type="button" id="repsend">SEND LAST WEEK</button></section>
+    <section><h3 class="cond">EVENING REMINDER</h3>${rem}</section>
+    <section><h3 class="cond">SHORTCUT &amp; NFC</h3>${nfc}</section>
+    <section><h3 class="cond">THE SYSTEM</h3><p class="note dim">day ${M.started ? M.dayIdx + 1 : 0} &#183; ${esc(uid || 'not connected')}</p></section>`,
+  (b) => b.addEventListener('click', async (e) => {
+    const id = e.target.id
+    if (id === 'arcsave') saveArchive()
+    else if (id === 'arcload') restore()
+    else if (id === 'repsend') shareReport()
+    else if (id === 'nfcmake') { S.ink = randomKey(); save(); sheetSystem() }
+    else if (id === 'remtoggle') {
+      const hour = +(b.querySelector('#remhour') || {}).value || 20
+      try {
+        if (S.push && S.push.on) { await push.disable(uid); S.push = { on: false, hour } }
+        else { await push.enable(uid, hour, M.today, M.req.length - M.today_.doneReq); S.push = { on: true, hour } }
+        save()
+        notify({ title: S.push.on ? 'Evening reminder on' : 'Evening reminder off', sound: null, hold: 2200 })
+      } catch (err) { notify({ title: 'Reminder not set', sub: esc(err.message || String(err)), sound: null }) }
+      sheetSystem()
+    } else if (e.target.dataset.copy) {
+      try { await navigator.clipboard.writeText(e.target.dataset.copy); e.target.textContent = 'COPIED' } catch (_) {}
+    }
+  }))
+  const sel = document.getElementById('remhour')
+  if (sel) sel.addEventListener('change', () => {
+    if (S.push && S.push.on) { S.push.hour = +sel.value; save(); push.report(uid, S.push.hour, M.today, M.req.length - M.today_.doneReq) }
+  })
+}
+
+const randomKey = () => {
+  const b = new Uint8Array(18)
+  crypto.getRandomValues(b)
+  return btoa(String.fromCharCode(...b)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+}
+
+function nfcHelp(uid) {
+  const url = inboxUrl()
+  const body = (q) => JSON.stringify({ q, t: { '.sv': 'timestamp' }, k: S.ink })
+  const quests = HABITS.filter((h) => !h.beyond).map((h) =>
+    `<div class="nq"><b>${esc(h.lift ? 'Lifting session' : h.name)}</b><code>${esc(h.id)}</code><button type="button" data-copy="${esc(body(h.id))}">COPY BODY</button></div>`).join('')
+  return `<p class="note">In Shortcuts: <b>Automation &#8594; NFC</b> (or a plain shortcut) &#8594; <b>Get Contents of URL</b>:</p>
+    <div class="kv"><span>URL</span><code>${esc(url)}</code><button type="button" data-copy="${esc(url)}">COPY</button></div>
+    <div class="kv"><span>METHOD</span><code>POST</code></div>
+    <div class="kv"><span>BODY</span><code>JSON: q = quest id &#183; t = dictionary {".sv": "timestamp"} &#183; k = your key</code></div>
+    <div class="kv"><span>KEY</span><code>${esc(S.ink)}</code><button type="button" data-copy="${esc(S.ink)}">COPY</button></div>
+    <p class="note">Turn off &#8220;Ask Before Running&#8221;. Taps are logged to the day they happen, show up live, and can only ever add &#8212; never remove. Treat the key like a password.</p>
+    <div class="nqs">${quests}</div>`
+}
 
 /* ---------- boot ----------------------------------------------------------- */
 function boot() {
   document.body.addEventListener('click', (e) => {
+    if (e.target.closest('#sheet')) {
+      if (e.target.id === 'sheetx' || e.target.id === 'sheet') closeSheet()
+      return
+    }
     const q = e.target.closest('.q:not(.locked)')
-    if (q) return toggle(q.dataset.id, e)
-    if (e.target.id === 'cbclose') { S.lastOpen = today(); save(); render(); return }
-    if (e.target.closest('#promo')) { $('#promo').hidden = true; return }
-    if (e.target.id === 'line') { $('#line').hidden = true; return }
+    if (q) return toggle(q.dataset.id, q.dataset.day, { ev: e, el: q })
+    if (e.target.id === 'cbclose') { cbDismissed = true; render(); return }
+    const sh = e.target.closest('[data-sheet]')
+    if (sh) {
+      const which = sh.dataset.sheet
+      if (which === 'status') sheetStatus()
+      else if (which === 'shadows') sheetShadows()
+      else if (which === 'inventory') sheetInventory()
+      else if (which === 'system') sheetSystem()
+    }
   })
 
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js', { scope: './' }).catch(() => {})
 
+  /* 13: every store state has a look. connecting scans; offline flickers
+     gold; a restored link sweeps cyan. */
+  let prev = 'connecting'
   onStatus((st) => {
     document.documentElement.dataset.store = st
-    if (st === 'offline' && loaded) speak('Connection lost. Taps are held until it returns.', null)
+    const hud = document.getElementById('hud')
+    if (loaded && st === 'offline' && prev !== 'offline') {
+      pulse(hud, 'glitch', 700)
+      notify({ head: 'ALERT', title: LINES.offline, sound: null, hold: 2600 })
+    }
+    if (st === 'ready' && prev !== 'ready') {
+      pulse(hud, 'linked', 1400)
+      if (loaded && (prev === 'offline' || prev === 'error')) play('link')
+    }
+    prev = st
   })
 
   render()                       // skeleton, so the frame is up immediately
   start()
 
-  setInterval(() => { if (loaded) render() }, 60000)
+  setInterval(() => { if (loaded) render(); else tickClock() }, 30000)
   document.addEventListener('visibilitychange', () => { if (!document.hidden && loaded) render() })
   addEventListener('pagehide', flush)
 }
@@ -488,19 +1067,32 @@ async function start() {
   try {
     const remote = await connect()
     S = adopt(remote)
+    const today = iso(new Date())
+    awayAtOpen = S.lastOpen ? diffDays(S.lastOpen, today) : 0
     loaded = true
+    bump()
+    if (remote && remote.v !== 3) quietMigrate()
     render()
     syncNotifyUI()
-    S.lastOpen = today()
-    save()
+    S.lastOpen = today
+    opening()
+    onInbox(applyInbox)
   } catch (e) {
     /* Do NOT fall through to an empty board. An unreadable record must look
        like a problem, not like a fresh start. */
     document.documentElement.dataset.store = 'error'
-    speak('The System cannot reach the archive. Your record is safe — reopen when you have signal.', null)
+    notify({ head: 'ALERT', title: 'The System cannot reach the archive', sub: 'Your record is safe. Reopen when you have signal.', sound: null, hold: 0, actions: [{ label: 'CLOSE', primary: true }] })
     console.warn('[store] connect failed —', e && e.message)
   }
 }
 
+function syncNotifyUI() {
+  const box = $('#notify')
+  if (!box) return
+  if (!push.standalone()) { box.innerHTML = '<span>Share &#8594; Add to Home Screen</span>'; return }
+  box.hidden = true
+}
+
 if (reduceMotion) document.documentElement.classList.add('rm')
 boot()
+

@@ -2,7 +2,7 @@
   "id": "/the-system/",
   "name": "THE SYSTEM",
   "short_name": "SYSTEM",
-  "description": "Four habits. One screen. The record above the list.",
+  "description": "The Daily Quest, the Gate, the record above the list.",
   "start_url": "/the-system/",
   "scope": "/the-system/",
   "display": "standalone",

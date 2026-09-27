@@ -34,33 +34,31 @@
 
 <div style="height:150px;flex-shrink:0"></div>
 
-<div class="hud pl mono">
+<div class="hud pl mono" id="hud">
   <i class="dot"></i>
-  <span class="name">SYSTEM</span>
+  <button type="button" class="name" data-sheet="system">SYSTEM</button>
   <span class="when" id="meta">—</span>
+  <i class="hud-scan"></i>
 </div>
 
-<section class="hex id pl">
-  <div class="emblem cond"><span id="rank">E</span></div>
+<section class="hex id pl" id="plate" data-sheet="status">
+  <div class="emblem cond" id="emblem"><span id="rank">E</span></div>
   <div style="flex:1;min-width:0">
     <div class="wordmark cond">THE SYSTEM</div>
     <div class="meta mono" id="metaline"></div>
-    <div class="xp">
+    <div class="xp" id="xpwrap">
       <span class="track"><span class="fill" id="xpbar" style="width:0%"></span></span>
       <span class="num mono" id="xpnum">0/100</span>
     </div>
   </div>
 </section>
 
-<!-- one System line at a time. spoken once, tap to dismiss. -->
-<div id="line" class="line mono pl" hidden></div>
-
 <!-- shown only after a real absence, and it never scolds -->
 <section class="hex pl" id="comeback" hidden>
   <div class="k cond">THE GATE REOPENS</div>
   <h2>—</h2>
   <p></p>
-  <button id="cbclose" class="mono">DISMISS</button>
+  <button type="button" id="cbclose" class="mono">DISMISS</button>
 </section>
 
 <!-- THE RECORD, above the list. you see what you built before what you owe. -->
@@ -79,15 +77,31 @@
   </div>
 </section>
 
-<!-- the status window. a row per stat with a live habit. -->
-<section class="hex pl" id="statsbox" hidden>
+<!-- the week's Gate: a boss that dies on the 5th kept day -->
+<section class="hex gate pl" id="gate" data-sheet="shadows">
+  <div class="boss"><img id="bossimg" alt="" decoding="async"><i class="boss-fx"></i><span class="bossrank cond" id="bossrank">E</span></div>
+  <div class="gate-b">
+    <div class="rowhead">
+      <i class="bar"></i>
+      <h2 class="cond" id="gatek">GATE</h2>
+      <span class="aside mono" id="gatewhen"></span>
+    </div>
+    <div class="bossname cond" id="bossname">—</div>
+    <div class="hp" id="hp"></div>
+    <div class="strip mono" id="strip"></div>
+    <div class="gatenote mono" id="gatenote"></div>
+  </div>
+</section>
+
+<!-- the status window, as in the source -->
+<section class="hex pl" id="statsbox" data-sheet="status">
   <div class="rowhead">
     <i class="bar"></i>
     <h2 class="cond">STATUS</h2>
-    <span class="aside mono">14&#8209;day</span>
+    <span class="aside mono">bar: 14&#8209;day</span>
   </div>
+  <div class="idgrid mono" id="idgrid"></div>
   <div id="stats" class="mono"></div>
-  <div class="statnote mono">how consistently you've shown up lately</div>
 </section>
 
 <div class="qhead">
@@ -96,23 +110,50 @@
   <span class="rule"></span>
   <span class="n mono" id="count">0/0</span>
 </div>
+<div class="dungeon mono" id="dungeon"></div>
 
 <div id="list"></div>
 
+<!-- did it yesterday, forgot to tap: until noon -->
+<section id="late" hidden>
+  <div class="qhead sub">
+    <h2 class="cond">LATE REPORT</h2>
+    <span class="clock mono">yesterday &#183; until 12:00</span>
+    <span class="rule"></span>
+  </div>
+  <div id="latelist"></div>
+</section>
+
+<section id="weekly" hidden>
+  <div class="qhead">
+    <h2 class="cond">WEEKLY QUEST</h2>
+    <span class="clock mono" id="wkclock"></span>
+    <span class="rule"></span>
+  </div>
+  <div id="wklist"></div>
+</section>
+
 <div id="notify" class="mono"></div>
 
-<div class="foot mono">
+<nav class="foot mono">
+  <button type="button" data-sheet="status">STATUS</button>
+  <button type="button" data-sheet="shadows">SHADOWS</button>
+  <button type="button" data-sheet="inventory">INVENTORY</button>
   <span id="lv">lv 1</span>
-</div>
+</nav>
 
-<!-- rank promotion: the biggest visual moment in the app. tap anywhere. -->
-<div id="promo" hidden>
-  <div class="promo-in">
-    <div class="promo-k mono">THE SYSTEM</div>
-    <div class="promo-h cond">RANK UP.</div>
-    <div class="promo-r cond"><span class="from">E</span><i>&#8594;</i><span class="to">D</span></div>
-    <div class="loot mono"></div>
-    <div class="promo-tap mono">tap anywhere</div>
+<!-- System Windows float here, one at a time -->
+<div id="windows" aria-live="polite"></div>
+
+<!-- Status / Shadows / Inventory / System: opened on purpose, closed on purpose -->
+<div id="sheet" hidden>
+  <div class="sheet-in">
+    <div class="sheet-h">
+      <b class="sw-x mono">!</b>
+      <span class="sheet-t cond">STATUS</span>
+      <button type="button" class="sheet-x mono" id="sheetx">CLOSE</button>
+    </div>
+    <div class="sheet-b"></div>
   </div>
 </div>
 
