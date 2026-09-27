@@ -458,6 +458,8 @@ function mergeRemote(r) {
   if (added) { save(); render(); speak('Record restored from the System archive.', null) }
 }
 
+/* No UI for these now — the footer buttons were removed. Kept exported so
+   putting them back is two lines of HTML rather than a rewrite. */
 export function backup() { exportLog(S) }
 export async function restore(file) {
   try { mergeRemote(await importLog(file)); save(); render() }
@@ -472,8 +474,6 @@ function boot() {
     if (e.target.id === 'cbclose') { S.lastOpen = today(); save(); render(); return }
     if (e.target.closest('#promo')) { $('#promo').hidden = true; return }
     if (e.target.id === 'line') { $('#line').hidden = true; return }
-    if (e.target.id === 'backup') { backup(); return }
-    if (e.target.id === 'restore') { $('#restorefile').click(); return }
   })
 
   render()

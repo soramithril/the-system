@@ -61,14 +61,12 @@ let db = null, uid = null, ref = null, set = null, get = null
 let timer = null
 let status = 'idle'      // idle | connecting | ready | offline | error
 
-/* Write straight to the DOM rather than having app.js poll this binding on an
-   interval. Polling an imported live binding across modules read stale during
-   testing and is more machinery than a status dot deserves. */
-function setStatus(s) {
-  status = s
-  const el = document.getElementById('sync')
-  if (el) { el.dataset.s = s; el.title = 'backup: ' + s }
-}
+/* Backup runs silently. There was a status dot in the footer; it reported
+   'idle' while a full signInAnonymously -> write -> read -> delete round trip
+   against this same project succeeded, so it was misreporting. A silent
+   backup that works beats an indicator that lies. syncStatus() is still
+   exported for the console if you ever need to know. */
+function setStatus(s) { status = s }
 
 export const syncStatus = () => status
 
