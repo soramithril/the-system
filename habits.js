@@ -22,6 +22,8 @@
                the Gate. It still pays XP and feeds stats.
      weekly    a weekly target instead of a daily quest. Each session pays
                xp; reaching the target pays `bonus` once. Missing costs 0.
+     measure   tapping it opens the tape-measure / scale window.
+     archived  parked: hidden, never granted, its history kept.
      xp        contributes to level and rank. Never decreases.
 
    WHY SO FEW ON DAY ONE
@@ -29,10 +31,11 @@
      (Dalton & Spiller 2012, three controlled studies). About half of
      motivated volunteers fail to repeat even ONE chosen behaviour
      consistently (Lally 2010). v1 opened with 14 dailies + 9 weeklies +
-     15 mains and was used for a week. So: three small required cards on
-     day one (the set, the run, vitamins — two of them share one morning
-     cue), one optional lifting card at the weekend, and the System grants
-     the rest over time.
+     15 mains and was used for a week. So: four required cards on day one
+     (the set, the run, vitamins, Japanese), one optional lifting card at
+     the weekend, one weekly weigh-in, and the System makes the rest
+     required one cleared Gate at a time. The source's own Daily Quest is
+     body only; this stays close to that.
 
    NO TIME OF DAY
      The Daily Quest in the source has no anchor. It has a deadline: done
@@ -109,19 +112,11 @@ export const HABITS = [
     unlock: 0,
     xp: 38,
   },
-  {
-    id: 'content',
-    name: 'One content action',
-    detail: 'film, edit or upload',
-    stats: ['SEN'],
-    skill: 'Creation',
-    unlock: 14,
-    xp: 40,
-  },
 
-  /* THE QUEUE. Sealed until earned: after day 14, each cleared Gate unseals
-     the next one on the following Monday — at most one a week, so the list
-     never grows faster than it is being kept. Add a quest = add a line. */
+  /* THE QUEUE. Tappable from day one but not required: each cleared Gate
+     makes the next one required, on the following Monday — at most one a
+     week, so the list never grows faster than it is being kept. Add a
+     quest = add a line. */
   {
     id: 'protein',
     name: 'Protein',
@@ -131,6 +126,36 @@ export const HABITS = [
     queue: true,
     xp: 15,
   },
+
+  /* WEEKLY. Any day this week; missing it costs nothing. The weigh-in opens
+     the tape-measure window, so the body trials always have fresh numbers:
+     weight every week, waist and neck every other. */
+  {
+    id: 'weighin',
+    name: 'Weigh-in',
+    detail: 'the scale weekly · the tape every other week',
+    weekly: 1,
+    measure: true,
+    stats: ['VIT'],
+    unlock: 0,
+    xp: 20,
+    bonus: 10,
+  },
+
+  /* PARKED — YouTube, undecided. Hidden, never granted, nothing lost.
+     Decide after day 14; bringing one back is deleting `archived`. The plan
+     if yes: ONE Gate-unlocked weekly quest (batch recording fits a week, not
+     a day), and subscriber milestones as titles, never as rank. */
+  {
+    id: 'content',
+    name: 'One content action',
+    detail: 'film, edit or upload',
+    stats: ['SEN'],
+    skill: 'Creation',
+    archived: true,
+    queue: true,
+    xp: 40,
+  },
   {
     id: 'upload',
     name: 'Upload a video',
@@ -138,17 +163,9 @@ export const HABITS = [
     bonus: 25,
     stats: ['SEN'],
     skill: 'Creation',
+    archived: true,
     queue: true,
     xp: 50,
-  },
-  {
-    id: 'listening',
-    name: 'Japanese listening',
-    detail: '20 minutes of audio',
-    stats: ['INT'],
-    skill: 'Japanese',
-    queue: true,
-    xp: 20,
   },
 ]
 

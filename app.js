@@ -66,7 +66,7 @@ function adopt(r) {
     km: Object.fromEntries(Object.entries(r.km && typeof r.km === 'object' ? r.km : {}).filter(([k, v]) => DAY.test(k) && num(v, 0, 100))),
     tests: Object.fromEntries(Object.entries(r.tests && typeof r.tests === 'object' ? r.tests : {})
       .map(([t, l]) => [t, listOf(l).filter((e) => e && num(e.v, 0, 10000) && DAY.test(e.d))])),
-    body: listOf(r.body).filter((m) => m && DAY.test(m.d) && num(m.waist, 20, 250) && num(m.neck, 10, 100)),
+    body: listOf(r.body).filter((m) => m && DAY.test(m.d) && ((num(m.waist, 20, 250) && num(m.neck, 10, 100)) || num(m.weight, 20, 400))),
     _ts: r._ts || 0,
   }
 }
@@ -984,7 +984,13 @@ function sheetStatus() {
         ${nx.trials.map(trialRow).join('')}
       </div>
       <p class="note mono">Rank ${esc(nx.r)} needs its XP and every trial. Records keep their best, and a passed rank is never lost.</p>`
-  const records = Object.keys(TESTS).map((k) => `<div class="srow"><span>${esc(TESTS[k].name)}</span><u>${M.best[k] == null ? '&#8212;' : fmtTest(k, M.best[k])}</u></div>`).join('')
+  const weights = listOf(S.body).filter((m) => m.weight > 0)
+  const lb = S.units !== 'metric'
+  const fmtW = (kg) => (lb ? (kg / 0.45359237).toFixed(1) + ' lb' : kg.toFixed(1) + ' kg')
+  const wNow = weights.length ? weights[weights.length - 1].weight : null
+  const wDelta = weights.length > 1 ? wNow - weights[0].weight : 0
+  const records = `<div class="srow"><span>Weight${weights.length > 1 ? ' (since first)' : ''}</span><u>${wNow == null ? '&#8212;' : fmtW(wNow) + (weights.length > 1 ? ` (${wDelta > 0 ? '+' : wDelta < 0 ? '&#8722;' : ''}${fmtW(Math.abs(wDelta)).replace(/ .*/, '')})` : '')}</u></div>` +
+    Object.keys(TESTS).map((k) => `<div class="srow"><span>${esc(TESTS[k].name)}</span><u>${M.best[k] == null ? '&#8212;' : fmtTest(k, M.best[k])}</u></div>`).join('')
   openSheet('STATUS', `
     <div class="idgrid big mono">
       <span>NAME</span><b><input id="pname" maxlength="18" value="${esc(S.name || '')}" placeholder="Player" autocomplete="off"></b>
@@ -1077,30 +1083,32 @@ function recordTest(k) {
 
 /* Tape: waist at the navel, neck just below the larynx, plus weight. Stored
    metric; typed in whichever units the tape and scale use. */
-function measure() {
+/* `log`: the id of a weekly quest (the weigh-in) that saving also ticks */
+function measure(log) {
   const imp = S.units !== 'metric'
   notify({
-    head: 'RANK TRIAL', title: 'Measure', sound: null,
+    head: log ? 'WEEKLY QUEST' : 'RANK TRIAL', title: log ? 'Weigh-in' : 'Measure', sound: null,
     sub: `<div class="meas">
         <label>WAIST <input id="mw" type="text" inputmode="decimal" autocomplete="off"><em>${imp ? 'in' : 'cm'}</em></label>
         <label>NECK <input id="mn" type="text" inputmode="decimal" autocomplete="off"><em>${imp ? 'in' : 'cm'}</em></label>
         <label>WEIGHT <input id="mk" type="text" inputmode="decimal" autocomplete="off"><em>${imp ? 'lb' : 'kg'}</em></label>
       </div>
       <div class="bfout">body fat <b id="mbf">&#8212;</b> &#183; height ${BODY.heightCm} cm</div>
-      <div class="dim">Waist at the navel, relaxed. Neck just below the larynx. Same time of day each time &#8212; the trend matters more than any one number.</div>`,
+      <div class="dim">${log ? 'Weight is enough this week; add the tape every other week. ' : ''}Waist at the navel, relaxed. Neck just below the larynx. Same time of day each time &#8212; the trend matters more than any one number.</div>`,
     actions: [
-      { label: imp ? 'USE CM/KG' : 'USE IN/LB', onClick: () => { S.units = imp ? 'metric' : 'imperial'; save(); setTimeout(measure, 250) } },
+      { label: imp ? 'USE CM/KG' : 'USE IN/LB', onClick: () => { S.units = imp ? 'metric' : 'imperial'; save(); setTimeout(() => measure(log), 250) } },
       { label: 'CANCEL' },
       { label: 'SAVE', primary: true, onClick: (el) => {
         const m = readMeasure(el, imp)
         if (!m) return false
-        addBody(m)
+        addBody(m, log)
       } },
     ],
     onShow: (el) => {
       el.querySelectorAll('.meas input').forEach((i) => i.addEventListener('input', () => {
         const m = readMeasure(el, imp)
-        el.querySelector('#mbf').textContent = m ? navyBf(m.waist, m.neck).toFixed(1) + '%' : '—'
+        const bf = m && m.waist ? navyBf(m.waist, m.neck) : null
+        el.querySelector('#mbf').textContent = bf != null ? bf.toFixed(1) + '%' : '—'
       }))
     },
   })
@@ -1112,21 +1120,33 @@ function readMeasure(el, imp) {
   const waist = f('#mw') * k, neck = f('#mn') * k
   const w = f('#mk')
   const weight = w > 0 ? (imp ? w * 0.45359237 : w) : 0
-  if (!(waist > 40 && waist < 250 && neck > 20 && neck < 80 && waist > neck)) return null
-  return { waist: round1(waist), neck: round1(neck), weight: round1(weight) }
+  const tape = waist > 40 && waist < 250 && neck > 20 && neck < 80 && waist > neck
+  const kg = weight > 25 && weight < 400
+  if (tape) return { waist: round1(waist), neck: round1(neck), weight: kg ? round1(weight) : 0 }
+  if (kg && !(waist > 0) && !(neck > 0)) return { weight: round1(weight) }   // weight alone is a weigh-in
+  return null
 }
 
-function addBody(m) {
+function addBody(m, log) {
   if (!loaded) return
   const A = model()
   const today = iso(new Date())
   S.body = listOf(S.body).concat([{ d: today, ...m, height: BODY.heightCm }])
-  bump()
-  const B = model()
-  render()
-  const bf = navyBf(m.waist, m.neck)
-  moment(diff(A, B, today), { line: `Body fat ${bf.toFixed(1)}%${m.weight ? ` · lean mass ${round1(m.weight * (1 - bf / 100)).toFixed(1)} kg` : ''}`, sub: 'Recorded. The trend is what matters.' })
-  save()
+  const bf = m.waist ? navyBf(m.waist, m.neck) : null
+  const wt = m.weight ? (S.units !== 'metric' ? `${(m.weight / 0.45359237).toFixed(1)} lb` : `${m.weight.toFixed(1)} kg`) : ''
+  const line = bf != null
+    ? `Body fat ${bf.toFixed(1)}%${m.weight ? ` · lean mass ${round1(m.weight * (1 - bf / 100)).toFixed(1)} kg` : ''}`
+    : `Weight ${wt}`
+  const sub = 'Recorded. The trend is what matters.'
+  if (log && (S.log[today] || []).indexOf(log) === -1) {
+    toggle(log, today, { el: cardEl(log, today), line, sub })
+  } else {
+    bump()
+    const B = model()
+    render()
+    moment(diff(A, B, today), { line, sub })
+    save()
+  }
   if (sheetOpen()) sheetStatus()
 }
 
@@ -1268,7 +1288,11 @@ function boot() {
     const kmb = e.target.closest('[data-km]')
     if (kmb) { const card = kmb.closest('.q'); if (card && loaded) openKm(card.dataset.day); return }
     const q = e.target.closest('.q:not(.locked)')
-    if (q) return toggle(q.dataset.id, q.dataset.day, { ev: e, el: q })
+    if (q) {
+      const h = byId(q.dataset.id)
+      if (h && h.measure && loaded && !q.classList.contains('done')) return measure(h.id)
+      return toggle(q.dataset.id, q.dataset.day, { ev: e, el: q })
+    }
     if (e.target.id === 'cbclose') { cbDismissed = true; render(); return }
     const sh = e.target.closest('[data-sheet]')
     if (sh) {

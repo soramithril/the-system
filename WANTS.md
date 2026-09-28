@@ -60,9 +60,9 @@ full-screen animations, no leaderboards).
   fat, lean mass ≥ 70 kg at the same time, a sub-50 10 km, and the source's
   100/100/100 + 10 km in one day.
 - **Quests:** nothing is locked — every quest is tappable from day 1 and pays
-  XP. Japanese is required from day 1; the rest are "not required yet" until
-  the System grants them (content on day 15, then one per cleared Gate), so
-  skipping them never costs a day. The weekly upload quest.
+  XP. Required from day 1: Strength Training, Run, Vitamins, Japanese.
+  Protein is "not required yet" until the first cleared Gate makes it
+  required. Weekly: the weigh-in (opens the scale / tape window).
 - **The Gate:** a boss every Monday that dies on the 5th kept day, ARISE and
   the Shadow Army with its 13-rung ladder, Red Gate on 7 of 7, the Monday
   report.
@@ -73,8 +73,15 @@ full-screen animations, no leaderboards).
 
 Tests: `TZ=America/New_York node --test test/*.test.mjs`
 
-## Queued (after day 14)
+## Decide after day 14
 
+- [ ] **YouTube in the System, or not.** Parked in `habits.js` (`content`,
+      `upload`, `archived: true`). If yes: one Gate-unlocked WEEKLY quest
+      (batch recording fits a week, not a day) — e.g. "Create: 2 sessions" —
+      and subscriber milestones as titles, never as rank. Subscribers depend
+      on the algorithm; rank measures you.
+- [ ] The v1 videos (sprint clip, Toji lifting, shadow aura) as card /
+      ARISE backgrounds — only as files in the repo, only playing on screen.
 - [ ] Art files into the repo (eyes band, backdrop, figure, crest) — `art/eyes.jpg`, `art/backdrop.jpg`
 
 ## Wants (raw, unsorted — write them here instead of building them)

@@ -28,8 +28,8 @@ test('day 0: four required cards, the rest tappable early; lifting only at the w
   assert.equal(M.started, false)
   assert.deepEqual(M.req.map((h) => h.id), DAY)
   assert.deepEqual(M.opt.map((h) => h.id), ['beyond'])
-  assert.deepEqual(M.early.map((h) => h.id), ['content', 'protein', 'listening'])
-  assert.deepEqual(M.wk.map((h) => h.id), ['upload'])
+  assert.deepEqual(M.early.map((h) => h.id), ['protein'])
+  assert.deepEqual(M.wk.map((h) => h.id), ['weighin'])
   assert.equal(M.dungeon, null)
   assert.equal(M.xp, 0)
   assert.equal(M.level, 1)
@@ -112,46 +112,41 @@ test('mid-week start: the first Gate needs fewer days', () => {
   assert.equal(M.cur.strip[0].st, 'void')
 })
 
-test('fixed grants on day 7 and 14, then one earned grant per cleared week', () => {
-  const S = keepAll(MON, 36)
-  const M = derive(S, at(addDays(MON, 35)))
+test('the first cleared Gate makes protein required the next Monday; parked quests never appear', () => {
+  const S = keepAll(MON, 15)
+  const M = derive(S, at(addDays(MON, 14)))
   assert.equal(M.grants.japanese, 0)
-  assert.equal(M.grants.content, 14)
-  // week of day 7-13 ends before day 14 → no grant; week 14-20 → protein on 21
-  assert.equal(M.grants.protein, 21)
-  assert.equal(M.grants.upload, 28)
-  assert.equal(M.grants.listening, 35)
+  assert.equal(M.grants.protein, 7)
+  assert.equal(M.grants.content, undefined)
+  assert.equal(M.grants.upload, undefined)
+  assert.ok(!M.req.concat(M.opt, M.early, M.wk).some((h) => h.id === 'content' || h.id === 'upload'))
 })
 
 test('an uncleared week grants nothing; the next cleared one does', () => {
-  const S = keepAll(MON, 21, () => [])
-  for (let i = 14; i < 21; i++) if (i % 2) delete S.log[addDays(MON, i)]   // week 3 not cleared
-  const S2 = { first: MON, log: { ...S.log } }
-  const more = keepAll(MON, 28)
-  for (let i = 21; i < 28; i++) S2.log[addDays(MON, i)] = more.log[addDays(MON, i)]
-  const M = derive(S2, at(addDays(MON, 28)))
-  assert.equal(M.grants.protein, 28)
+  const S = keepAll(MON, 14)
+  for (let i = 0; i < 7; i++) if (i % 2) delete S.log[addDays(MON, i)]   // week 1 not cleared
+  const M = derive(S, at(addDays(MON, 14)))
+  assert.equal(M.grants.protein, 14)
 })
 
-test('sealed rows say what opens them', () => {
+test('not-yet-required quests say what makes them required', () => {
   const M = derive({ first: MON, log: {} }, at(addDays(MON, 3)))
   const why = Object.fromEntries(M.sealed.map((s) => [s.h.id, s.why]))
-  assert.equal(why.content, 'days')
-  assert.equal(why.protein, 'after')
-  assert.equal(why.upload, 'queued')
-  assert.equal(M.sealed.find((s) => s.h.id === 'content').inDays, 11)
+  assert.deepEqual(Object.keys(why), ['protein'])
+  assert.equal(why.protein, 'gate')
 })
 
-test('weekly quest: a session pays xp, reaching the target pays the bonus once', () => {
-  const S = keepAll(MON, 29)
-  const k = addDays(MON, 28)                          // upload granted day 28
+test('weekly weigh-in: pays xp and its bonus once, never touches the kept day', () => {
+  const S = keepAll(MON, 3)
+  const k = addDays(MON, 2)
   const before = derive(S, at(k))
-  assert.ok(before.wk.some((h) => h.id === 'upload'))
-  S.log[k] = S.log[k].concat(['upload'])
+  assert.ok(before.wk.some((h) => h.id === 'weighin'))
+  S.log[k] = S.log[k].concat(['weighin'])
   const after = derive(S, at(k))
-  assert.equal(after.xp - before.xp, 50 + 25)
+  assert.equal(after.xp - before.xp, 20 + 10)
+  assert.equal(after.today_.kept, true)
   const ev = diff(before, after, k)
-  assert.ok(ev.some((e) => e.type === 'weekly' && e.id === 'upload'))
+  assert.ok(ev.some((e) => e.type === 'weekly' && e.id === 'weighin'))
 })
 
 test('job change: level 10 starts a trial tomorrow; 5 kept days reveal the class', () => {
@@ -314,13 +309,13 @@ test('return bonus is withdrawn if yesterday gets filled in later (tap order nev
 })
 
 test('a queued quest is optional on the day its key arrives, required from the next', () => {
-  const S = keepAll(MON, 23)
-  const d21 = derive(S, at(addDays(MON, 21)))
-  assert.ok(d21.opt.some((h) => h.id === 'protein'))
-  assert.ok(!d21.req.some((h) => h.id === 'protein'))
-  assert.equal(d21.today_.kept, true, 'a late grant cannot un-keep the day')
-  const d22 = derive(S, at(addDays(MON, 22)))
-  assert.ok(d22.req.some((h) => h.id === 'protein'))
+  const S = keepAll(MON, 9)
+  const d7 = derive(S, at(addDays(MON, 7)))
+  assert.ok(d7.opt.some((h) => h.id === 'protein'))
+  assert.ok(!d7.req.some((h) => h.id === 'protein'))
+  assert.equal(d7.today_.kept, true, 'a late grant cannot un-keep the day')
+  const d8 = derive(S, at(addDays(MON, 8)))
+  assert.ok(d8.req.some((h) => h.id === 'protein'))
 })
 
 test('stats count days, not quests: three STR quests in one day is +1', () => {
@@ -330,11 +325,11 @@ test('stats count days, not quests: three STR quests in one day is +1', () => {
 })
 
 test('early quests: tappable before they are granted, pay xp, never cost the day', () => {
-  const S = { first: MON, log: { [MON]: DAY.concat(['content', 'protein']) } }
+  const S = { first: MON, log: { [MON]: DAY.concat(['protein']) } }
   const M = derive(S, at(MON))
   assert.equal(M.today_.kept, true)
-  assert.equal(M.xp, 80 + 40 + 15)
-  assert.ok(M.stats.some((s) => s.key === 'SEN'), 'a stat shows up once an early quest feeds it')
+  assert.equal(M.xp, 80 + 15)
+  assert.ok(!M.stats.some((s) => s.key === 'SEN'), 'parked quests leave no stat behind')
   const skip = derive({ first: MON, log: { [MON]: DAY } }, at(MON))
   assert.equal(skip.today_.kept, true, 'skipping early quests keeps the day')
 })
