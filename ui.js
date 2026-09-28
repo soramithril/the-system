@@ -2,9 +2,9 @@
    THE SYSTEM WINDOW — the one look every message uses.
 
    A floating navy panel with a glowing edge and a "[!] NOTIFICATION" header.
-   The text types itself out under the chime. It floats at the top of the
-   screen — over the plate, never over the quests — and it never blocks the
-   next tap: the rest of the page stays live underneath it.
+   The text types itself out under the chime. It floats at the bottom of the
+   screen — over the Gate and the record, never over the quests at the top —
+   and it never blocks the next tap: the rest of the page stays live.
 
      tap once  → finish typing
      tap again → dismiss
@@ -26,7 +26,8 @@ let showing = null
 
 /* o = { head, title, sub (html), lines [text], big, tone ('red'|'violet'|'gold'),
          img, actions [{ label, primary, onClick }], hold (ms, 0 = stay),
-         sound (cue name, or null for silence), onShow(el) } */
+         sound (cue name, or null for silence), onShow(el),
+         top (true for a window with a text field) } */
 export function notify(o) {
   return new Promise((resolve) => {
     queue.push({ ...o, resolve })
@@ -41,6 +42,7 @@ function next() {
   showing = o || null
   if (!o) return
   const host = document.getElementById('windows')
+  host.classList.toggle('top', !!o.top)           // text fields go where the keyboard cannot cover them
   const el = document.createElement('div')
   el.className = 'sw' + (o.big ? ' big' : '') + (o.tone ? ' tone-' + o.tone : '')
   el.setAttribute('role', 'status')

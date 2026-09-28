@@ -32,8 +32,6 @@
 <div class="art scan"></div>
 <div class="art vig"></div>
 
-<div style="height:150px;flex-shrink:0"></div>
-
 <div class="hud pl mono" id="hud">
   <i class="dot"></i>
   <button type="button" class="name" data-sheet="system">SYSTEM</button>
@@ -61,50 +59,9 @@
   <button type="button" id="cbclose" class="mono">DISMISS</button>
 </section>
 
-<!-- THE RECORD, above the list. you see what you built before what you owe. -->
-<section class="hex record pl">
-  <div class="rowhead">
-    <i class="bar"></i>
-    <h2 class="cond">THE RECORD</h2>
-    <span class="aside mono">18 weeks</span>
-  </div>
-  <div id="grid"></div>
-  <div class="stats mono">
-    <div><div class="n lit"><span id="week">0</span><small id="weekof">/7</small></div><div class="k">this week</div></div>
-    <div><div class="n" id="cleared">0</div><div class="k">gates</div></div>
-    <div><div class="n" id="rate">0%</div><div class="k">30&#8209;day</div></div>
-    <div class="push"><div class="n" id="life">0</div><div class="k">logged</div></div>
-  </div>
-</section>
-
-<!-- the week's Gate: a boss that dies on the 5th kept day -->
-<section class="hex gate pl" id="gate" data-sheet="shadows">
-  <div class="boss"><img id="bossimg" alt="" decoding="async"><i class="boss-fx"></i><span class="bossrank cond" id="bossrank">E</span></div>
-  <div class="gate-b">
-    <div class="rowhead">
-      <i class="bar"></i>
-      <h2 class="cond" id="gatek">GATE</h2>
-      <span class="aside mono" id="gatewhen"></span>
-    </div>
-    <div class="bossname cond" id="bossname">—</div>
-    <div class="hp" id="hp"></div>
-    <div class="strip mono" id="strip"></div>
-    <div class="gatenote mono" id="gatenote"></div>
-  </div>
-</section>
-
-<!-- the status window, as in the source -->
-<section class="hex pl" id="statsbox" data-sheet="status">
-  <div class="rowhead">
-    <i class="bar"></i>
-    <h2 class="cond">STATUS</h2>
-    <span class="aside mono">bar: 14&#8209;day</span>
-  </div>
-  <div class="idgrid mono" id="idgrid"></div>
-  <div class="nextrank mono" id="nextrank"></div>
-  <div id="stats" class="mono"></div>
-</section>
-
+<!-- TODAY FIRST. The plate above is what you built; the quests come next and
+     must be on screen the moment the app opens — v3 had them 60px below the
+     fold on a 390x844 phone. The Gate, the record and the status follow. -->
 <div class="qhead">
   <h2 class="cond">DAILY QUEST</h2>
   <span class="clock mono" id="clock">—</span>
@@ -123,6 +80,50 @@
     <span class="rule"></span>
   </div>
   <div id="latelist"></div>
+</section>
+
+<!-- the week's Gate: a boss that dies on the 5th kept day -->
+<section class="hex gate pl" id="gate" data-sheet="shadows">
+  <div class="boss"><img id="bossimg" alt="" decoding="async"><i class="boss-fx"></i><span class="bossrank cond" id="bossrank">E</span></div>
+  <div class="gate-b">
+    <div class="rowhead">
+      <i class="bar"></i>
+      <h2 class="cond" id="gatek">GATE</h2>
+      <span class="aside mono" id="gatewhen"></span>
+    </div>
+    <div class="bossname cond" id="bossname">—</div>
+    <div class="hp" id="hp"></div>
+    <div class="strip mono" id="strip"></div>
+    <div class="gatenote mono" id="gatenote"></div>
+  </div>
+</section>
+
+<!-- THE RECORD. the 18-week grid of everything kept. -->
+<section class="hex record pl">
+  <div class="rowhead">
+    <i class="bar"></i>
+    <h2 class="cond">THE RECORD</h2>
+    <span class="aside mono">18 weeks</span>
+  </div>
+  <div id="grid"></div>
+  <div class="stats mono">
+    <div><div class="n lit"><span id="week">0</span><small id="weekof">/7</small></div><div class="k">this week</div></div>
+    <div><div class="n" id="cleared">0</div><div class="k">gates</div></div>
+    <div><div class="n" id="rate">0%</div><div class="k">30&#8209;day</div></div>
+    <div class="push"><div class="n" id="life">0</div><div class="k">logged</div></div>
+  </div>
+</section>
+
+<!-- the status window, as in the source -->
+<section class="hex pl" id="statsbox" data-sheet="status">
+  <div class="rowhead">
+    <i class="bar"></i>
+    <h2 class="cond">STATUS</h2>
+    <span class="aside mono">bar: 14&#8209;day</span>
+  </div>
+  <div class="idgrid mono" id="idgrid"></div>
+  <div class="nextrank mono" id="nextrank"></div>
+  <div id="stats" class="mono"></div>
 </section>
 
 <section id="weekly" hidden>

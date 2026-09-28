@@ -82,7 +82,12 @@ Tests: `TZ=America/New_York node --test test/*.test.mjs`
       on the algorithm; rank measures you.
 - [ ] The v1 videos (sprint clip, Toji lifting, shadow aura) as card /
       ARISE backgrounds — only as files in the repo, only playing on screen.
-- [ ] Art files into the repo (eyes band, backdrop, figure, crest) — `art/eyes.jpg`, `art/backdrop.jpg`
+- [ ] Layout, part 2: shrink the Gate into a slim strip (boss name, HP, the
+      week's pips) that sits right above the quests, so the boss stays in view
+      without costing space. Bump the 8–9px labels up a size.
+- [ ] Art files into the repo (eyes band, backdrop, figure, crest) — `art/eyes.jpg`,
+      `art/backdrop.jpg`. The 150px space they had at the top was removed so the
+      quests fit on screen; give the art a place that doesn't push them down.
 
 ## Wants (raw, unsorted — write them here instead of building them)
 

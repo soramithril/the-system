@@ -1067,7 +1067,7 @@ function recordTest(k) {
     })
   }
   notify({
-    head: 'RANK TRIAL', title: t.name, sound: null,
+    head: 'RANK TRIAL', title: t.name, sound: null, top: true,
     sub: `<div class="recin"><input id="recv" type="text" inputmode="decimal" autocomplete="off" placeholder="${k === 'run10k' ? '52:30' : '0'}"><span>${esc(t.unit)}</span></div><div class="dim">${esc(t.how)}</div>`,
     actions: [
       { label: 'CANCEL' },
@@ -1087,7 +1087,7 @@ function recordTest(k) {
 function measure(log) {
   const imp = S.units !== 'metric'
   notify({
-    head: log ? 'WEEKLY QUEST' : 'RANK TRIAL', title: log ? 'Weigh-in' : 'Measure', sound: null,
+    head: log ? 'WEEKLY QUEST' : 'RANK TRIAL', title: log ? 'Weigh-in' : 'Measure', sound: null, top: true,
     sub: `<div class="meas">
         <label>WAIST <input id="mw" type="text" inputmode="decimal" autocomplete="off"><em>${imp ? 'in' : 'cm'}</em></label>
         <label>NECK <input id="mn" type="text" inputmode="decimal" autocomplete="off"><em>${imp ? 'in' : 'cm'}</em></label>
