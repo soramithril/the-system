@@ -157,6 +157,7 @@ export function derive(S, now = new Date()) {
   const formPrev = {}
   const titleKey = {}
   let week = null
+  let lastRec = null
   let cum = 0
   let ladder = 0
   let loggedDays = 0, keptTotal = 0, lifetime = 0, redCount = 0
@@ -203,19 +204,26 @@ export function derive(S, now = new Date()) {
     const raw = Array.isArray(log[key]) ? log[key] : []
     const has = (id) => raw.indexOf(id) !== -1
 
+    /* A queued quest is optional on the day its key arrives. That day can be
+       granted retroactively — a late report of Sunday clears last week's
+       Gate on Monday morning — and a quest that became required halfway
+       through a kept day would silently un-keep it. */
     const req = [], opt = [], wk = []
     for (const h of LIVE) {
       const g = grants[h.id]
       if (g == null || g > i) continue
       if (h.weekly) { wk.push(h); continue }
       if (h.days && h.days.indexOf(wd) === -1) continue
-      ;(h.optional ? opt : req).push(h)
+      ;(h.optional || (h.queue && g === i) ? opt : req).push(h)
     }
 
     const doneReq = req.filter((h) => has(h.id))
     const done = doneReq.concat(opt.filter((h) => has(h.id)), wk.filter((h) => has(h.id)))
     const kept = req.length > 0 && doneReq.length === req.length
-    const ret = done.length > 0 && has('__return')
+    /* the sentinel pays only while yesterday really is a miss — a late
+       report or a restored archive that fills yesterday in withdraws it, so
+       XP never depends on the order of taps */
+    const ret = done.length > 0 && has('__return') && !!lastRec && lastRec.req.length > 0 && !lastRec.kept
 
     let xp = done.reduce((s, h) => s + h.xp, 0)
     if (ret) { xp += RETURN_BONUS; returned = true }
@@ -230,12 +238,13 @@ export function derive(S, now = new Date()) {
     if (done.length) loggedDays++
     lifetime += done.length
 
-    /* stats only go up; skills count days, once per skill per day */
-    const skillToday = {}
+    /* stats only go up; stats and skills both count days, once each per day */
+    const skillToday = {}, statToday = {}
     for (const h of done) {
-      for (const s of h.stats || []) statCount[s] = (statCount[s] || 0) + 1
+      for (const s of h.stats || []) statToday[s] = 1
       if (h.skill) skillToday[h.skill] = 1
     }
+    for (const s in statToday) statCount[s] = (statCount[s] || 0) + 1
     for (const s in skillToday) skillDays[s] = (skillDays[s] || 0) + 1
 
     /* form: s += (1 - e^(-1/14)) * (100*done - s), required habits only,
@@ -265,6 +274,7 @@ export function derive(S, now = new Date()) {
       ret, xp, cum, st: null,
     }
     days[key] = rec
+    lastRec = rec
     week.days.push(rec)
 
     /* the Gate. The boss dies on the week's `need`th kept day (5 of 7: the

@@ -35,7 +35,9 @@ async function post(path, body) {
   return r.json().catch(() => ({}))
 }
 
-export async function enable(id, hour, date, open) {
+/* Resolves with the worker's token for this subscription. The app keeps it
+   in the save; every later call has to present it. */
+export async function enable(id, hour, date, open, token) {
   if (!configured()) throw new Error('The reminder server is not deployed yet.')
   if (!supported()) throw new Error('This browser cannot receive reminders.')
   const perm = await Notification.requestPermission()
@@ -43,27 +45,28 @@ export async function enable(id, hour, date, open) {
   const reg = await navigator.serviceWorker.ready
   let sub = await reg.pushManager.getSubscription()
   if (!sub) sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64u(VAPID) })
-  await post('/subscribe', { id, sub: sub.toJSON(), tz: tz(), hour, date, open })
+  const r = await post('/subscribe', { id, sub: sub.toJSON(), tz: tz(), hour, date, open, token })
+  return r.token || token
 }
 
-export async function disable(id) {
+export async function disable(id, token) {
   try {
     const reg = await navigator.serviceWorker.ready
     const sub = await reg.pushManager.getSubscription()
     if (sub) await sub.unsubscribe()
   } catch (_) {}
-  if (configured()) await post('/unsubscribe', { id }).catch(() => {})
+  if (configured()) await post('/unsubscribe', { id, token }).catch(() => {})
 }
 
 /* Debounced: a burst of taps is one request. */
 let t = 0, last = ''
-export function report(id, hour, date, open) {
-  if (!configured() || !id) return
+export function report(id, token, hour, date, open) {
+  if (!configured() || !id || !token) return
   const sig = [id, hour, date, open].join('|')
   if (sig === last) return
   clearTimeout(t)
   t = setTimeout(() => {
     last = sig
-    post('/state', { id, tz: tz(), hour, date, open }).catch(() => { last = '' })
+    post('/state', { id, token, tz: tz(), hour, date, open }).catch(() => { last = '' })
   }, 1500)
 }

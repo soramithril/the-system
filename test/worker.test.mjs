@@ -43,6 +43,8 @@ test('sends once, in the chosen local hour, only while a quest is open', async (
   const sub = { endpoint: 'https://push.example/abc', keys: { p256dh: E._p256dh, auth: Buffer.from(crypto.getRandomValues(new Uint8Array(16))).toString('base64url') } }
   let r = await post(E, '/subscribe', { id: 'user_123456', sub, tz: 'America/New_York', hour: 20, date: '2026-10-01', open: 2 })
   assert.equal(r.status, 200)
+  const { token } = await r.json()
+  assert.ok(token && token.length >= 16)
 
   await tick(E, new Date('2026-10-01T23:00:00Z'))          // 19:00 EDT — too early
   assert.equal(sent.length, 0)
@@ -54,7 +56,7 @@ test('sends once, in the chosen local hour, only while a quest is open', async (
   assert.equal(sent.length, 1)
 
   // next day, all done → silent
-  r = await post(E, '/state', { id: 'user_123456', date: '2026-10-02', open: 0 })
+  r = await post(E, '/state', { id: 'user_123456', token, date: '2026-10-02', open: 0 })
   assert.equal(r.status, 200)
   await tick(E, new Date('2026-10-03T00:00:00Z'))
   assert.equal(sent.length, 1)
@@ -67,6 +69,31 @@ test('sends once, in the chosen local hour, only while a quest is open', async (
   status = 410
   await tick(E, new Date('2026-10-05T00:00:00Z'))
   assert.equal(E.SUBS.m.size, 0)
+})
+
+test('only the token holder can change or delete a subscription; allowlist closes the door', async () => {
+  const E = await env()
+  const sub = { endpoint: 'https://push.example/abc', keys: { p256dh: E._p256dh, auth: 'AAAAAAAAAAAAAAAAAAAAAA' } }
+  const { token } = await (await post(E, '/subscribe', { id: 'user_123456', sub, tz: 'UTC', hour: 20 })).json()
+  assert.equal((await post(E, '/state', { id: 'user_123456', open: 0 })).status, 403)
+  assert.equal((await post(E, '/state', { id: 'user_123456', token: 'x'.repeat(32), open: 0 })).status, 403)
+  assert.equal((await post(E, '/unsubscribe', { id: 'user_123456' })).status, 403)
+  assert.equal((await post(E, '/subscribe', { id: 'user_123456', sub, tz: 'UTC', hour: 21 })).status, 403, 'no hijack without the token')
+  assert.equal((await post(E, '/subscribe', { id: 'user_123456', sub, tz: 'UTC', hour: 21, token })).status, 200)
+  assert.equal((await post(E, '/unsubscribe', { id: 'user_123456', token })).status, 200)
+  assert.equal(E.SUBS.m.size, 0)
+  E.ALLOWED_IDS = 'owner_abcdef'
+  assert.equal((await post(E, '/subscribe', { id: 'stranger_123', sub, tz: 'UTC', hour: 20 })).status, 403)
+  assert.equal((await post(E, '/subscribe', { id: 'owner_abcdef', sub, tz: 'UTC', hour: 20 })).status, 200)
+})
+
+test('a /state without a time zone keeps the stored one', async () => {
+  const E = await env()
+  globalThis.fetch = async () => new Response(null, { status: 201 })
+  const sub = { endpoint: 'https://push.example/abc', keys: { p256dh: E._p256dh, auth: 'AAAAAAAAAAAAAAAAAAAAAA' } }
+  const { token } = await (await post(E, '/subscribe', { id: 'user_123456', sub, tz: 'Asia/Tokyo', hour: 20 })).json()
+  await post(E, '/state', { id: 'user_123456', token, date: '2026-10-01', open: 1 })
+  assert.equal(JSON.parse(E.SUBS.m.get('sub:user_123456')).tz, 'Asia/Tokyo')
 })
 
 test('rejects junk', async () => {

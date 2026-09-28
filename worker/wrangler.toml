@@ -16,6 +16,8 @@ APP_URL = "https://soramithril.github.io/the-system/"
 ORIGIN = "https://soramithril.github.io"
 # a contact the push services can reach if the worker misbehaves
 VAPID_SUBJECT = "mailto:REPLACE_WITH_YOUR_EMAIL"
+# your uid (bottom of the app's SYSTEM menu). Set it and nobody else can subscribe.
+ALLOWED_IDS = ""
 
 # secrets (never in this file):
 #   wrangler secret put VAPID_PUBLIC

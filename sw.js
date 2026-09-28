@@ -11,7 +11,7 @@
    later with nothing in any log.
    ========================================================================= */
 
-const CACHE = 'system-v3-1'
+const CACHE = 'system-v3-2'
 const SHELL = [
   './',
   './index.html',
@@ -121,9 +121,8 @@ self.addEventListener('push', (e) => {
        Safari mishandles setAppBadge() with 0 or no argument, so clear
        explicitly instead of passing a falsy count. */
     try {
-      if (remaining && remaining > 0) await self.registration.navigator?.setAppBadge?.(remaining)
-      else if (self.navigator && self.navigator.setAppBadge && remaining && remaining > 0) await self.navigator.setAppBadge(remaining)
-      else if (self.navigator && self.navigator.clearAppBadge) await self.navigator.clearAppBadge()
+      if (remaining && remaining > 0) await self.navigator.setAppBadge?.(remaining)
+      else await self.navigator.clearAppBadge?.()
     } catch (_) { /* badging unsupported or denied — never let this throw */ }
   })())
 })

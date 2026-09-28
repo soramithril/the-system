@@ -234,3 +234,28 @@ test('grid: 18 calendar columns, today in the last one', () => {
   assert.equal(last.cells[3].st, 'future')
   assert.equal(dow(last.start), 1)
 })
+
+test('return bonus is withdrawn if yesterday gets filled in later (tap order never matters)', () => {
+  const y = addDays(MON, 1), t = addDays(MON, 2)
+  const base = { first: MON, log: { [MON]: ['bodyweight', 'vitamins'], [t]: ['vitamins', '__return'] } }
+  const missed = derive(base, at(t))
+  const filled = derive({ ...base, log: { ...base.log, [y]: ['bodyweight', 'vitamins'] } }, at(t))
+  const noSentinel = derive({ first: MON, log: { [MON]: ['bodyweight', 'vitamins'], [y]: ['bodyweight', 'vitamins'], [t]: ['vitamins'] } }, at(t))
+  assert.equal(missed.xp, 42 + 7 + 15)
+  assert.equal(filled.xp, noSentinel.xp)
+})
+
+test('a queued quest is optional on the day its key arrives, required from the next', () => {
+  const S = keepAll(MON, 23)
+  const d21 = derive(S, at(addDays(MON, 21)))
+  assert.ok(d21.opt.some((h) => h.id === 'protein'))
+  assert.ok(!d21.req.some((h) => h.id === 'protein'))
+  assert.equal(d21.today_.kept, true, 'a late grant cannot un-keep the day')
+  const d22 = derive(S, at(addDays(MON, 22)))
+  assert.ok(d22.req.some((h) => h.id === 'protein'))
+})
+
+test('stats count days, not quests: three STR quests in one day is +1', () => {
+  const M = derive({ first: MON, log: { [MON]: ['bodyweight', 'lift', 'beyond'] } }, at(MON))
+  assert.equal(M.stats.find((s) => s.key === 'STR').value, 11)
+})

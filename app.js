@@ -34,7 +34,7 @@ let S = blank()
 let loaded = false
 
 function blank() {
-  return { v: 3, log: {}, first: null, lastOpen: null, seen: [], name: '', title: '', equip: {}, ink: '', dq: '', rep: '', arch: '', push: null, _ts: 0 }
+  return { v: 3, log: {}, first: null, lastOpen: null, seen: [], name: '', title: '', equip: {}, dq: '', rep: '', arch: '', push: null, _ts: 0 }
 }
 
 const DAY = /^\d{4}-\d{2}-\d{2}$/
@@ -59,6 +59,7 @@ function adopt(r) {
     first: r.first || keys[0] || null,
     seen: Array.isArray(r.seen) ? r.seen.filter((x) => typeof x === 'string') : Object.values(r.seen || {}),
     equip: r.equip && typeof r.equip === 'object' ? r.equip : {},
+    ink: typeof r.ink === 'string' && r.ink.length >= 16 ? r.ink : undefined,
     _ts: r._ts || 0,
   }
 }
@@ -97,7 +98,7 @@ function offered(A, h, key) {
     return A.req.indexOf(h) !== -1 || A.opt.indexOf(h) !== -1 || A.wk.indexOf(h) !== -1
   }
   const r = A.days[key]
-  return !!r && (r.req.indexOf(h.id) !== -1 || (r.opt.indexOf(h.id) !== -1 && !h.beyond))
+  return !!r && (r.req.indexOf(h.id) !== -1 || r.wk.indexOf(h.id) !== -1 || (r.opt.indexOf(h.id) !== -1 && !h.beyond))
 }
 
 /* Toggle one quest on one day. `key` is today, or yesterday for a late
@@ -132,7 +133,13 @@ export function toggle(id, key, ctx = {}) {
     const y = A.days[addDays(key, -1)]
     if (y && y.req.length && !y.kept) day.push('__return')
   }
-  if (!day.some((x) => x[0] !== '_')) delete S.log[key]
+  /* an emptied day is dropped — unless it was the whole record. The rules
+     refuse a save with no log at all (the net under the design), so the
+     last day keeps a sentinel instead and the untick still gets written. */
+  if (!day.some((x) => x[0] !== '_')) {
+    if (Object.keys(S.log).length > 1) delete S.log[key]
+    else S.log[key] = ['__cleared']
+  }
 
   bump()
   const B = model()
@@ -141,6 +148,7 @@ export function toggle(id, key, ctx = {}) {
     const ev = diff(A, B, key)
     if (accepting) ev.push({ type: 'accepted' })
     moment(ev, { ...ctx, id, key, gain: B.xp - A.xp, late, req: !h.optional && !h.weekly })
+    lateKeys()
   } else {
     play('uncheck')
     haptic('light')
@@ -154,7 +162,7 @@ export function toggle(id, key, ctx = {}) {
    save carrying it has been written. */
 function applyInbox(k, v) {
   if (!loaded) return
-  if (!v || typeof v.q !== 'string' || typeof v.t !== 'number') { clearInbox(k); return }
+  if (!v || typeof v.q !== 'string' || typeof v.t !== 'number' || !S.ink || v.k !== S.ink) { clearInbox(k); return }
   const key = iso(new Date(v.t))
   const h = byId(v.q)
   const A = model()
@@ -169,6 +177,7 @@ function applyInbox(k, v) {
   const ev = diff(A, B, key)
   if (accepting) ev.push({ type: 'accepted' })
   moment(ev, { id: h.id, key, gain: B.xp - A.xp, remote: true, req: !h.optional && !h.weekly })
+  lateKeys()
   save()
   Promise.resolve(writing).then(() => clearInbox(k)).catch(() => {})
 }
@@ -349,6 +358,9 @@ function reassess(top, lines) {
    announced. */
 function opening() {
   const M = model()
+  const away = S.lastOpen ? diffDays(S.lastOpen, M.today) : 0
+  if (away >= 3) { awayAtOpen = away; cbDismissed = false }
+  S.lastOpen = M.today
   if (!M.started) {
     if (!seen('awaken')) awakening()
     return
@@ -383,6 +395,17 @@ function keyLines(M) {
   return out
 }
 const unsealing = new Set()
+
+/* a Gate cleared retroactively (late report, sticker) can hand over a key
+   after today's arrival window has already come and gone */
+function lateKeys() {
+  const M = model()
+  if (!M.started || S.dq !== M.today) return
+  const k = keyLines(M)
+  if (!k.length) return
+  notify({ title: LINES.key, lines: k.filter((l) => l !== LINES.key), sound: 'key', sub: 'Optional today. Required from tomorrow.' })
+  render()
+}
 
 function arrival(M) {
   const keys = keyLines(M)
@@ -702,7 +725,8 @@ function keyed(parent, items, make, update) {
 function cardView(M, h, key, done, dayIdx) {
   const parts = partsFor(h, dayIdx, key, M.rankIdx)
   const name = questName(h, key)
-  const tag = h.beyond ? 'HIDDEN QUEST' : h.lift ? "TODAY'S DUNGEON" : ''
+  const fresh = h.queue && !h.weekly && M.grants[h.id] === dayIdx
+  const tag = h.beyond ? 'HIDDEN QUEST' : h.lift ? "TODAY'S DUNGEON" : fresh ? 'UNSEALED TODAY · OPTIONAL' : ''
   const detail = h.lift ? 'optional · never costs the Gate' : h.beyond ? 'optional · +' + h.xp : h.detail || ''
   return {
     k: h.id + '@' + key, h, key, done, parts, name, tag,
@@ -818,6 +842,7 @@ function renderWeekly(M) {
       return el
     },
     (el, v) => {
+      el.dataset.day = M.today
       const n = M.cur.sessions[v.h.id] || 0
       const doneToday = got.indexOf(v.h.id) !== -1
       el.classList.toggle('done', doneToday)
@@ -848,7 +873,7 @@ function pushBadge() {
     if (navigator.setAppBadge) { n > 0 ? navigator.setAppBadge(n) : navigator.clearAppBadge() }
     navigator.serviceWorker?.controller?.postMessage({ type: 'badge', count: n })
   } catch (_) {}
-  if (S.push && S.push.on) push.report(currentUid(), S.push.hour, M.today, n)
+  if (S.push && S.push.on) push.report(currentUid(), S.push.token, S.push.hour, M.today, n)
 }
 
 /* ---------- sheets ---------------------------------------------------------- */
@@ -980,8 +1005,9 @@ function sheetSystem() {
     else if (id === 'remtoggle') {
       const hour = +(b.querySelector('#remhour') || {}).value || 20
       try {
-        if (S.push && S.push.on) { await push.disable(uid); S.push = { on: false, hour } }
-        else { await push.enable(uid, hour, M.today, M.req.length - M.today_.doneReq); S.push = { on: true, hour } }
+        const token = S.push && S.push.token
+        if (S.push && S.push.on) { await push.disable(uid, token); S.push = { on: false, hour } }
+        else S.push = { on: true, hour, token: await push.enable(uid, hour, M.today, M.req.length - M.today_.doneReq, token) }
         save()
         notify({ title: S.push.on ? 'Evening reminder on' : 'Evening reminder off', sound: null, hold: 2200 })
       } catch (err) { notify({ title: 'Reminder not set', sub: esc(err.message || String(err)), sound: null }) }
@@ -992,7 +1018,7 @@ function sheetSystem() {
   }))
   const sel = document.getElementById('remhour')
   if (sel) sel.addEventListener('change', () => {
-    if (S.push && S.push.on) { S.push.hour = +sel.value; save(); push.report(uid, S.push.hour, M.today, M.req.length - M.today_.doneReq) }
+    if (S.push && S.push.on) { S.push.hour = +sel.value; save(); push.report(uid, S.push.token, S.push.hour, M.today, M.req.length - M.today_.doneReq) }
   })
 }
 
@@ -1067,15 +1093,13 @@ async function start() {
   try {
     const remote = await connect()
     S = adopt(remote)
-    const today = iso(new Date())
-    awayAtOpen = S.lastOpen ? diffDays(S.lastOpen, today) : 0
     loaded = true
+    lastLevel = null                    // the real record is not a level-up
     bump()
     if (remote && remote.v !== 3) quietMigrate()
+    opening()
     render()
     syncNotifyUI()
-    S.lastOpen = today
-    opening()
     onInbox(applyInbox)
   } catch (e) {
     /* Do NOT fall through to an empty board. An unreadable record must look

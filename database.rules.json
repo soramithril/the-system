@@ -12,10 +12,10 @@
         ".read": "auth != null && auth.uid === $uid",
         ".write": "auth != null && auth.uid === $uid",
         "$entry": {
-          ".write": "!data.exists() && newData.exists() && root.child('saves').child($uid).child('ink').isString() && newData.child('k').val() === root.child('saves').child($uid).child('ink').val()",
+          ".write": "!data.exists() && newData.exists() && root.child('saves').child($uid).child('ink').isString() && root.child('saves').child($uid).child('ink').val().length >= 16 && newData.child('k').val() === root.child('saves').child($uid).child('ink').val()",
           ".validate": "newData.hasChildren(['q', 't', 'k'])",
           "q": { ".validate": "newData.isString() && newData.val().length <= 32" },
-          "t": { ".validate": "newData.isNumber() && newData.val() <= now + 60000" },
+          "t": { ".validate": "newData.isNumber() && newData.val() <= now + 60000 && newData.val() >= now - 300000" },
           "k": { ".validate": "newData.isString()" },
           "$other": { ".validate": false }
         }

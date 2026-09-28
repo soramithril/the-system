@@ -10,9 +10,16 @@
    Never more than one a day: `sent` records the local date of the last one.
 
    Routes (all POST, JSON):
-     /subscribe    { id, sub, tz, hour, date, open }
-     /state        { id, tz, hour, date, open }
-     /unsubscribe  { id }
+     /subscribe    { id, sub, tz, hour, date, open, token? }  → { token }
+     /state        { id, token, tz, hour, date, open }
+     /unsubscribe  { id, token }
+
+   AUTH. The worker URL is public (it sits in push.js), so:
+     - /subscribe hands back a random token, and every later call for that
+       id must carry it — nobody else can silence or delete your reminder.
+     - ALLOWED_IDS (a var, comma-separated uids) closes /subscribe to
+       everyone else, so strangers cannot fill the slots. Your uid is at the
+       bottom of the app's SYSTEM menu.
 
    Cron: hourly. Setup: worker/README.md.
    ========================================================================= */
@@ -38,7 +45,7 @@ const json = (env, body, status = 200) =>
 
 const DAY = /^\d{4}-\d{2}-\d{2}$/
 const validId = (id) => typeof id === 'string' && /^[A-Za-z0-9_-]{6,128}$/.test(id)
-const validTz = (tz) => { try { new Intl.DateTimeFormat('en-US', { timeZone: tz }); return true } catch (_) { return false } }
+const validTz = (tz) => { if (typeof tz !== 'string' || !tz) return false; try { new Intl.DateTimeFormat('en-US', { timeZone: tz }); return true } catch (_) { return false } }
 const validHour = (h) => Number.isInteger(h) && h >= 0 && h <= 23
 
 function localNow(tz, now = new Date()) {
@@ -57,8 +64,12 @@ export default {
     try { b = await req.json() } catch (_) { return json(env, { error: 'bad json' }, 400) }
     if (!b || !validId(b.id)) return json(env, { error: 'bad id' }, 400)
     const key = 'sub:' + b.id
+    const owns = (rec) => typeof b.token === 'string' && b.token.length >= 16 && rec.token === b.token
 
     if (path === '/unsubscribe') {
+      const raw = await env.SUBS.get(key)
+      if (!raw) return json(env, { ok: true })
+      if (!owns(JSON.parse(raw))) return json(env, { error: 'forbidden' }, 403)
       await env.SUBS.delete(key)
       return json(env, { ok: true })
     }
@@ -67,26 +78,32 @@ export default {
       const s = b.sub
       if (!s || typeof s.endpoint !== 'string' || !/^https:\/\//.test(s.endpoint) || !s.keys || !s.keys.p256dh || !s.keys.auth) return json(env, { error: 'bad subscription' }, 400)
       if (!validTz(b.tz) || !validHour(b.hour)) return json(env, { error: 'bad time' }, 400)
+      const allowed = (env.ALLOWED_IDS || '').split(',').map((x) => x.trim()).filter(Boolean)
+      if (allowed.length && allowed.indexOf(b.id) === -1) return json(env, { error: 'not allowed' }, 403)
       const existing = await env.SUBS.get(key)
+      if (existing && !owns(JSON.parse(existing))) return json(env, { error: 'forbidden' }, 403)
       if (!existing) {
         const n = (await env.SUBS.list({ prefix: 'sub:' })).keys.length
         if (n >= MAX_SUBS) return json(env, { error: 'full' }, 429)
       }
+      const token = existing ? b.token : crypto.randomUUID().replace(/-/g, '')
       const rec = {
+        token,
         sub: { endpoint: s.endpoint, keys: { p256dh: s.keys.p256dh, auth: s.keys.auth } },
         tz: b.tz, hour: b.hour,
         date: DAY.test(b.date) ? b.date : null,
         open: Number.isInteger(b.open) ? b.open : null,
-        sent: null,
+        sent: existing ? JSON.parse(existing).sent : null,
       }
       await env.SUBS.put(key, JSON.stringify(rec))
-      return json(env, { ok: true })
+      return json(env, { ok: true, token })
     }
 
     if (path === '/state') {
       const raw = await env.SUBS.get(key)
       if (!raw) return json(env, { ok: false, error: 'not subscribed' }, 404)
       const rec = JSON.parse(raw)
+      if (!owns(rec)) return json(env, { error: 'forbidden' }, 403)
       if (validTz(b.tz)) rec.tz = b.tz
       if (validHour(b.hour)) rec.hour = b.hour
       if (DAY.test(b.date)) rec.date = b.date
