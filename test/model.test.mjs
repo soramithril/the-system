@@ -8,7 +8,7 @@ import { derive, diff, addDays, boxFor, levelFromXp, skillLevel, partsFor, byId,
 
 const MON = '2026-09-28'   // a Monday — the planned day 1
 const SAT = '2026-10-03'
-const DAY = ['bodyweight', 'run', 'vitamins']   // day one's required cards: 20 + 15 + 7 xp
+const DAY = ['bodyweight', 'run', 'vitamins', 'japanese']   // day one's required cards: 20 + 15 + 7 + 38 xp
 const at = (key, h = 12) => new Date(`${key}T${String(h).padStart(2, '0')}:00:00`)
 
 /* every required quest that is due, for a model's day */
@@ -23,11 +23,13 @@ const keepAll = (first, days, extra = () => []) => {
   return S
 }
 
-test('day 0: three required cards; lifting only at the weekend', () => {
+test('day 0: four required cards, the rest tappable early; lifting only at the weekend', () => {
   const M = derive({ log: {}, first: null }, at(MON))
   assert.equal(M.started, false)
   assert.deepEqual(M.req.map((h) => h.id), DAY)
   assert.deepEqual(M.opt.map((h) => h.id), ['beyond'])
+  assert.deepEqual(M.early.map((h) => h.id), ['content', 'protein', 'listening'])
+  assert.deepEqual(M.wk.map((h) => h.id), ['upload'])
   assert.equal(M.dungeon, null)
   assert.equal(M.xp, 0)
   assert.equal(M.level, 1)
@@ -44,10 +46,10 @@ test('a kept day: xp, box, skills, stats, first titles', () => {
   const S = { first: MON, log: { [MON]: DAY } }
   const M = derive(S, at(MON))
   assert.equal(M.today_.kept, true)
-  assert.equal(M.xp, 42)
+  assert.equal(M.xp, 80)
   assert.equal(M.boxes.length, 1)
   const st = Object.fromEntries(M.stats.map((s) => [s.key, s.value]))
-  assert.deepEqual(st, { STR: 11, AGI: 11, VIT: 11 })
+  assert.deepEqual(st, { STR: 11, AGI: 11, VIT: 11, INT: 11 })
   assert.equal(M.skills.find((s) => s.name === 'Strength Training').level, 1)
   assert.equal(M.skills.find((s) => s.name === 'Sprint').level, 1)
   assert.deepEqual(M.earned.map((t) => t.id), ['awakened', 'unbroken'])
@@ -113,7 +115,7 @@ test('mid-week start: the first Gate needs fewer days', () => {
 test('fixed grants on day 7 and 14, then one earned grant per cleared week', () => {
   const S = keepAll(MON, 36)
   const M = derive(S, at(addDays(MON, 35)))
-  assert.equal(M.grants.japanese, 7)
+  assert.equal(M.grants.japanese, 0)
   assert.equal(M.grants.content, 14)
   // week of day 7-13 ends before day 14 → no grant; week 14-20 → protein on 21
   assert.equal(M.grants.protein, 21)
@@ -134,10 +136,10 @@ test('an uncleared week grants nothing; the next cleared one does', () => {
 test('sealed rows say what opens them', () => {
   const M = derive({ first: MON, log: {} }, at(addDays(MON, 3)))
   const why = Object.fromEntries(M.sealed.map((s) => [s.h.id, s.why]))
-  assert.equal(why.japanese, 'days')
+  assert.equal(why.content, 'days')
   assert.equal(why.protein, 'after')
   assert.equal(why.upload, 'queued')
-  assert.equal(M.sealed.find((s) => s.h.id === 'japanese').inDays, 4)
+  assert.equal(M.sealed.find((s) => s.h.id === 'content').inDays, 11)
 })
 
 test('weekly quest: a session pays xp, reaching the target pays the bonus once', () => {
@@ -248,7 +250,7 @@ test('body: US Navy tape formula; lean mass only counts when lean at the same ti
 test('return quest bonus is derived from the sentinel', () => {
   const S = { first: MON, log: { [MON]: DAY, [addDays(MON, 2)]: ['vitamins', '__return'] } }
   const M = derive(S, at(addDays(MON, 2)))
-  assert.equal(M.xp, 42 + 7 + 15)
+  assert.equal(M.xp, 80 + 7 + 15)
   assert.ok(M.earned.some((t) => t.id === 'returned'))
 })
 
@@ -307,7 +309,7 @@ test('return bonus is withdrawn if yesterday gets filled in later (tap order nev
   const missed = derive(base, at(t))
   const filled = derive({ ...base, log: { ...base.log, [y]: DAY } }, at(t))
   const noSentinel = derive({ first: MON, log: { [MON]: DAY, [y]: DAY, [t]: ['vitamins'] } }, at(t))
-  assert.equal(missed.xp, 42 + 7 + 15)
+  assert.equal(missed.xp, 80 + 7 + 15)
   assert.equal(filled.xp, noSentinel.xp)
 })
 
@@ -325,4 +327,14 @@ test('stats count days, not quests: three STR quests in one day is +1', () => {
   const M = derive({ first: SAT, log: { [SAT]: ['bodyweight', 'lift', 'beyond'] } }, at(SAT))
   assert.equal(M.stats.find((s) => s.key === 'STR').value, 11)
   assert.equal(M.stats.find((s) => s.key === 'AGI').value, 10, 'only the run feeds agility')
+})
+
+test('early quests: tappable before they are granted, pay xp, never cost the day', () => {
+  const S = { first: MON, log: { [MON]: DAY.concat(['content', 'protein']) } }
+  const M = derive(S, at(MON))
+  assert.equal(M.today_.kept, true)
+  assert.equal(M.xp, 80 + 40 + 15)
+  assert.ok(M.stats.some((s) => s.key === 'SEN'), 'a stat shows up once an early quest feeds it')
+  const skip = derive({ first: MON, log: { [MON]: DAY } }, at(MON))
+  assert.equal(skip.today_.kept, true, 'skipping early quests keeps the day')
 })

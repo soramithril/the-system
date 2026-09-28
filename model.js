@@ -286,17 +286,20 @@ export function derive(S, now = new Date()) {
        granted retroactively — a late report of Sunday clears last week's
        Gate on Monday morning — and a quest that became required halfway
        through a kept day would silently un-keep it. */
-    const req = [], opt = [], wk = []
+    /* Nothing is locked. A quest the System has not granted yet is EARLY:
+       tappable from day one, pays its XP and feeds its stat, but it is not
+       required — it cannot cost a day or a Gate until its key arrives. */
+    const req = [], opt = [], wk = [], early = []
     for (const h of LIVE) {
       const g = grants[h.id]
-      if (g == null || g > i) continue
       if (h.weekly) { wk.push(h); continue }
       if (h.days && h.days.indexOf(wd) === -1) continue
+      if (g == null || g > i) { early.push(h); continue }
       ;(h.optional || (h.queue && g === i) ? opt : req).push(h)
     }
 
     const doneReq = req.filter((h) => has(h.id))
-    const done = doneReq.concat(opt.filter((h) => has(h.id)), wk.filter((h) => has(h.id)))
+    const done = doneReq.concat(opt.filter((h) => has(h.id)), early.filter((h) => has(h.id)), wk.filter((h) => has(h.id)))
     const kept = req.length > 0 && doneReq.length === req.length
     /* the sentinel pays only while yesterday really is a miss — a late
        report or a restored archive that fills yesterday in withdraws it, so
@@ -361,7 +364,7 @@ export function derive(S, now = new Date()) {
 
     const rec = {
       key, i, wd,
-      req: req.map((h) => h.id), opt: opt.map((h) => h.id), wk: wk.map((h) => h.id),
+      req: req.map((h) => h.id), opt: opt.map((h) => h.id), wk: wk.map((h) => h.id), early: early.map((h) => h.id),
       done: done.map((h) => h.id), doneReq: doneReq.length,
       kept, frac: req.length ? doneReq.length / req.length : 0,
       ret, xp, cum, st: null,
@@ -469,7 +472,7 @@ export function derive(S, now = new Date()) {
 
   /* ---- stats: the number only goes up; the bar is 14-day form ---- */
   const stats = Object.keys(STATS)
-    .filter((k) => LIVE.some((h) => grantedNow(h) && (h.stats || []).indexOf(k) !== -1))
+    .filter((k) => statCount[k] > 0 || LIVE.some((h) => grantedNow(h) && (h.stats || []).indexOf(k) !== -1))
     .map((k) => {
       const feed = LIVE.filter((h) => grantedNow(h) && !h.optional && !h.weekly && (h.stats || []).indexOf(k) !== -1)
       const f = feed.filter((h) => form[h.id] != null).map((h) => form[h.id])
@@ -484,7 +487,7 @@ export function derive(S, now = new Date()) {
 
   /* ---- skills ---- */
   const skillNames = []
-  for (const h of LIVE) if (h.skill && grantedNow(h) && skillNames.indexOf(h.skill) === -1) skillNames.push(h.skill)
+  for (const h of LIVE) if (h.skill && (grantedNow(h) || skillDays[h.skill] > 0) && skillNames.indexOf(h.skill) === -1) skillNames.push(h.skill)
   const skills = skillNames.map((name) => ({ name, days: skillDays[name] || 0, ...skillLevel(skillDays[name] || 0) }))
 
   /* ---- titles ---- */
@@ -590,7 +593,7 @@ export function derive(S, now = new Date()) {
     xp: cum, level: L.level, into: L.into, need: L.need, rankIdx: ri, rank: RANKS[ri].r, dtl, next, best,
     grants, sealed, sliding,
     today_: T,
-    req: pick(T.req), opt: pick(T.opt), wk: pick(T.wk),
+    req: pick(T.req), opt: pick(T.opt), wk: pick(T.wk), early: pick(T.early),
     stats, skills, titles, earned, latest,
     kills, shadows, redCount, gates: kills.length,
     boxes, inv,

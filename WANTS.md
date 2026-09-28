@@ -59,8 +59,10 @@ full-screen animations, no leaderboards).
   push-ups, 10 km time, body fat by tape). S-rank is the body goal: ~10% body
   fat, lean mass ≥ 70 kg at the same time, a sub-50 10 km, and the source's
   100/100/100 + 10 km in one day.
-- **Quests:** the sealed queue, earned grants after day 14 (one per cleared
-  Gate), the weekly upload quest.
+- **Quests:** nothing is locked — every quest is tappable from day 1 and pays
+  XP. Japanese is required from day 1; the rest are "not required yet" until
+  the System grants them (content on day 15, then one per cleared Gate), so
+  skipping them never costs a day. The weekly upload quest.
 - **The Gate:** a boss every Monday that dies on the 5th kept day, ARISE and
   the Shadow Army with its 13-rung ladder, Red Gate on 7 of 7, the Monday
   report.

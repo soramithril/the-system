@@ -102,10 +102,10 @@ const lateOpen = (key, now = new Date()) =>
 function offered(A, h, key) {
   if (key === A.today) {
     if (h.beyond) return A.opt.indexOf(h) !== -1 && ((S.log[key] || []).indexOf(h.id) !== -1 || (S.log[key] || []).indexOf('bodyweight') !== -1)
-    return A.req.indexOf(h) !== -1 || A.opt.indexOf(h) !== -1 || A.wk.indexOf(h) !== -1
+    return A.req.indexOf(h) !== -1 || A.opt.indexOf(h) !== -1 || A.early.indexOf(h) !== -1 || A.wk.indexOf(h) !== -1
   }
   const r = A.days[key]
-  return !!r && (r.req.indexOf(h.id) !== -1 || r.wk.indexOf(h.id) !== -1 || (r.opt.indexOf(h.id) !== -1 && !h.beyond))
+  return !!r && (r.req.indexOf(h.id) !== -1 || r.wk.indexOf(h.id) !== -1 || r.early.indexOf(h.id) !== -1 || (r.opt.indexOf(h.id) !== -1 && !h.beyond))
 }
 
 /* Toggle one quest on one day. `key` is today, or yesterday for a late
@@ -811,7 +811,8 @@ function cardView(M, h, key, done, dayIdx) {
   const parts = partsFor(h, rec ? rec.runKm : 0, M.rankIdx)
   const name = questName(h, key)
   const fresh = h.queue && !h.weekly && M.grants[h.id] === dayIdx
-  const tag = h.beyond ? 'HIDDEN QUEST' : h.lift ? "TODAY'S DUNGEON" : fresh ? 'UNSEALED TODAY · OPTIONAL' : ''
+  const early = rec && rec.early.indexOf(h.id) !== -1
+  const tag = h.beyond ? 'HIDDEN QUEST' : h.lift ? "TODAY'S DUNGEON" : early ? earlyTag(M, h) : fresh ? 'UNSEALED TODAY · OPTIONAL' : ''
   const detail = h.lift ? 'optional · never costs the Gate' : h.beyond ? 'optional · +' + h.xp : h.detail || ''
   return {
     k: h.id + '@' + key, h, key, done, parts, name, tag,
@@ -823,10 +824,19 @@ function cardView(M, h, key, done, dayIdx) {
   }
 }
 
+/* what the System still wants before this quest becomes required */
+function earlyTag(M, h) {
+  const s = M.sealed.find((x) => x.h === h)
+  if (!s) return 'NOT REQUIRED YET'
+  if (s.why === 'days') return `NOT REQUIRED YET · FROM ${s.inDays === 1 ? 'TOMORROW' : 'DAY ' + (M.dayIdx + s.inDays + 1)}`
+  if (s.why === 'monday') return 'NOT REQUIRED YET · FROM MONDAY'
+  return 'NOT REQUIRED YET · A GATE UNLOCKS IT'
+}
+
 function cardMake(v) {
   const el = document.createElement('button')
   el.type = 'button'
-  el.className = 'q' + (v.h.optional ? ' opt' : '') + (v.h.lift ? ' lift' : '') + (v.h.beyond ? ' beyond' : '') + (v.h.run ? ' run' : '')
+  el.className = 'q' + (v.h.optional || v.tag.indexOf('NOT REQUIRED') === 0 ? ' opt' : '') + (v.h.lift ? ' lift' : '') + (v.h.beyond ? ' beyond' : '') + (v.h.run ? ' run' : '')
   el.dataset.id = v.h.id
   el.dataset.day = v.key
   el.innerHTML = `<i class="tick t"></i><i class="tick b"></i>
@@ -861,32 +871,16 @@ function cardUpdate(el, v) {
   el.querySelector('.qx').textContent = (v.done ? '+' : '') + v.xp
 }
 
-const WHY = {
-  days: (s) => `sealed &#183; the System grants this in ${s.inDays} day${s.inDays === 1 ? '' : 's'}`,
-  after: (s) => `sealed &#183; from day ${s.day}, each cleared Gate unseals one`,
-  gate: () => 'sealed &#183; clear this week&#8217;s Gate to unseal',
-  monday: () => 'sealed &#183; the Gate is cleared &#8212; unseals Monday',
-  queued: () => 'sealed',
-}
-
 function renderQuests(M) {
   const key = M.today
   const got = S.log[key] || []
   const cards = M.req.map((h) => cardView(M, h, key, got.indexOf(h.id) !== -1, M.dayIdx))
+  for (const h of M.early) cards.push(cardView(M, h, key, got.indexOf(h.id) !== -1, M.dayIdx))
   for (const h of M.opt) {
     if (h.beyond && got.indexOf('bodyweight') === -1 && got.indexOf(h.id) === -1) continue
     cards.push(cardView(M, h, key, got.indexOf(h.id) !== -1, M.dayIdx))
   }
-  const sealed = M.sealed.map((s) => ({ k: 'sealed-' + s.h.id, sig: s.why + (s.inDays || '') + (s.day || ''), s }))
-  keyed($('#list'), cards.concat(sealed),
-    (v) => {
-      if (!v.s) return cardMake(v)
-      const el = document.createElement('div')
-      el.className = 'q locked'
-      el.innerHTML = `<span class="keyhole"><i></i></span><span class="qt"><b>${esc(questName(v.s.h, key))}</b><em>${WHY[v.s.why](v.s)}</em></span>`
-      return el
-    },
-    (el, v) => { if (!v.s) cardUpdate(el, v) })
+  keyed($('#list'), cards, cardMake, cardUpdate)
 
   const doneN = M.today_.doneReq
   $('#count').textContent = `${doneN}/${M.req.length}`
@@ -904,7 +898,7 @@ function renderLate(M, now) {
   if (!open || !lateSeenThisSession) { box.hidden = true; $('#latelist').innerHTML = ''; return }
   box.hidden = false
   const got = S.log[y] || []
-  const hs = rec.req.concat(rec.opt.filter((id) => !byId(id).beyond)).map(byId)
+  const hs = rec.req.concat(rec.early, rec.opt.filter((id) => !byId(id).beyond)).map(byId)
   keyed($('#latelist'), hs.map((h) => {
     const v = cardView(M, h, y, got.indexOf(h.id) !== -1, rec.i)
     v.cue = ''

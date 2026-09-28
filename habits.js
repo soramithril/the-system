@@ -106,7 +106,7 @@ export const HABITS = [
     detail: '15 minutes minimum',
     stats: ['INT'],
     skill: 'Japanese',
-    unlock: 7,
+    unlock: 0,
     xp: 38,
   },
   {

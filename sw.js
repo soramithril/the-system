@@ -11,7 +11,7 @@
    later with nothing in any log.
    ========================================================================= */
 
-const CACHE = 'system-v3-3'
+const CACHE = 'system-v3-4'
 const SHELL = [
   './',
   './index.html',
