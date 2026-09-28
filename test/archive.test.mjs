@@ -23,6 +23,16 @@ test('merge is a union: every day from both, earliest first day, current setting
   assert.ok(m.seen.includes('awaken') && m.seen.includes('title:awakened'))
 })
 
+test('merge keeps run km, trial results and tape measurements from both', () => {
+  const a = { ...cur, km: { '2026-10-05': 3 }, tests: { pushups: [{ v: 30, d: '2026-10-05' }] }, body: [{ d: '2026-10-05', waist: 105, neck: 42, weight: 92 }] }
+  const b = { ...old, km: { '2026-10-05': 2.5, '2026-09-28': 1.4 }, tests: { pushups: [{ v: 30, d: '2026-10-05' }, { v: 22, d: '2026-09-28' }], runkm: [{ v: 1.2, d: '2026-09-28' }] }, body: [{ d: '2026-09-28', waist: 107, neck: 42, weight: 93 }] }
+  const m = mergeSaves(a, b)
+  assert.deepEqual(m.km, { '2026-10-05': 3, '2026-09-28': 1.4 })
+  assert.equal(m.tests.pushups.length, 2)
+  assert.equal(m.tests.runkm.length, 1)
+  assert.equal(m.body.length, 2)
+})
+
 test('rejects files that are not a record', () => {
   assert.throws(() => parseArchive('{"hello":1}'))
   assert.throws(() => parseArchive('{"log":{"nope":["x"]}}'))

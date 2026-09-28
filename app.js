@@ -14,9 +14,9 @@
    progress.
    ========================================================================= */
 
-import { HABITS, STATS, RANKS, LINES, PERMITS, JOB_LEVEL } from './habits.js'
+import { HABITS, STATS, RANKS, LINES, PERMITS, JOB_LEVEL, TESTS, BODY } from './habits.js'
 import { BOSSES, ITEMS, RARITY } from './lore.js'
-import { derive, diff, byId, partsFor, questName, iso, addDays, diffDays, gradeOf } from './model.js'
+import { derive, diff, byId, partsFor, questName, iso, addDays, diffDays, gradeOf, navyBf, round1 } from './model.js'
 import { haptic, animateNumber, sparks, floatUp, pulse, riseFrom, reduceMotion } from './fx.js'
 import { play } from './sfx.js'
 import { notify, dismiss, openSheet, closeSheet, sheetOpen, esc } from './ui.js'
@@ -34,8 +34,11 @@ let S = blank()
 let loaded = false
 
 function blank() {
-  return { v: 3, log: {}, first: null, lastOpen: null, seen: [], name: '', title: '', equip: {}, dq: '', rep: '', arch: '', push: null, _ts: 0 }
+  return { v: 3, log: {}, first: null, lastOpen: null, seen: [], name: '', title: '', equip: {}, km: {}, tests: {}, body: [], dq: '', rep: '', arch: '', push: null, _ts: 0 }
 }
+
+const listOf = (x) => (Array.isArray(x) ? x : x && typeof x === 'object' ? Object.values(x) : [])
+const num = (x, lo, hi) => typeof x === 'number' && isFinite(x) && x > lo && x <= hi
 
 const DAY = /^\d{4}-\d{2}-\d{2}$/
 /* Accepts whatever came back and fills in anything missing, so a partial or
@@ -60,6 +63,10 @@ function adopt(r) {
     seen: Array.isArray(r.seen) ? r.seen.filter((x) => typeof x === 'string') : Object.values(r.seen || {}),
     equip: r.equip && typeof r.equip === 'object' ? r.equip : {},
     ink: typeof r.ink === 'string' && r.ink.length >= 16 ? r.ink : undefined,
+    km: Object.fromEntries(Object.entries(r.km && typeof r.km === 'object' ? r.km : {}).filter(([k, v]) => DAY.test(k) && num(v, 0, 100))),
+    tests: Object.fromEntries(Object.entries(r.tests && typeof r.tests === 'object' ? r.tests : {})
+      .map(([t, l]) => [t, listOf(l).filter((e) => e && num(e.v, 0, 10000) && DAY.test(e.d))])),
+    body: listOf(r.body).filter((m) => m && DAY.test(m.d) && num(m.waist, 20, 250) && num(m.neck, 10, 100)),
     _ts: r._ts || 0,
   }
 }
@@ -124,6 +131,9 @@ export function toggle(id, key, ctx = {}) {
   const adding = at === -1
   if (adding) day.push(id)
   else day.splice(at, 1)
+  /* unticking the run takes its +KM entry with it, unless +KM itself is
+     lowering the distance below the target */
+  if (!adding && h.run && S.km && S.km[key] != null && !ctx.keepKm) { S.km = { ...S.km }; delete S.km[key] }
 
   /* THE RETURN QUEST. First completion of the day, after a day with a
      scheduled miss: bonus XP and a System line. The comeback micro-reward —
@@ -154,6 +164,62 @@ export function toggle(id, key, ctx = {}) {
     haptic('light')
   }
   save()
+}
+
+/* ---------- +KM: the distance you actually ran ------------------------------
+   The run card's tick logs today's target. +KM logs the real number. At or
+   over the target it ticks the quest; under it, the km still count toward the
+   week (so the plan knows) but the quest stays open. Next Monday the plan
+   rises to meet a week you ran ahead — see RUN in habits.js. */
+function setKm(key, v) {
+  if (!loaded) return
+  const today = iso(new Date())
+  if (key !== today && !lateOpen(key)) return
+  const A = model()
+  const rec = A.days[key]
+  const run = HABITS.find((h) => h.run)
+  if (!rec || !run || !offered(A, run, key)) return
+  v = round1(Math.max(0, Math.min(100, v)))
+  const target = rec.runKm
+  S.km = { ...(S.km || {}) }
+  if (v > 0 && v !== target) S.km[key] = v
+  else delete S.km[key]
+  const logged = (S.log[key] || []).indexOf(run.id) !== -1
+  const line = v > target ? `Ran ${v.toFixed(1)} km · ${round1(v - target).toFixed(1)} over the plan` : ''
+  if (v >= target && v > 0 && !logged) return toggle(run.id, key, { el: cardEl(run.id, key), line, sub: line ? 'Next week’s target follows what you actually run, up to 10% more.' : '' })
+  if ((v < target || v === 0) && logged) return toggle(run.id, key, { keepKm: true })
+  bump()
+  render()
+  if (line) notify({ title: line, sub: 'Next week’s target follows what you actually run, up to 10% more.', sound: 'check', hold: 3200 })
+  save()
+}
+
+const cardEl = (id, key) => document.querySelector(`.q[data-id="${id}"][data-day="${key}"]`)
+
+function openKm(key) {
+  const M = model()
+  const rec = M.days[key]
+  if (!rec) return
+  let v = S.km && S.km[key] != null ? S.km[key] : rec.runKm
+  notify({
+    head: 'QUEST INFO', title: 'Distance run', sound: null,
+    sub: `<div class="kmstep"><button type="button" data-d="-1">&#8722;1</button><button type="button" data-d="-0.1">&#8722;.1</button>
+      <b class="kmv">${v.toFixed(1)}</b><span>km</span>
+      <button type="button" data-d="0.1">+.1</button><button type="button" data-d="1">+1</button></div>
+      <div class="dim">Target ${rec.runKm.toFixed(1)} km${key !== M.today ? ' &#183; yesterday' : ''}. Run further and next week&#8217;s target rises to meet you &#8212; never more than 10% over what you ran.</div>`,
+    actions: [
+      { label: 'CANCEL' },
+      { label: 'SAVE', primary: true, onClick: () => { setKm(key, v) } },
+    ],
+    onShow: (el) => {
+      const out = el.querySelector('.kmv')
+      el.querySelectorAll('.kmstep button').forEach((b) => b.addEventListener('click', (e) => {
+        e.stopPropagation()
+        v = round1(Math.max(0, Math.min(100, v + +b.dataset.d)))
+        out.textContent = v.toFixed(1)
+      }))
+    },
+  })
 }
 
 /* ---------- the inbox: Shortcut / NFC taps -----------------------------------
@@ -238,8 +304,14 @@ function moment(evs, ctx = {}) {
   if (kept) flare(kept.key)
   const top = evs[0]
   buzzOk = !!(ctx.el || ctx.ev)          // haptics answer a thumb, never a background event
-  if (!top) { play('check'); buzz('light'); return }
+  if (!top) {
+    play('check')
+    buzz('light')
+    if (ctx.line) notify({ title: ctx.line, sub: ctx.sub ? esc(ctx.sub) : '', sound: null, hold: 3200 })
+    return
+  }
   let lines = evs.slice(1).map(lineFor).filter(Boolean)
+  if (ctx.line) lines.unshift(ctx.line)
   if (lines.length > 5) lines = lines.slice(0, 4).concat([`+${lines.length - 4} more`])
   bigEffect(top, lines, ctx)
 }
@@ -409,8 +481,15 @@ function lateKeys() {
 
 function arrival(M) {
   const keys = keyLines(M)
+  /* the run plan's weekly move, said once, on the Monday it happens */
+  if (M.today === M.cur.start && M.weeks.length > 1) {
+    const L = M.run.L.toFixed(1)
+    if (M.run.why === 'ahead') keys.push(`Run target raised to ${L} km — you ran ahead`)
+    else if (M.run.why === 'hold') keys.push(`Run target held at ${L} km — a lighter week, so no increase`)
+    else keys.push(`Run target: ${L} km (+5%)`)
+  }
   const goals = M.req.map((h) => {
-    const parts = partsFor(h, M.dayIdx, M.today, M.rankIdx)
+    const parts = partsFor(h, M.run.km, M.rankIdx)
     if (!parts.length) return `<div class="goal"><b>${esc(h.name)}</b></div>`
     return `<div class="goal"><b>${esc(h.name)}</b>${parts.map((p) => `<span>${esc(p.label)} [0/${fmtN(p)}]</span>`).join('')}</div>`
   }).join('')
@@ -454,6 +533,7 @@ function mondayReport(M) {
     sub: `<div class="rep">
       <span>KEPT</span><b>${r.kept}/${r.avail} &#183; ${r.permitsUsed} permit${r.permitsUsed === 1 ? '' : 's'}</b>
       <span>BOSS</span><b>${boss}</b>
+      <span>RUN</span><b>${r.run.ran.toFixed(1)} of ${r.run.plan.toFixed(1)} km</b>
       <span>XP</span><b>+${r.xp}</b>
       <span>LEVEL</span><b>${r.levelFrom === r.levelTo ? r.levelTo : r.levelFrom + ' &#8594; ' + r.levelTo}</b>
       <span>RANK</span><b>${r.rankFrom === r.rankTo ? RANKS[r.rankTo].r : RANKS[r.rankFrom].r + ' &#8594; ' + RANKS[r.rankTo].r}</b>
@@ -475,6 +555,7 @@ function reportText(M) {
     `THE SYSTEM — week of ${d}`,
     `Gate: ${r.red ? 'RED GATE (7 of 7)' : r.cleared ? 'cleared' : 'not cleared'} — ${r.kept} of ${r.avail} kept, ${r.permitsUsed} rest permit${r.permitsUsed === 1 ? '' : 's'}`,
     `Boss: ${r.boss.name}${r.kill ? ` — risen as ${r.boss.shadow}` : ' — escaped'}`,
+    `Run: ${r.run.ran.toFixed(1)} of ${r.run.plan.toFixed(1)} km`,
     `XP +${r.xp} · Level ${r.levelTo} · ${RANKS[r.rankTo].r}-rank`,
   ].join('\n')
 }
@@ -686,6 +767,9 @@ function renderStatus(M) {
     <span>JOB</span><b>${esc(job)}</b>
     <span>TITLE</span><b>${t ? esc(t.name) : '—'}</b>
     <span>LEVEL</span><b>${M.level}</b>`
+  const nx = M.next
+  $('#nextrank').innerHTML = !nx ? 'RANK S &#183; the Association has nothing left to measure'
+    : `NEXT RANK <b>${nx.r}</b> &#183; XP ${nx.xpOk ? '<i class="ok">&#10003;</i>' : `${M.xp}/${nx.at}`} &#183; trials <span class="${nx.passed === nx.trials.length ? 'ok' : ''}">${nx.passed}/${nx.trials.length}</span>`
   const box = $('#stats')
   if (box.children.length !== M.stats.length || box.dataset.sig !== M.stats.map((s) => s.key).join()) {
     box.innerHTML = M.stats.map((s) => `<div class="stat" data-s="${s.key}"><b>${s.key}</b><u></u><span class="bar"><span></span></span><i></i></div>`).join('')
@@ -723,7 +807,8 @@ function keyed(parent, items, make, update) {
 }
 
 function cardView(M, h, key, done, dayIdx) {
-  const parts = partsFor(h, dayIdx, key, M.rankIdx)
+  const rec = M.days[key]
+  const parts = partsFor(h, rec ? rec.runKm : 0, M.rankIdx)
   const name = questName(h, key)
   const fresh = h.queue && !h.weekly && M.grants[h.id] === dayIdx
   const tag = h.beyond ? 'HIDDEN QUEST' : h.lift ? "TODAY'S DUNGEON" : fresh ? 'UNSEALED TODAY · OPTIONAL' : ''
@@ -733,6 +818,7 @@ function cardView(M, h, key, done, dayIdx) {
     detail: h.beyond ? '' : detail,
     cue: !done && h.cue && M.sliding[h.id] ? h.cue : '',
     xp: h.xp,
+    ran: h.run && rec && S.km && S.km[key] != null ? S.km[key] : null,
     sig: [h.id, key, name, tag, detail, parts.map((p) => p.label + fmtN(p)).join(',')].join('|'),
   }
 }
@@ -740,7 +826,7 @@ function cardView(M, h, key, done, dayIdx) {
 function cardMake(v) {
   const el = document.createElement('button')
   el.type = 'button'
-  el.className = 'q' + (v.h.optional ? ' opt' : '') + (v.h.lift ? ' lift' : '') + (v.h.beyond ? ' beyond' : '')
+  el.className = 'q' + (v.h.optional ? ' opt' : '') + (v.h.lift ? ' lift' : '') + (v.h.beyond ? ' beyond' : '') + (v.h.run ? ' run' : '')
   el.dataset.id = v.h.id
   el.dataset.day = v.key
   el.innerHTML = `<i class="tick t"></i><i class="tick b"></i>
@@ -753,6 +839,7 @@ function cardMake(v) {
         ? `<span class="parts mono">${v.parts.map((p) => `<span class="pt${p.short ? ' short' : ''}"><em>${esc(p.label)}</em><s></s></span>`).join('')}</span>`
         : v.detail ? `<em class="det">${esc(v.detail)}</em>` : ''}
     </span>
+    ${v.h.run ? '<span class="kmbtn mono" role="button" data-km="1">+KM</span>' : ''}
     <u class="qx mono"></u>
     <i class="sweep"></i>`
   if (unsealing.has(v.h.id)) { unsealing.delete(v.h.id); pulse(el, 'unseal', 1200) }
@@ -767,7 +854,9 @@ function cardUpdate(el, v) {
   el.querySelectorAll('.parts s').forEach((s, i) => {
     const p = v.parts[i]
     const n = p.unit === 'km' ? p.n.toFixed(1) : p.n
-    s.textContent = `[${v.done ? n : 0}/${n}${p.unit ? ' ' + p.unit : ''}]`
+    const got = p.run && v.ran != null ? v.ran.toFixed(1) : v.done ? n : 0
+    s.textContent = `[${got}/${n}${p.unit ? ' ' + p.unit : ''}]`
+    s.classList.toggle('over', p.run && v.ran != null && v.ran > p.n)
   })
   el.querySelector('.qx').textContent = (v.done ? '+' : '') + v.xp
 }
@@ -889,6 +978,19 @@ function sheetStatus() {
   const titles = M.titles.map((x) => x.key
     ? `<button type="button" class="trow${t && t.id === x.id ? ' on' : ''}" data-title="${x.id}"><b>${esc(x.name)}</b><em>${esc(x.how)}</em><span>${t && t.id === x.id ? 'EQUIPPED' : 'EQUIP'}</span></button>`
     : `<div class="trow off"><b>[???]</b><em>${esc(x.how)}</em></div>`).join('')
+  const nx = M.next
+  const trialRow = (tr) => `<div class="trial${tr.pass ? ' pass' : ''}">
+      <i>${tr.pass ? '&#10003;' : ''}</i><b>${esc(tr.name)}</b>
+      <span>${tr.best == null ? '&#8212;' : fmtTest(tr.test, tr.best)} / ${tr.better === 'done' ? 'done' : fmtTest(tr.test, tr.target)}${tr.better === 'less' ? ' or under' : ''}</span>
+      <button type="button" ${TESTS[tr.test].body ? 'data-measure="1"' : `data-rec="${tr.test}"`}>${TESTS[tr.test].body ? 'MEASURE' : 'RECORD'}</button>
+    </div>`
+  const trials = !nx ? '<p class="note mono">S-rank. The Association has nothing left to measure.</p>'
+    : `<div class="trials mono">
+        <div class="trial${nx.xpOk ? ' pass' : ''}"><i>${nx.xpOk ? '&#10003;' : ''}</i><b>Experience</b><span>${M.xp} / ${nx.at} xp</span></div>
+        ${nx.trials.map(trialRow).join('')}
+      </div>
+      <p class="note mono">Rank ${esc(nx.r)} needs its XP and every trial. Records keep their best, and a passed rank is never lost.</p>`
+  const records = Object.keys(TESTS).map((k) => `<div class="srow"><span>${esc(TESTS[k].name)}</span><u>${M.best[k] == null ? '&#8212;' : fmtTest(k, M.best[k])}</u></div>`).join('')
   openSheet('STATUS', `
     <div class="idgrid big mono">
       <span>NAME</span><b><input id="pname" maxlength="18" value="${esc(S.name || '')}" placeholder="Player" autocomplete="off"></b>
@@ -896,6 +998,9 @@ function sheetStatus() {
       <span>TITLE</span><b>${t ? esc(t.name) : '—'}</b>
       <span>LEVEL</span><b>${M.level} &#183; ${M.rank}&#8209;rank &#183; ${M.xp} xp</b>
     </div>
+    <h3 class="cond">RANK TRIALS${nx ? ' &#183; ' + esc(RANKS[nx.idx - 1].r) + ' &#8594; ' + esc(nx.r) : ''}</h3>${trials}
+    <h3 class="cond">RECORDS</h3><div class="records mono">${records}</div>
+    <button type="button" data-measure="1">MEASURE BODY</button>
     <h3 class="cond">STATS</h3><div class="sgrid mono">${stats}</div>
     <p class="note mono">Each is 10, plus one for every day you logged a quest that feeds it. They only go up. The bar on the main screen is the honest part: 14&#8209;day form.</p>
     <h3 class="cond">SKILLS</h3><div class="mono">${skills || '<p class="note">No skills yet.</p>'}</div>
@@ -904,6 +1009,8 @@ function sheetStatus() {
     const inp = b.querySelector('#pname')
     inp.addEventListener('change', () => { S.name = inp.value.trim().slice(0, 18); save(); render() })
     b.addEventListener('click', (e) => {
+      if (e.target.closest('[data-rec]')) return recordTest(e.target.closest('[data-rec]').dataset.rec)
+      if (e.target.closest('[data-measure]')) return measure()
       const tb = e.target.closest('[data-title]')
       if (!tb) return
       S.title = tb.dataset.title
@@ -912,6 +1019,121 @@ function sheetStatus() {
       sheetStatus()
     })
   })
+}
+
+/* ---------- rank trials: what you record, and how -------------------------- */
+function fmtTest(k, v) {
+  const t = TESTS[k]
+  if (t.better === 'done') return v ? 'done' : '&#8212;'
+  if (k === 'run10k') { const sec = Math.round(v * 60); return `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}` }
+  const n = t.unit === 'reps' ? Math.round(v) : round1(v).toFixed(1)
+  return n + (t.unit === '%' ? '%' : t.unit ? ' ' + t.unit : '')
+}
+
+/* "52:30" or "52.5" for a time; a plain number otherwise */
+function parseTest(k, s) {
+  s = String(s || '').trim()
+  if (k === 'run10k' && s.indexOf(':') !== -1) {
+    const [m, sec] = s.split(':').map(Number)
+    return m + (sec || 0) / 60
+  }
+  return parseFloat(s.replace(',', '.'))
+}
+
+/* Every record goes through the same diff as a tap, so the trial that
+   completes a rank plays the reassessment. */
+function addTest(k, v) {
+  if (!loaded || !(v > 0)) return
+  const A = model()
+  const today = iso(new Date())
+  S.tests = { ...(S.tests || {}), [k]: listOf((S.tests || {})[k]).concat([{ v: round1(v * 100) / 100, d: today }]) }
+  bump()
+  const B = model()
+  render()
+  const pass = A.next && A.next.trials.find((t) => t.test === k)
+  const line = `Recorded: ${TESTS[k].name} ${fmtTest(k, v)}`
+  moment(diff(A, B, today), { line, sub: pass ? (meets(pass, v) ? 'Trial passed.' : 'Not yet — the best stays on record.') : '' })
+  save()
+  if (sheetOpen()) sheetStatus()
+}
+const meets = (tr, v) => (TESTS[tr.test].better === 'less' ? v <= tr.target : v >= tr.target)
+
+function recordTest(k) {
+  const t = TESTS[k]
+  if (t.better === 'done') {
+    return notify({
+      head: 'RANK TRIAL', title: t.name, sound: null, sub: esc(t.how),
+      actions: [{ label: 'CANCEL' }, { label: 'DONE TODAY', primary: true, onClick: () => addTest(k, 1) }],
+    })
+  }
+  notify({
+    head: 'RANK TRIAL', title: t.name, sound: null,
+    sub: `<div class="recin"><input id="recv" type="text" inputmode="decimal" autocomplete="off" placeholder="${k === 'run10k' ? '52:30' : '0'}"><span>${esc(t.unit)}</span></div><div class="dim">${esc(t.how)}</div>`,
+    actions: [
+      { label: 'CANCEL' },
+      { label: 'SAVE', primary: true, onClick: (el) => {
+        const v = parseTest(k, el.querySelector('#recv').value)
+        if (!(v > 0)) { el.querySelector('#recv').focus(); return false }
+        addTest(k, v)
+      } },
+    ],
+    onShow: (el) => setTimeout(() => { try { el.querySelector('#recv').focus() } catch (_) {} }, 350),
+  })
+}
+
+/* Tape: waist at the navel, neck just below the larynx, plus weight. Stored
+   metric; typed in whichever units the tape and scale use. */
+function measure() {
+  const imp = S.units !== 'metric'
+  notify({
+    head: 'RANK TRIAL', title: 'Measure', sound: null,
+    sub: `<div class="meas">
+        <label>WAIST <input id="mw" type="text" inputmode="decimal" autocomplete="off"><em>${imp ? 'in' : 'cm'}</em></label>
+        <label>NECK <input id="mn" type="text" inputmode="decimal" autocomplete="off"><em>${imp ? 'in' : 'cm'}</em></label>
+        <label>WEIGHT <input id="mk" type="text" inputmode="decimal" autocomplete="off"><em>${imp ? 'lb' : 'kg'}</em></label>
+      </div>
+      <div class="bfout">body fat <b id="mbf">&#8212;</b> &#183; height ${BODY.heightCm} cm</div>
+      <div class="dim">Waist at the navel, relaxed. Neck just below the larynx. Same time of day each time &#8212; the trend matters more than any one number.</div>`,
+    actions: [
+      { label: imp ? 'USE CM/KG' : 'USE IN/LB', onClick: () => { S.units = imp ? 'metric' : 'imperial'; save(); setTimeout(measure, 250) } },
+      { label: 'CANCEL' },
+      { label: 'SAVE', primary: true, onClick: (el) => {
+        const m = readMeasure(el, imp)
+        if (!m) return false
+        addBody(m)
+      } },
+    ],
+    onShow: (el) => {
+      el.querySelectorAll('.meas input').forEach((i) => i.addEventListener('input', () => {
+        const m = readMeasure(el, imp)
+        el.querySelector('#mbf').textContent = m ? navyBf(m.waist, m.neck).toFixed(1) + '%' : '—'
+      }))
+    },
+  })
+}
+
+function readMeasure(el, imp) {
+  const f = (id) => parseFloat(String(el.querySelector(id).value || '').replace(',', '.'))
+  const k = imp ? 2.54 : 1
+  const waist = f('#mw') * k, neck = f('#mn') * k
+  const w = f('#mk')
+  const weight = w > 0 ? (imp ? w * 0.45359237 : w) : 0
+  if (!(waist > 40 && waist < 250 && neck > 20 && neck < 80 && waist > neck)) return null
+  return { waist: round1(waist), neck: round1(neck), weight: round1(weight) }
+}
+
+function addBody(m) {
+  if (!loaded) return
+  const A = model()
+  const today = iso(new Date())
+  S.body = listOf(S.body).concat([{ d: today, ...m, height: BODY.heightCm }])
+  bump()
+  const B = model()
+  render()
+  const bf = navyBf(m.waist, m.neck)
+  moment(diff(A, B, today), { line: `Body fat ${bf.toFixed(1)}%${m.weight ? ` · lean mass ${round1(m.weight * (1 - bf / 100)).toFixed(1)} kg` : ''}`, sub: 'Recorded. The trend is what matters.' })
+  save()
+  if (sheetOpen()) sheetStatus()
 }
 
 function sheetShadows() {
@@ -1049,6 +1271,8 @@ function boot() {
       if (e.target.id === 'sheetx' || e.target.id === 'sheet') closeSheet()
       return
     }
+    const kmb = e.target.closest('[data-km]')
+    if (kmb) { const card = kmb.closest('.q'); if (card && loaded) openKm(card.dataset.day); return }
     const q = e.target.closest('.q:not(.locked)')
     if (q) return toggle(q.dataset.id, q.dataset.day, { ev: e, el: q })
     if (e.target.id === 'cbclose') { cbDismissed = true; render(); return }

@@ -583,3 +583,45 @@ html[data-store="error"] .hud .when::after { content: ' · no archive'; color: v
 
 html[data-store="offline"] .hud { border-top-color: rgba(217,168,78,.55); }
 html[data-store="error"] .hud { border-top-color: rgba(217,168,78,.55); }
+
+/* ---- the run card: +KM ---------------------------------------------------- */
+.q.run { border-left-color: #6ee7b7; box-shadow: inset 0 1px 0 rgba(255,255,255,.06), -2px 0 12px rgba(110,231,183,.35); }
+.q.run .tick { background: repeating-linear-gradient(90deg, rgba(110,231,183,.7) 0 7px, transparent 7px 13px); }
+.q.run.done { border-left-color: #1f5c48; }
+.q .pt s.over { color: #6ee7b7; }
+.kmbtn { flex-shrink: 0; align-self: center; font-size: 9px; letter-spacing: 1.5px; color: #6ee7b7; border: 1px solid rgba(110,231,183,.5);
+  padding: 9px 9px; min-width: 44px; min-height: 36px; display: grid; place-items: center; position: relative; z-index: 2; }
+.q.done .kmbtn { color: #3c8f73; border-color: rgba(110,231,183,.25); }
+.kmstep { display: flex; align-items: center; justify-content: center; gap: 6px; margin: 6px 0 8px; }
+.kmstep button { font-size: 11px; padding: 10px 8px; min-width: 44px; min-height: 42px; border: 1px solid rgba(var(--acc-rgb),.4); color: #cdefff; }
+.kmstep b { font: 700 28px 'JetBrains Mono', monospace; color: #fff; min-width: 70px; text-align: center; }
+.kmstep span { color: #7f8ba0; margin-right: 4px; }
+
+/* ---- rank trials ------------------------------------------------------------ */
+.nextrank { font-size: 8.5px; letter-spacing: 1px; color: #6b7487; margin-top: -3px; }
+.nextrank b { color: #c9bcff; font-size: 11px; }
+.nextrank .ok { color: var(--acc); font-style: normal; }
+.trials { display: flex; flex-direction: column; }
+.trial { display: grid; grid-template-columns: 16px 1fr auto; grid-template-rows: auto auto; gap: 1px 8px; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,.05); font-size: 10px; }
+.trial i { grid-row: 1 / 3; font-style: normal; width: 12px; height: 12px; transform: rotate(45deg); border: 1px solid rgba(255,255,255,.25); display: grid; place-items: center; font-size: 0; }
+.trial.pass i { background: var(--acc); border-color: var(--acc); box-shadow: 0 0 8px rgba(var(--acc-rgb),.6); }
+.trial b { font-weight: 500; color: var(--text); }
+.trial span { grid-column: 2; font-size: 8.5px; color: #6b7487; }
+.trial.pass span { color: #7fcdea; }
+.trial button { grid-row: 1 / 3; grid-column: 3; margin: 0 !important; padding: 8px 10px !important; min-height: 34px !important; font-size: 8.5px !important; }
+.records { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 14px; }
+.records .srow span { color: #6b7487; font-size: 8.5px; }
+.records .srow u { font-size: 11px; }
+.recin { display: flex; align-items: baseline; gap: 8px; margin: 6px 0 6px; }
+.recin input, .meas input { font: 700 20px 'JetBrains Mono', monospace; color: #fff; background: rgba(255,255,255,.05); border: 1px solid rgba(var(--acc-rgb),.45); padding: 8px 10px; width: 130px; border-radius: 0; -webkit-appearance: none; }
+.recin span { color: #7f8ba0; font-size: 11px; }
+.meas { display: grid; grid-template-columns: 1fr; gap: 6px; margin: 6px 0; }
+.meas label { display: grid; grid-template-columns: 60px 1fr 24px; align-items: center; gap: 8px; font-size: 9px; letter-spacing: 1.6px; color: #7f8ba0; }
+.meas input { font-size: 16px; width: 100%; padding: 7px 9px; }
+.meas em { font-style: normal; color: #7f8ba0; }
+.bfout { font-size: 10px; color: #9fb4c8; margin: 4px 0; }
+.bfout b { color: #fff; font-size: 14px; }
+
+/* windows opened from inside a sheet sit over it, but under its header, so
+   CLOSE is always reachable */
+html.sheet-open #windows { z-index: 95; top: calc(var(--sit) + 66px); }

@@ -86,14 +86,34 @@ export function mergeSaves(cur, inc) {
   const firsts = [cur.first, inc.first, keys[0]].filter(Boolean).sort()
   const seen = (cur.seen || []).slice()
   for (const x of inc.seen || []) if (seen.indexOf(x) === -1) seen.push(x)
+
+  /* km: the longer of the two for a day. tests and body: every entry from
+     both, once. */
+  const km = { ...(inc.km || {}) }
+  for (const k of Object.keys(cur.km || {})) km[k] = Math.max(km[k] || 0, cur.km[k])
+  const tests = {}
+  for (const t of new Set(Object.keys(cur.tests || {}).concat(Object.keys(inc.tests || {})))) {
+    tests[t] = uniq(list((cur.tests || {})[t]).concat(list((inc.tests || {})[t])), (e) => e.d + '|' + e.v)
+  }
+  const body = uniq(list(cur.body).concat(list(inc.body)), (m) => [m.d, m.waist, m.neck, m.weight].join('|'))
+
   return {
     ...inc,
     ...cur,
     log,
     first: firsts[0] || null,
     seen,
+    km,
+    tests,
+    body,
     name: cur.name || inc.name || '',
     title: cur.title || inc.title || '',
     equip: { ...(inc.equip || {}), ...(cur.equip || {}) },
   }
+}
+
+const list = (x) => (Array.isArray(x) ? x : x && typeof x === 'object' ? Object.values(x) : []).filter((e) => e && typeof e === 'object')
+function uniq(arr, key) {
+  const seen = new Set()
+  return arr.filter((e) => { const k = key(e); if (seen.has(k)) return false; seen.add(k); return true })
 }

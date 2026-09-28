@@ -24,7 +24,7 @@
    Pure: no DOM, no storage. Runs under node for the tests in test/.
    ========================================================================= */
 
-import { HABITS, STATS, RANKS, TITLES, RUN, DUNGEONS, BEYOND, JOB_LEVEL, RETURN_BONUS, PERMITS } from './habits.js'
+import { HABITS, STATS, RANKS, TITLES, RUN, DUNGEONS, BEYOND, JOB_LEVEL, RETURN_BONUS, PERMITS, TESTS, BODY } from './habits.js'
 import { BOSSES, GRADES, CLASSES, NECRO_SHADOWS, RARITY, ITEMS } from './lore.js'
 
 /* ---------- dates ----------------------------------------------------------
@@ -47,7 +47,8 @@ export const byId = (id) => HABITS.find((h) => h.id === id)
 const LIVE = HABITS.filter((h) => !h.archived)
 const QUEUE = LIVE.filter((h) => h.queue)
 export const FIXED_LAST = LIVE.filter((h) => !h.queue).reduce((m, h) => Math.max(m, h.unlock || 0), 0)
-const BASE = LIVE.find((h) => h.parts && h.parts.some((p) => p.run)) || LIVE[0]   // the Daily Quest card
+const BASE = LIVE.find((h) => h.parts && !h.queue) || LIVE[0]   // the Daily Quest card: Go Beyond scales its counters
+const RUNQ = LIVE.find((h) => h.run) || null
 
 /* Linear: level N -> N+1 costs N*100. Overflow carries, so a fresh bar never
    sits at exactly 0% after a level-up. */
@@ -56,7 +57,61 @@ export function levelFromXp(t) {
   while (left >= need) { left -= need; lv++; need = lv * 100 }
   return { level: lv, into: left, need }
 }
-export const rankIndex = (t) => RANKS.reduce((acc, r, i) => (t >= r.at ? i : acc), 0)
+
+/* ---------- rank: XP and trials ----------------------------------------------
+   The Hunter Association does not care how long you have been grinding; it
+   measures. A rank needs its XP AND every one of its trials, in order, and a
+   passed rank stays passed — a test keeps its best value, forever.
+
+   Body fat: the US Navy tape formula, men, metric. */
+export function navyBf(waistCm, neckCm, heightCm = BODY.heightCm) {
+  if (!(waistCm > neckCm) || !(heightCm > 0)) return null
+  return 495 / (1.0324 - 0.19077 * Math.log10(waistCm - neckCm) + 0.15456 * Math.log10(heightCm)) - 450
+}
+
+const listOf = (x) => (Array.isArray(x) ? x : x && typeof x === 'object' ? Object.values(x) : [])
+
+/* The best value of every test recorded up to `upto` (inclusive), or ever.
+   Lean mass only counts from a measurement that was lean at the same time
+   (TESTS.lean.atBf): bulking to a big number and cutting to a low body fat
+   months apart cannot pass "big AND shredded". */
+export function bests(S, upto) {
+  const best = {}
+  const tests = (S && S.tests) || {}
+  for (const t of Object.keys(TESTS)) {
+    if (TESTS[t].body) continue
+    for (const e of listOf(tests[t])) {
+      if (!e || typeof e.v !== 'number' || !(e.v > 0) || (upto && e.d > upto)) continue
+      best[t] = best[t] == null ? e.v : TESTS[t].better === 'less' ? Math.min(best[t], e.v) : Math.max(best[t], e.v)
+    }
+  }
+  for (const m of listOf(S && S.body)) {
+    if (!m || (upto && m.d > upto)) continue
+    const bf = navyBf(m.waist, m.neck, m.height || BODY.heightCm)
+    if (bf == null || bf < 2 || bf > 60) continue
+    best.bf = best.bf == null ? bf : Math.min(best.bf, bf)
+    if (m.weight > 0 && bf <= (TESTS.lean.atBf || 100)) {
+      const lean = m.weight * (1 - bf / 100)
+      best.lean = best.lean == null ? lean : Math.max(best.lean, lean)
+    }
+  }
+  return best
+}
+
+export const passes = (tr, best) => {
+  const b = best[tr.test]
+  if (b == null) return false
+  return TESTS[tr.test].better === 'less' ? b <= tr.target : b >= tr.target
+}
+
+export function rankAt(xp, best) {
+  let ri = 0
+  for (let i = 1; i < RANKS.length; i++) {
+    if (xp >= RANKS[i].at && RANKS[i].trials.every((tr) => passes(tr, best))) ri = i
+    else break
+  }
+  return ri
+}
 
 /* Skills: level L needs L(L+1)/2 logged days — 1, 3, 6, 10, 15, 21 … so each
    level takes one day longer than the last. */
@@ -67,29 +122,38 @@ export function skillLevel(days) {
   return { level: L, into: days - tri(L), need: L + 1 }
 }
 
-/* ---------- the run -------------------------------------------------------- */
-const round1 = (x) => Math.round(x * 10) / 10
-export function runFor(dayIdx, key) {
-  const week = Math.floor(Math.max(0, dayIdx) / 7) + 1
-  const long = Math.min(RUN.cap, round1(RUN.start * Math.pow(1 + RUN.growth, week - 1)))
-  const short = RUN.shortDays.indexOf(dow(key)) !== -1
-  const km = short
-    ? Math.min(long, Math.max(RUN.shortMin, Math.min(RUN.shortMax, round1(long * RUN.shortRatio))))
-    : long
-  return { km, long, short, week, walk: week <= RUN.walkWeeks }
+/* ---------- the run ----------------------------------------------------------
+   The plan is one number per week, L: the long-day distance. Short days are
+   half of it, clamped. derive() moves L on as each week closes — grow 5%, or
+   rise to meet what you actually ran (at most 10% over it), or hold after a
+   thin week. The evidence is with RUN in habits.js. */
+export const round1 = (x) => Math.round(x * 10) / 10
+const SHORTS = RUN.shortDays.length
+export const shortOf = (L) => Math.min(L, Math.max(RUN.shortMin, Math.min(RUN.shortMax, round1(L * RUN.shortRatio))))
+const weekVolume = (L) => { const l = round1(L); return (7 - SHORTS) * l + SHORTS * shortOf(l) }
+
+/* the largest long-day distance whose planned week stays within V km */
+export function longFor(V) {
+  if (weekVolume(RUN.cap) <= V) return RUN.cap
+  let lo = RUN.start, hi = RUN.cap
+  if (weekVolume(lo) > V) return lo
+  for (let k = 0; k < 40; k++) {
+    const m = (lo + hi) / 2
+    if (weekVolume(m) <= V) lo = m
+    else hi = m
+  }
+  return lo
 }
 
-/* The fiction's counters for a card on a given day. */
-export function partsFor(h, dayIdx, key, ri = 0) {
+/* The fiction's counters for a card on a given day. `km` is that day's run
+   target, from the model. */
+export function partsFor(h, km, ri = 0) {
   if (h.beyond) {
     const n = BEYOND[Math.min(ri, BEYOND.length - 1)]
-    return (BASE.parts || []).filter((p) => !p.run).map((p) => ({ label: p.label, n, unit: '' }))
+    return (BASE.parts || []).map((p) => ({ label: p.label, n, unit: '' }))
   }
-  return (h.parts || []).map((p) => {
-    if (!p.run) return { label: p.label, n: p.n, unit: p.unit || '' }
-    const r = runFor(dayIdx, key)
-    return { label: r.walk ? 'Run/walk' : p.label, n: r.km, unit: 'km', short: r.short, run: true }
-  })
+  if (h.run) return [{ label: 'Run', n: km || RUN.start, unit: 'km', run: true }]
+  return (h.parts || []).map((p) => ({ label: p.label, n: p.n, unit: p.unit || '' }))
 }
 
 export const dungeonOn = (key) => DUNGEONS[dow(key)] || null
@@ -165,6 +229,8 @@ export function derive(S, now = new Date()) {
   let statFormMax = 0
   let titlesLeft = TITLES.length
   let job = { state: 'none' }
+  let runL = RUN.start, runWhy = 'start'
+  const kmLog = (S && S.km) || {}
 
   const openWeek = (key) => {
     const start = mondayOf(key)
@@ -176,19 +242,31 @@ export function derive(S, now = new Date()) {
       boss: BOSSES[ladder % BOSSES.length], cycle: Math.floor(ladder / BOSSES.length),
       kept: 0, cleared: false, clearKey: null, red: false, redKey: null,
       sessions: {}, wkDone: {}, xp: 0, cumStart: cum, cumEnd: cum, days: [],
+      runL, runWhy, runPlan: 0, runActual: 0,
     }
     weeks.push(week)
   }
 
   /* Monday: the week that just ended is judged. If its Gate was cleared, and
      it ended after the last grant, the next sealed quest in the queue opens
-     today. One per week at most, by construction. */
+     today. One per week at most, by construction.
+     The run plan moves on too: hold after a thin week, otherwise grow 5% —
+     or, if you ran more than planned, rise to meet what you really ran, never
+     more than 10% above it. */
   const closeWeek = (i) => {
     week.cumEnd = cum
     if (week.cleared && qPtr < QUEUE.length && i - 1 >= prevGrant) {
       grants[QUEUE[qPtr].id] = i
       prevGrant = i
       qPtr++
+    }
+    const plan = week.runPlan, act = week.runActual
+    if (plan > 0 && act < RUN.hold * plan) runWhy = 'hold'
+    else {
+      const grow = runL * (1 + RUN.growth)
+      const ahead = act > plan ? longFor(act * (1 + RUN.ahead)) : 0
+      runWhy = ahead > grow ? 'ahead' : 'grow'
+      runL = Math.min(RUN.cap, Math.max(grow, ahead))
     }
   }
 
@@ -238,6 +316,21 @@ export function derive(S, now = new Date()) {
     if (done.length) loggedDays++
     lifetime += done.length
 
+    /* the run: today's target from the week's L; what was actually run is
+       the +KM entry if there is one, else the target if the quest was
+       ticked. A mistyped 42 km cannot drag the plan up — for planning, one
+       day counts at most twice its target or 3 km over it. */
+    const shortDay = RUN.shortDays.indexOf(wd) !== -1
+    const Lr = round1(week.runL)
+    const runKm = shortDay ? shortOf(Lr) : Lr
+    const km = typeof kmLog[key] === 'number' && kmLog[key] > 0 ? kmLog[key] : null
+    const runDue = RUNQ && grants[RUNQ.id] != null && grants[RUNQ.id] <= i
+    const ranKm = km != null ? km : RUNQ && has(RUNQ.id) ? runKm : 0
+    if (runDue) {
+      week.runPlan += runKm
+      week.runActual += Math.min(ranKm, Math.max(2 * runKm, runKm + 3))
+    }
+
     /* stats only go up; stats and skills both count days, once each per day */
     const skillToday = {}, statToday = {}
     for (const h of done) {
@@ -272,6 +365,7 @@ export function derive(S, now = new Date()) {
       done: done.map((h) => h.id), doneReq: doneReq.length,
       kept, frac: req.length ? doneReq.length / req.length : 0,
       ret, xp, cum, st: null,
+      runKm, ranKm, short: shortDay,
     }
     days[key] = rec
     lastRec = rec
@@ -359,8 +453,19 @@ export function derive(S, now = new Date()) {
   const cur = weeks[weeks.length - 1]
   const prev = weeks.length > 1 ? weeks[weeks.length - 2] : null
   const L = levelFromXp(cum)
-  const ri = rankIndex(cum)
+  const best = bests(S)
+  const ri = rankAt(cum, best)
   const grantedNow = (h) => grants[h.id] != null && grants[h.id] <= n
+
+  /* ---- the next rank: what the Association still wants to see ---- */
+  let next = null
+  if (ri < RANKS.length - 1) {
+    const R = RANKS[ri + 1]
+    const trials = R.trials.map((tr) => ({
+      ...tr, ...TESTS[tr.test], best: best[tr.test] == null ? null : best[tr.test], pass: passes(tr, best),
+    }))
+    next = { idx: ri + 1, r: R.r, at: R.at, xpOk: cum >= R.at, trials, passed: trials.filter((t) => t.pass).length }
+  }
 
   /* ---- stats: the number only goes up; the bar is 14-day form ---- */
   const stats = Object.keys(STATS)
@@ -473,7 +578,8 @@ export function derive(S, now = new Date()) {
       permitsUsed: prev.permitsUsed, cleared: prev.cleared, red: prev.red, boss: prev.boss, kill,
       xp: prev.xp,
       levelFrom: levelFromXp(prev.cumStart).level, levelTo: levelFromXp(prev.cumEnd).level,
-      rankFrom: rankIndex(prev.cumStart), rankTo: rankIndex(prev.cumEnd),
+      rankFrom: rankAt(prev.cumStart, bests(S, addDays(prev.start, -1))), rankTo: rankAt(prev.cumEnd, bests(S, prev.end)),
+      run: { plan: round1(prev.runPlan), ran: round1(prev.runActual) },
       boxes: boxes.filter((b) => b.key >= prev.start && b.key <= prev.end).length,
     }
   }
@@ -481,7 +587,7 @@ export function derive(S, now = new Date()) {
   return {
     today, first: started ? first : null, started, dayIdx: n, now,
     days, weeks, cur, prev, report,
-    xp: cum, level: L.level, into: L.into, need: L.need, rankIdx: ri, rank: RANKS[ri].r, dtl,
+    xp: cum, level: L.level, into: L.into, need: L.need, rankIdx: ri, rank: RANKS[ri].r, dtl, next, best,
     grants, sealed, sliding,
     today_: T,
     req: pick(T.req), opt: pick(T.opt), wk: pick(T.wk),
@@ -491,7 +597,7 @@ export function derive(S, now = new Date()) {
     job: jobView,
     lifetime, loggedDays, rate30: rq ? Math.round((rd / rq) * 100) : 0,
     grid,
-    run: runFor(n, today),
+    run: { km: T.runKm, ran: T.ranKm, short: T.short, L: round1(cur.runL), why: cur.runWhy, week: weeks.length },
     dungeon: dungeonOn(today),
   }
 }

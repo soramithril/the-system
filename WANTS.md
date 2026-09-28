@@ -20,12 +20,20 @@ after it the freeze applies.
 - [ ] Evening reminder: deploy `worker/` (steps in `worker/README.md`), then put
       the worker URL and public key into `push.js`. Until then the System menu
       says the server is not deployed.
-- [ ] `habits.js` → `DUNGEONS`: swap the placeholder upper/lower split for the
-      Toji program's lifting days and session names.
-- [ ] `habits.js` → `RUN`: check against the running plan (start 1.0 km, +5% a
-      week, short days Tue/Fri at half distance, 10 km cap, run/walk weeks 1–8).
+- [ ] `habits.js` → `DUNGEONS`: lifting is Saturday + Sunday, placeholder
+      names FULL BODY A / B. Rename to the Toji program's sessions — and tell
+      whoever writes that program it has to fit two weekend days.
+- [ ] `habits.js` → `BODY.heightCm`: 175 — confirm; body fat depends on it.
 - [ ] `habits.js` → `RANKS`: the `loot` on each rank — keep only treats you
       would genuinely withhold from yourself otherwise.
+
+## Day 1 — baselines, in the app (STATUS → RANK TRIALS)
+
+- [ ] MEASURE BODY: waist at the navel, neck below the larynx, weight. Same
+      time of day each time after this (morning, before food).
+- [ ] RECORD push-ups: one set, as many as you can.
+- [ ] RECORD run non-stop: the longest you can run without walking.
+- [ ] Re-measure every 2 weeks; re-test whenever a rank's XP is met.
 
 ## Shipped in v3 (built before day 1)
 
@@ -41,9 +49,16 @@ full-screen animations, no leaderboards).
 - **Feel:** tap press / sweep / diamond ring / "+XP", today's square charging
   and flaring, state-change looks (connecting, offline, link restored, new
   day), real iPhone haptics (iOS 18 switch trick), and one tap → one moment.
-- **Training:** Today's Dungeon line, the run inside the Daily Quest card
-  (feeds STR and AGI, distance rises weekly), the optional lifting card, Go
-  Beyond after 20/20/20.
+- **Training:** Today's Dungeon line, the optional weekend lifting card (FULL
+  BODY A/B), Go Beyond after 20/20/20. The run is its own card and pure AGI:
+  +KM logs the real distance, and the plan grows 5% a week, rises to meet you
+  when you run ahead (never more than 10% over what you ran — Nielsen 2014),
+  and holds after a thin week.
+- **Rank = XP and trials:** Level is the grind; rank is measured, like the
+  Hunter Association. Each rank needs its XP and its trials (run distance,
+  push-ups, 10 km time, body fat by tape). S-rank is the body goal: ~10% body
+  fat, lean mass ≥ 70 kg at the same time, a sub-50 10 km, and the source's
+  100/100/100 + 10 km in one day.
 - **Quests:** the sealed queue, earned grants after day 14 (one per cleared
   Gate), the weekly upload quest.
 - **The Gate:** a boss every Monday that dies on the 5th kept day, ARISE and

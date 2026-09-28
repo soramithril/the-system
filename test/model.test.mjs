@@ -4,9 +4,11 @@
 
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { derive, diff, addDays, runFor, boxFor, levelFromXp, skillLevel, partsFor, byId, dow } from '../model.js'
+import { derive, diff, addDays, boxFor, levelFromXp, skillLevel, partsFor, byId, dow, navyBf, bests } from '../model.js'
 
 const MON = '2026-09-28'   // a Monday — the planned day 1
+const SAT = '2026-10-03'
+const DAY = ['bodyweight', 'run', 'vitamins']   // day one's required cards: 20 + 15 + 7 xp
 const at = (key, h = 12) => new Date(`${key}T${String(h).padStart(2, '0')}:00:00`)
 
 /* every required quest that is due, for a model's day */
@@ -21,25 +23,25 @@ const keepAll = (first, days, extra = () => []) => {
   return S
 }
 
-test('day 0: nothing logged — two required cards, lifting on a lifting day', () => {
+test('day 0: three required cards; lifting only at the weekend', () => {
   const M = derive({ log: {}, first: null }, at(MON))
   assert.equal(M.started, false)
-  assert.deepEqual(M.req.map((h) => h.id), ['bodyweight', 'vitamins'])
-  assert.deepEqual(M.opt.map((h) => h.id), ['lift', 'beyond'])
-  assert.equal(M.dungeon, 'UPPER A')
+  assert.deepEqual(M.req.map((h) => h.id), DAY)
+  assert.deepEqual(M.opt.map((h) => h.id), ['beyond'])
+  assert.equal(M.dungeon, null)
   assert.equal(M.xp, 0)
   assert.equal(M.level, 1)
   assert.equal(M.rank, 'E')
   assert.equal(M.cur.boss.id, 'raikans')
   assert.equal(M.cur.need, 5)
-  // wednesday is a rest day: no lifting card
-  const W = derive({ log: {}, first: null }, at('2026-09-30'))
-  assert.deepEqual(W.opt.map((h) => h.id), ['beyond'])
-  assert.equal(W.dungeon, null)
+  const W = derive({ log: {}, first: null }, at(SAT))
+  assert.deepEqual(W.opt.map((h) => h.id), ['lift', 'beyond'])
+  assert.equal(W.dungeon, 'FULL BODY A')
+  assert.equal(derive({ log: {}, first: null }, at(addDays(SAT, 1))).dungeon, 'FULL BODY B')
 })
 
 test('a kept day: xp, box, skills, stats, first titles', () => {
-  const S = { first: MON, log: { [MON]: ['bodyweight', 'vitamins'] } }
+  const S = { first: MON, log: { [MON]: DAY } }
   const M = derive(S, at(MON))
   assert.equal(M.today_.kept, true)
   assert.equal(M.xp, 42)
@@ -47,12 +49,13 @@ test('a kept day: xp, box, skills, stats, first titles', () => {
   const st = Object.fromEntries(M.stats.map((s) => [s.key, s.value]))
   assert.deepEqual(st, { STR: 11, AGI: 11, VIT: 11 })
   assert.equal(M.skills.find((s) => s.name === 'Strength Training').level, 1)
+  assert.equal(M.skills.find((s) => s.name === 'Sprint').level, 1)
   assert.deepEqual(M.earned.map((t) => t.id), ['awakened', 'unbroken'])
 })
 
 test('optional quests never affect a kept day', () => {
-  const S = { first: MON, log: { [MON]: ['lift', 'beyond', 'vitamins'] } }
-  const M = derive(S, at(MON))
+  const S = { first: SAT, log: { [SAT]: ['lift', 'beyond', 'vitamins'] } }
+  const M = derive(S, at(SAT))
   assert.equal(M.today_.kept, false)
   assert.equal(M.xp, 30 + 10 + 7)
 })
@@ -157,30 +160,93 @@ test('job change: level 10 starts a trial tomorrow; 5 kept days reveal the class
   assert.equal(M.job.name, 'Necromancer')             // gates cleared → shadows
 })
 
-test('the run: 1.0 km week 1, 1.1 week 2, short days halved, 10 km cap near week 48', () => {
-  assert.equal(runFor(0, MON).km, 1.0)
-  assert.equal(runFor(1, addDays(MON, 1)).km, 0.5)   // tuesday: short
-  assert.equal(runFor(1, addDays(MON, 1)).short, true)
-  assert.equal(runFor(7, addDays(MON, 7)).km, 1.1)
-  assert.equal(runFor(0, MON).walk, true)
-  const w48 = runFor(47 * 7, addDays(MON, 47 * 7)).km
-  const w49 = runFor(48 * 7, addDays(MON, 48 * 7)).km
-  assert.ok(w48 >= 9.8 && w48 < 10, `week 48 = ${w48}`)
-  assert.equal(w49, 10)
-  const tueLate = addDays(MON, 48 * 7 + 1)
-  assert.equal(runFor(48 * 7 + 1, tueLate).km, 2)     // short days end at 2 km
+test('the run: week 1 is 1.0 km, Sunday and Monday short; ran to plan → grows 5%', () => {
+  const W1 = derive({ first: MON, log: {} }, at(MON))
+  assert.equal(W1.run.km, 0.5)                        // monday: short
+  assert.equal(W1.run.L, 1.0)
+  assert.equal(derive({ first: MON, log: {} }, at(addDays(MON, 1))).run.km, 1.0)
+  const M = derive(keepAll(MON, 8), at(addDays(MON, 7)))
+  assert.equal(M.run.why, 'grow')
+  assert.equal(M.run.L, 1.1)
+  assert.equal(M.days[addDays(MON, 8 - 1)].runKm, 0.6)  // week 2 monday: half of 1.05
 })
 
-test('daily quest parts: four counters, the run from the plan', () => {
-  const p = partsFor(byId('bodyweight'), 0, MON)
-  assert.deepEqual(p.map((x) => x.label), ['Push-ups', 'Sit-ups', 'Squats', 'Run/walk'])
-  assert.equal(p[3].n, 1.0)
-  const b = partsFor(byId('beyond'), 0, MON, 5)
+test('the run: running ahead raises next week to meet it, at most 10% over what was run', () => {
+  const S = keepAll(MON, 7)
+  S.km = {}
+  for (let i = 1; i <= 5; i++) S.km[addDays(MON, i)] = 3.0     // tue-sat: 3 km instead of 1
+  const M = derive(S, at(addDays(MON, 7)))
+  assert.equal(M.run.why, 'ahead')
+  const ran = M.weeks[0].runActual                              // 0.5 + 5×3 + 0.5
+  assert.equal(ran, 16)
+  const planned = 5 * M.run.L + 2 * Math.min(M.run.L, Math.max(0.5, Math.min(2, Math.round(M.run.L * 5) / 10)))
+  assert.ok(planned <= ran * 1.1 + 0.2, `planned ${planned} vs ran ${ran}`)
+  assert.ok(M.run.L >= 2.8 && M.run.L <= 3.0, `L = ${M.run.L}`)
+})
+
+test('the run: a thin week holds the plan; a typo cannot drag it up', () => {
+  const S = { first: MON, log: {} }
+  for (let i = 0; i < 7; i++) S.log[addDays(MON, i)] = ['vitamins']
+  const H = derive(S, at(addDays(MON, 7)))
+  assert.equal(H.run.why, 'hold')
+  assert.equal(H.run.L, 1.0)
+  const T = keepAll(MON, 7)
+  T.km = { [addDays(MON, 1)]: 42 }
+  const M = derive(T, at(addDays(MON, 7)))
+  assert.ok(M.run.L < 2, `a 42 km typo moved L to ${M.run.L}`)
+})
+
+test('the run: 10 km cap arrives around week 49 on plan; short days end at 2 km', () => {
+  const S = keepAll(MON, 48 * 7 + 2)
+  const M48 = derive(S, at(addDays(MON, 47 * 7 + 1)))
+  assert.ok(M48.run.L >= 9.8 && M48.run.L < 10, `week 48 = ${M48.run.L}`)
+  const M49 = derive(S, at(addDays(MON, 48 * 7 + 1)))
+  assert.equal(M49.run.L, 10)
+  assert.equal(M49.days[addDays(MON, 48 * 7)].runKm, 2)   // monday: short
+})
+
+test('card parts: three counters, the run from the model, Go Beyond by rank', () => {
+  const p = partsFor(byId('bodyweight'), 1.0)
+  assert.deepEqual(p.map((x) => x.label), ['Push-ups', 'Sit-ups', 'Squats'])
+  assert.deepEqual(partsFor(byId('run'), 2.4), [{ label: 'Run', n: 2.4, unit: 'km', run: true }])
+  const b = partsFor(byId('beyond'), 0, 5)
   assert.deepEqual(b.map((x) => x.n), [100, 100, 100])
 })
 
+test('rank: XP alone is not enough; XP plus the trials is; trials alone are not', () => {
+  const S = keepAll(MON, 10)
+  const M = derive(S, at(addDays(MON, 9)))
+  assert.ok(M.xp >= 250)
+  assert.equal(M.rank, 'E')
+  assert.equal(M.next.r, 'D')
+  assert.equal(M.next.xpOk, true)
+  assert.equal(M.next.passed, 0)
+  S.tests = { runkm: [{ v: 2.1, d: addDays(MON, 9) }], pushups: [{ v: 30, d: addDays(MON, 9) }] }
+  assert.equal(derive(S, at(addDays(MON, 9))).rank, 'D')
+  const fresh = { first: MON, log: { [MON]: DAY }, tests: S.tests }
+  assert.equal(derive(fresh, at(MON)).rank, 'E')
+})
+
+test('rank: the report uses the tests as they stood that week', () => {
+  const S = keepAll(MON, 8)
+  S.tests = { runkm: [{ v: 2, d: addDays(MON, 7) }], pushups: [{ v: 31, d: addDays(MON, 7) }] }
+  const M = derive(S, at(addDays(MON, 7)))
+  assert.equal(M.rank, 'D')
+  assert.equal(M.report.rankTo, 0)
+})
+
+test('body: US Navy tape formula; lean mass only counts when lean at the same time', () => {
+  assert.ok(Math.abs(navyBf(107, 42, 175) - 29.1) < 0.3, `bf ${navyBf(107, 42, 175)}`)
+  const bulky = bests({ body: [{ d: MON, waist: 95, neck: 42, weight: 95 }] })
+  assert.ok(bulky.bf > 15)
+  assert.equal(bulky.lean, undefined)
+  const lean = bests({ body: [{ d: MON, waist: 76, neck: 40, weight: 78 }] })
+  assert.ok(lean.bf < 10)
+  assert.ok(lean.lean > 70)
+})
+
 test('return quest bonus is derived from the sentinel', () => {
-  const S = { first: MON, log: { [MON]: ['bodyweight', 'vitamins'], [addDays(MON, 2)]: ['vitamins', '__return'] } }
+  const S = { first: MON, log: { [MON]: DAY, [addDays(MON, 2)]: ['vitamins', '__return'] } }
   const M = derive(S, at(addDays(MON, 2)))
   assert.equal(M.xp, 42 + 7 + 15)
   assert.ok(M.earned.some((t) => t.id === 'returned'))
@@ -190,9 +256,9 @@ test('diff: the tap that keeps day 5 kills the boss, keeps the day, drops a box'
   const S = keepAll(MON, 5)
   const k = addDays(MON, 4)
   const after = derive(S, at(k))
-  S.log[k] = ['bodyweight']
+  S.log[k] = ['bodyweight', 'run']
   const before = derive(S, at(k))
-  const types = diff(before, derive({ ...S, log: { ...S.log, [k]: ['bodyweight', 'vitamins'] } }, at(k)), k).map((e) => e.type)
+  const types = diff(before, derive({ ...S, log: { ...S.log, [k]: DAY } }, at(k)), k).map((e) => e.type)
   assert.ok(types.includes('kill'))
   assert.ok(types.includes('kept'))
   assert.ok(types.includes('box'))
@@ -237,10 +303,10 @@ test('grid: 18 calendar columns, today in the last one', () => {
 
 test('return bonus is withdrawn if yesterday gets filled in later (tap order never matters)', () => {
   const y = addDays(MON, 1), t = addDays(MON, 2)
-  const base = { first: MON, log: { [MON]: ['bodyweight', 'vitamins'], [t]: ['vitamins', '__return'] } }
+  const base = { first: MON, log: { [MON]: DAY, [t]: ['vitamins', '__return'] } }
   const missed = derive(base, at(t))
-  const filled = derive({ ...base, log: { ...base.log, [y]: ['bodyweight', 'vitamins'] } }, at(t))
-  const noSentinel = derive({ first: MON, log: { [MON]: ['bodyweight', 'vitamins'], [y]: ['bodyweight', 'vitamins'], [t]: ['vitamins'] } }, at(t))
+  const filled = derive({ ...base, log: { ...base.log, [y]: DAY } }, at(t))
+  const noSentinel = derive({ first: MON, log: { [MON]: DAY, [y]: DAY, [t]: ['vitamins'] } }, at(t))
   assert.equal(missed.xp, 42 + 7 + 15)
   assert.equal(filled.xp, noSentinel.xp)
 })
@@ -256,6 +322,7 @@ test('a queued quest is optional on the day its key arrives, required from the n
 })
 
 test('stats count days, not quests: three STR quests in one day is +1', () => {
-  const M = derive({ first: MON, log: { [MON]: ['bodyweight', 'lift', 'beyond'] } }, at(MON))
+  const M = derive({ first: SAT, log: { [SAT]: ['bodyweight', 'lift', 'beyond'] } }, at(SAT))
   assert.equal(M.stats.find((s) => s.key === 'STR').value, 11)
+  assert.equal(M.stats.find((s) => s.key === 'AGI').value, 10, 'only the run feeds agility')
 })
