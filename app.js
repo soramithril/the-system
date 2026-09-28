@@ -85,20 +85,17 @@ const mark = (k) => { if (!seen(k)) S.seen.push(k) }
 /* ---------- the model, cached ----------------------------------------------
    derive() is a pure function of the log and the date, so it is recomputed
    only when one of those changes: a tap bumps `rev`, midnight changes the
-   day key, noon closes the late report. */
+   day key. */
 let rev = 0, cacheKey = '', M = null
 function model() {
   const now = new Date()
-  const k = rev + '|' + iso(now) + '|' + (now.getHours() < 12)
+  const k = rev + '|' + iso(now)
   if (k !== cacheKey || !M) { M = derive(S, now); cacheKey = k }
   return M
 }
 const bump = () => { rev++ }
 
 /* ---------- actions -------------------------------------------------------- */
-const lateOpen = (key, now = new Date()) =>
-  !!S.first && now.getHours() < 12 && key === addDays(iso(now), -1) && key >= S.first
-
 function offered(A, h, key) {
   if (key === A.today) {
     if (h.beyond) return A.opt.indexOf(h) !== -1 && ((S.log[key] || []).indexOf(h.id) !== -1 || (S.log[key] || []).indexOf('bodyweight') !== -1)
@@ -108,16 +105,16 @@ function offered(A, h, key) {
   return !!r && (r.req.indexOf(h.id) !== -1 || r.wk.indexOf(h.id) !== -1 || r.early.indexOf(h.id) !== -1 || (r.opt.indexOf(h.id) !== -1 && !h.beyond))
 }
 
-/* Toggle one quest on one day. `key` is today, or yesterday for a late
-   report. Everything that follows — XP, the Gate, the boss, the box — is
-   the model's business; this only edits the log and asks what changed. */
+/* Toggle one quest, today. Only today: a tap never reaches back into a day
+   that has closed. Everything that follows — XP, the Gate, the boss, the
+   box — is the model's business; this only edits the log and asks what
+   changed. */
 export function toggle(id, key, ctx = {}) {
   if (!loaded) return                   // the board is not yours yet
   const now = new Date()
   const today = iso(now)
   key = key || today
-  const late = key !== today
-  if (late && !lateOpen(key, now)) return
+  if (key !== today) return
   const h = byId(id)
   if (!h) return
   const A = model()
@@ -139,7 +136,7 @@ export function toggle(id, key, ctx = {}) {
      scheduled miss: bonus XP and a System line. The comeback micro-reward —
      the top-ranked intervention of 54 in a 61,000-person megastudy. A
      sentinel in the log keeps it derived and pays it once per day. */
-  if (adding && !late && day.filter((x) => x[0] !== '_').length === 1 && day.indexOf('__return') === -1) {
+  if (adding && day.filter((x) => x[0] !== '_').length === 1 && day.indexOf('__return') === -1) {
     const y = A.days[addDays(key, -1)]
     if (y && y.req.length && !y.kept) day.push('__return')
   }
@@ -157,7 +154,7 @@ export function toggle(id, key, ctx = {}) {
   if (adding) {
     const ev = diff(A, B, key)
     if (accepting) ev.push({ type: 'accepted' })
-    moment(ev, { ...ctx, id, key, gain: B.xp - A.xp, late, req: !h.optional && !h.weekly })
+    moment(ev, { ...ctx, id, key, gain: B.xp - A.xp, req: !h.optional && !h.weekly })
     lateKeys()
   } else {
     play('uncheck')
@@ -173,8 +170,7 @@ export function toggle(id, key, ctx = {}) {
    rises to meet a week you ran ahead — see RUN in habits.js. */
 function setKm(key, v) {
   if (!loaded) return
-  const today = iso(new Date())
-  if (key !== today && !lateOpen(key)) return
+  if (key !== iso(new Date())) return
   const A = model()
   const rec = A.days[key]
   const run = HABITS.find((h) => h.run)
@@ -468,7 +464,7 @@ function keyLines(M) {
 }
 const unsealing = new Set()
 
-/* a Gate cleared retroactively (late report, sticker) can hand over a key
+/* a Gate cleared retroactively (a sticker tap landing after midnight) can hand over a key
    after today's arrival window has already come and gone */
 function lateKeys() {
   const M = model()
@@ -621,7 +617,6 @@ function render() {
   renderGate(M)
   renderStatus(M)
   renderQuests(M)
-  renderLate(M, now)
   renderWeekly(M)
   $('#lv').textContent = 'lv ' + M.level
   $('#meta').textContent = now.toLocaleDateString(undefined, { weekday: 'short', day: '2-digit', month: 'short' }).toLowerCase()
@@ -891,24 +886,6 @@ function renderQuests(M) {
   $('#bonus').hidden = !bonus.length
 
   $('#count').textContent = `${M.today_.doneReq}/${M.req.length}`
-}
-
-let lateSeenThisSession = false
-function renderLate(M, now) {
-  const y = addDays(M.today, -1)
-  const rec = M.days[y]
-  const box = $('#late')
-  const open = lateOpen(y, now) && rec
-  if (open && rec.req.length && !rec.kept) lateSeenThisSession = true
-  if (!open || !lateSeenThisSession) { box.hidden = true; $('#latelist').innerHTML = ''; return }
-  box.hidden = false
-  const got = S.log[y] || []
-  const hs = rec.req.concat(rec.early, rec.opt.filter((id) => !byId(id).beyond)).map(byId)
-  keyed($('#latelist'), hs.map((h) => {
-    const v = cardView(M, h, y, got.indexOf(h.id) !== -1, rec.i)
-    v.cue = ''
-    return v
-  }), (v) => { const el = cardMake(v); el.classList.add('small'); return el }, cardUpdate)
 }
 
 function renderWeekly(M) {

@@ -66,8 +66,8 @@ full-screen animations, no leaderboards).
 - **The Gate:** a boss every Monday that dies on the 5th kept day, ARISE and
   the Shadow Army with its 13-rung ladder, Red Gate on 7 of 7, the Monday
   report.
-- **Research additions:** Rest Permits ("7 of 7, with 2 permits"), the Late
-  Report until noon, the archive copy, sending the report to one person, the
+- **Research additions:** Rest Permits ("7 of 7, with 2 permits"), the
+  archive copy, sending the report to one person, the
   cue line only while a habit slides, the evening reminder, Shortcut / NFC
   logging.
 
