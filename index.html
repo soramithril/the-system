@@ -59,17 +59,16 @@
   <button type="button" id="cbclose" class="mono">DISMISS</button>
 </section>
 
-<!-- TODAY FIRST. The plate above is what you built; the quests come next and
-     must be on screen the moment the app opens — v3 had them 60px below the
-     fold on a 390x844 phone. The Gate, the record and the status follow. -->
+<!-- THE FLOW, top to bottom: who you are (the plate) → what today asks
+     (DAILY QUEST: required only) → what is extra (BONUS: optional, XP only)
+     → this week's quest (WEEKLY) → progress (the Gate, the record, status).
+     The required cards must be on screen the moment the app opens. -->
 <div class="qhead">
   <h2 class="cond">DAILY QUEST</h2>
   <span class="clock mono" id="clock">—</span>
   <span class="rule"></span>
   <span class="n mono" id="count">0/0</span>
 </div>
-<div class="dungeon mono" id="dungeon"></div>
-
 <div id="list"></div>
 
 <!-- did it yesterday, forgot to tap: until noon -->
@@ -80,6 +79,25 @@
     <span class="rule"></span>
   </div>
   <div id="latelist"></div>
+</section>
+
+<!-- extra: optional quests pay XP and never cost the day -->
+<section id="bonus" hidden>
+  <div class="qhead">
+    <h2 class="cond">BONUS</h2>
+    <span class="clock mono">optional &#183; XP only</span>
+    <span class="rule"></span>
+  </div>
+  <div id="bonuslist"></div>
+</section>
+
+<section id="weekly" hidden>
+  <div class="qhead">
+    <h2 class="cond">WEEKLY QUEST</h2>
+    <span class="clock mono" id="wkclock"></span>
+    <span class="rule"></span>
+  </div>
+  <div id="wklist"></div>
 </section>
 
 <!-- the week's Gate: a boss that dies on the 5th kept day -->
@@ -124,15 +142,6 @@
   <div class="idgrid mono" id="idgrid"></div>
   <div class="nextrank mono" id="nextrank"></div>
   <div id="stats" class="mono"></div>
-</section>
-
-<section id="weekly" hidden>
-  <div class="qhead">
-    <h2 class="cond">WEEKLY QUEST</h2>
-    <span class="clock mono" id="wkclock"></span>
-    <span class="rule"></span>
-  </div>
-  <div id="wklist"></div>
 </section>
 
 <div id="notify" class="mono"></div>

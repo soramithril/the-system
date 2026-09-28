@@ -812,8 +812,9 @@ function cardView(M, h, key, done, dayIdx) {
   const name = questName(h, key)
   const fresh = h.queue && !h.weekly && M.grants[h.id] === dayIdx
   const early = rec && rec.early.indexOf(h.id) !== -1
-  const tag = h.beyond ? 'HIDDEN QUEST' : h.lift ? "TODAY'S DUNGEON" : early ? earlyTag(M, h) : fresh ? 'UNSEALED TODAY · OPTIONAL' : ''
-  const detail = h.lift ? 'optional · never costs the Gate' : h.beyond ? 'optional · +' + h.xp : h.detail || ''
+  const runTag = h.run ? [key === M.today ? `WEEK ${M.run.week} OF THE RUN PLAN` : '', rec && rec.short ? 'SHORT DAY' : ''].filter(Boolean).join(' · ') : ''
+  const tag = h.beyond ? 'HIDDEN QUEST' : h.lift ? 'WEEKEND DUNGEON' : early ? earlyTag(M, h) : fresh ? 'UNSEALED TODAY · OPTIONAL' : runTag
+  const detail = h.lift ? 'lifting · never costs the Gate' : h.beyond ? 'optional · +' + h.xp : h.detail || ''
   return {
     k: h.id + '@' + key, h, key, done, parts, name, tag,
     detail: h.beyond ? '' : detail,
@@ -874,18 +875,22 @@ function cardUpdate(el, v) {
 function renderQuests(M) {
   const key = M.today
   const got = S.log[key] || []
+  /* DAILY QUEST: only what keeps the day. BONUS: everything optional — the
+     weekend dungeon, Go Beyond, quests the System has not made required yet. */
   const cards = M.req.map((h) => cardView(M, h, key, got.indexOf(h.id) !== -1, M.dayIdx))
-  for (const h of M.early) cards.push(cardView(M, h, key, got.indexOf(h.id) !== -1, M.dayIdx))
+  const bonus = []
+  for (const h of M.opt.filter((x) => x.lift)) bonus.push(cardView(M, h, key, got.indexOf(h.id) !== -1, M.dayIdx))
+  for (const h of M.early) bonus.push(cardView(M, h, key, got.indexOf(h.id) !== -1, M.dayIdx))
   for (const h of M.opt) {
+    if (h.lift) continue
     if (h.beyond && got.indexOf('bodyweight') === -1 && got.indexOf(h.id) === -1) continue
-    cards.push(cardView(M, h, key, got.indexOf(h.id) !== -1, M.dayIdx))
+    bonus.push(cardView(M, h, key, got.indexOf(h.id) !== -1, M.dayIdx))
   }
   keyed($('#list'), cards, cardMake, cardUpdate)
+  keyed($('#bonuslist'), bonus, cardMake, cardUpdate)
+  $('#bonus').hidden = !bonus.length
 
-  const doneN = M.today_.doneReq
-  $('#count').textContent = `${doneN}/${M.req.length}`
-  $('#dungeon').innerHTML = `Today: <b>${esc(M.dungeon || 'REST')}</b> &#183; run week ${M.run.week}` +
-    (M.run.short ? ' &#183; short day' : '')
+  $('#count').textContent = `${M.today_.doneReq}/${M.req.length}`
 }
 
 let lateSeenThisSession = false
