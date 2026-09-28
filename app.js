@@ -827,16 +827,16 @@ function cardView(M, h, key, done, dayIdx) {
 /* what the System still wants before this quest becomes required */
 function earlyTag(M, h) {
   const s = M.sealed.find((x) => x.h === h)
-  if (!s) return 'NOT REQUIRED YET'
-  if (s.why === 'days') return `NOT REQUIRED YET · FROM ${s.inDays === 1 ? 'TOMORROW' : 'DAY ' + (M.dayIdx + s.inDays + 1)}`
-  if (s.why === 'monday') return 'NOT REQUIRED YET · FROM MONDAY'
-  return 'NOT REQUIRED YET · A GATE UNLOCKS IT'
+  if (!s) return 'OPTIONAL FOR NOW'
+  if (s.why === 'days') return `OPTIONAL UNTIL ${s.inDays === 1 ? 'TOMORROW' : 'DAY ' + (M.dayIdx + s.inDays + 1)}`
+  if (s.why === 'monday') return 'OPTIONAL UNTIL MONDAY'
+  return 'OPTIONAL UNTIL A GATE IS CLEARED'
 }
 
 function cardMake(v) {
   const el = document.createElement('button')
   el.type = 'button'
-  el.className = 'q' + (v.h.optional || v.tag.indexOf('NOT REQUIRED') === 0 ? ' opt' : '') + (v.h.lift ? ' lift' : '') + (v.h.beyond ? ' beyond' : '') + (v.h.run ? ' run' : '')
+  el.className = 'q' + (v.h.optional || v.tag.indexOf('OPTIONAL') === 0 ? ' opt' : '') + (v.h.lift ? ' lift' : '') + (v.h.beyond ? ' beyond' : '') + (v.h.run ? ' run' : '')
   el.dataset.id = v.h.id
   el.dataset.day = v.key
   el.innerHTML = `<i class="tick t"></i><i class="tick b"></i>
